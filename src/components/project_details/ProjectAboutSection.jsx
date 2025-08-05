@@ -1,53 +1,32 @@
 'use client';
+import { useState } from 'react';
 import Image from 'next/image';
 
-const ProjectAboutSection = ({ property }) => { // <-- Accept property as prop
+const ProjectAboutSection = ({ property }) => {
     const features = property?.amenities?.flatMap(a =>
         a.items?.map(item => ({
-            icon: '/project_detail_images/building.jpg', // API doesn't provide icons, use placeholder
+            icon: '/project_detail_images/building.jpg',
             label: item
         }))
     ) || [];
 
-    // Project description
+    const title = property?.title || "the Project";
     const description = property?.description || "No detailed description available.";
+    const allPhotos = property?.media?.photos || ["/project_detail_images/building.jpg"];
 
-    // Use first 2 images from photos for gallery
-    const gallery = property?.media?.photos?.slice(0, 2) || [
-        "/project_detail_images/building.jpg",
-        "/project_detail_images/building.jpg"
-    ];
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Project title
-    const title = property?.title || "About the Project";
+    const showImages = allPhotos.slice(0, 7); // show first 7
+    const remainingImages = allPhotos.slice(7); // for popover
+    const hasMoreImages = allPhotos.length > 8;
 
     return (
         <section className="bg-white px-4 md:px-12 py-12" dir="ltr">
-            {/* Feature Icons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center mb-10">
-                {features.length > 0 ? features.map((feature, idx) => (
-                    <div
-                        key={idx}
-                        className="bg-sky-100 hover:bg-sky-200 transition-all rounded-lg py-6 px-4 flex flex-col items-center"
-                    >
-                        <Image
-                            src={feature.icon}
-                            alt={feature.label}
-                            width={50}
-                            height={50}
-                            className="mb-3"
-                        />
-                        <p className="font-semibold text-sky-700 text-sm">{feature.label}</p>
-                    </div>
-                )) : (
-                    <p className="text-gray-500 col-span-4">No amenities available</p>
-                )}
-            </div>
 
             {/* Title + CTA */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                 <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
-                    About {title} {/* <-- Dynamic title */}
+                    About {title}
                 </h2>
                 <div className="flex items-center gap-2 text-sky-600 font-medium cursor-pointer hover:underline">
                     <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center">
@@ -57,24 +36,64 @@ const ProjectAboutSection = ({ property }) => { // <-- Accept property as prop
                 </div>
             </div>
 
-            {/* Description */}
-            <div className="text-gray-700 space-y-4 text-sm leading-relaxed mb-10">
-                <p>{description}</p> {/* <-- Dynamic description */}
-            </div>
-
             {/* Gallery */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {gallery.map((img, idx) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {showImages.map((img, idx) => (
                     <Image
                         key={idx}
                         src={img}
                         alt={`Gallery ${idx + 1}`}
-                        width={600}
-                        height={400}
-                        className="rounded-lg object-cover w-full"
+                        width={400}
+                        height={300}
+                        className="rounded-lg object-cover w-full h-52"
                     />
                 ))}
+
+                {hasMoreImages && (
+                    <div
+                        onClick={() => setIsModalOpen(true)}
+                        className="relative cursor-pointer rounded-lg overflow-hidden group"
+                    >
+                        <Image
+                            src={allPhotos[7]}
+                            alt="See more"
+                            width={400}
+                            height={300}
+                            className="object-cover w-full h-52 group-hover:brightness-75 transition-all"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
+                            +{remainingImages.length} More
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Popover Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-6">
+                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative">
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute top-3 right-3 text-black text-xl font-bold hover:text-red-500"
+                        >
+                            ×
+                        </button>
+                        <h3 className="text-xl font-semibold mb-4">Gallery</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {remainingImages.map((img, idx) => (
+                                <Image
+                                    key={idx}
+                                    src={img}
+                                    alt={`Extra Image ${idx + 1}`}
+                                    width={400}
+                                    height={300}
+                                    className="rounded-lg object-cover w-full h-48"
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

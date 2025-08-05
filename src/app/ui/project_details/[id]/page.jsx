@@ -9,6 +9,7 @@ import PhotoGallerySection from "@/components/project_details/PhotoGallerySectio
 import FloorPlanSection from "@/components/project_details/FloorPlanSection";
 import PropertyInformation from "@/components/project_details/PropertyInformation";
 import BuildingInformation from "@/components/project_details/BuildingInformation";
+import Footer from "@/components/footer";
 const ProjectDetailsPage = async ({ params }) => {
     const { id } = await params;
     const property = await getPropertyById(id);
@@ -26,6 +27,7 @@ const ProjectDetailsPage = async ({ params }) => {
             <FloorPlanSection property={property} />
             <PropertyInformation property={property} />
             <BuildingInformation property={property} />
+            <Footer/>
         </main>
     );
 };
