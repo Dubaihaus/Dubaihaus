@@ -37,10 +37,10 @@ const ProjectDetailsHighlights = ({ property }) => { // <-- Accept property
                     <p>{propertyTypes}</p> {/* <-- API type */}
                 </div>
 
-                <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Features</h2>
-                    <p>{description}</p> {/* <-- API description */}
-                </div>
+                <div
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: description }}
+                />
 
                 <div>
                     <h2 className="text-lg font-semibold text-gray-900">Investment Potential:</h2>
