@@ -2,52 +2,56 @@
 import Image from 'next/image';
 import { FaArrowRight, FaBuilding, FaHandsHelping, FaStar } from 'react-icons/fa';
 import { useRouter } from "next/navigation";
-const propertyTypes = [
-    {
-        title: 'Apartments for Sale',
-        label: 'FROM AED 240,000',
-        image: '/dashboard/apartments.jpg',
-        filters: { category: "apartments" },
-    },
-    {
-        title: 'Townhouses for Sale',
-        label: 'FROM AED 558,000',
-        image: '/dashboard/townhouses.jpg',
-        filters: { category: "townhouses" },
-    },
-    {
-        title: 'Villas for Sale',
-        label: 'FROM AED 1,000,000',
-        image: '/dashboard/villas.jpg',
-        filters: { category: "villas" },
-    },
-    {
-        title: 'Buildings for Sale',
-        label: 'FROM AED 47,000,000',
-        image: '/dashboard/building.jpg',
-        filters: { category: "residential-building" },
-    },
-    {
-        title: 'Land Plots for Sale',
-        label: 'ONLINE PRE-APPROVAL',
-        image: '/dashboard/property1.jpg',
-        filters: { category: "residential-plots" },
-    },
-    {
-        title: 'All Properties for Sale',
-        label: 'FROM AED 240,000',
-        image: '/dashboard/building.jpg',
-        filters: {}, // No extra filter = all
-    },
-];
+import { useTranslations } from 'next-intl';
 
 const OffPlanPropertyTypesSection = () => {
     const router = useRouter();
+    const t = useTranslations('offPlan'); // Namespace for this section
+
+    const propertyTypes = [
+        {
+            title: t('propertyTypes.apartments.title'),
+            label: t('propertyTypes.apartments.label'),
+            image: '/dashboard/apartments.jpg',
+            filters: { category: "apartments" },
+        },
+        {
+            title: t('propertyTypes.townhouses.title'),
+            label: t('propertyTypes.townhouses.label'),
+            image: '/dashboard/townhouses.jpg',
+            filters: { category: "townhouses" },
+        },
+        {
+            title: t('propertyTypes.villas.title'),
+            label: t('propertyTypes.villas.label'),
+            image: '/dashboard/villas.jpg',
+            filters: { category: "villas" },
+        },
+        {
+            title: t('propertyTypes.buildings.title'),
+            label: t('propertyTypes.buildings.label'),
+            image: '/dashboard/building.jpg',
+            filters: { category: "residential-building" },
+        },
+        {
+            title: t('propertyTypes.land.title'),
+            label: t('propertyTypes.land.label'),
+            image: '/dashboard/property1.jpg',
+            filters: { category: "residential-plots" },
+        },
+        {
+            title: t('propertyTypes.all.title'),
+            label: t('propertyTypes.all.label'),
+            image: '/dashboard/building.jpg',
+            filters: {}, // No extra filter = all
+        },
+    ];
 
     const handleCardClick = (filters) => {
         const params = new URLSearchParams(filters).toString();
         router.push(`/off-plan${params ? `?${params}` : ''}`);
     };
+
     return (
         <section className="px-4 py-16 md:px-16 bg-white" dir="ltr">
             {/* Heading Section */}
@@ -55,38 +59,33 @@ const OffPlanPropertyTypesSection = () => {
                 {/* Left Text */}
                 <div className="max-w-2xl">
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                        New Off-Plan Properties in Dubai
+                        {t('heading')}
                     </h2>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                        Off-plan properties are those developments which are still in the planning or
-                        the construction stages. Purchasing an off-plan property in Dubai (the UAE)
-                        comes with certain advantages as many real estate developers in the United Arab
-                        Emirates offer special promotions in the early phases, such as generous post-handover
-                        payment plans.
+                        {t('description')}
                     </p>
                 </div>
 
                 {/* Icons */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                    {/* Each Icon */}
                     <div className="flex items-center gap-2 text-sm text-gray-700">
                         <FaBuilding className="text-sky-600 text-xl" />
-                        <span>Brand New Projects</span>
+                        <span>{t('icons.brandNew')}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700">
                         <FaHandsHelping className="text-sky-600 text-xl" />
-                        <span>Full Support</span>
+                        <span>{t('icons.support')}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-700">
                         <FaStar className="text-sky-600 text-xl" />
-                        <span>Priority Booking</span>
+                        <span>{t('icons.priority')}</span>
                     </div>
                 </div>
 
                 {/* CTA Button */}
                 <div className="mt-4 lg:mt-0">
                     <button className="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-6 py-2 rounded-md transition">
-                        Find Your Off-Plan Property in Dubai
+                        {t('cta')}
                     </button>
                 </div>
             </div>
@@ -97,7 +96,7 @@ const OffPlanPropertyTypesSection = () => {
                     <div
                         key={index}
                         onClick={() => handleCardClick(item.filters)}
-                        className="relative rounded-lg overflow-hidden group shadow hover:shadow-lg transition"
+                        className="relative rounded-lg overflow-hidden group shadow hover:shadow-lg transition cursor-pointer"
                     >
                         <Image
                             src={item.image}
@@ -107,8 +106,8 @@ const OffPlanPropertyTypesSection = () => {
                             className="object-cover w-full h-[200px]"
                         />
                         <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
-              {item.label}
-            </span>
+                            {item.label}
+                        </span>
 
                         {/* Title */}
                         <div className="flex items-center justify-between px-4 py-3 bg-white">

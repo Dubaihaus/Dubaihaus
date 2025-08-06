@@ -1,0 +1,52 @@
+{
+  "navbar": {
+    "properties": "Immobilien",
+    "events": "Veranstaltungen",
+    "comingSoon": "Bald verfügbare Projekte",
+    "developers": "Entwickler",
+    "areas": "Gebiete",
+    "map": "Karte",
+    "videos": "Videos",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "find": "Finden"
+  },
+  "hero": {
+    "headline": "PALM JEBEL ALI",
+    "subheadline": "Strandvillen-Grundstücke zum Verkauf auf Palm Jebel Ali",
+    "button": "Mehr Entdecken"
+  },
+  "section": {
+    "offPlanTitle": "Neue Off-Plan Immobilien zum Verkauf in Dubai",
+    "offPlanDesc": "Off-Plan Immobilien befinden sich noch in der Planungs- oder Bauphase. Der Kauf in den VAE bietet Frühbucherpreise und flexible Zahlungspläne."
+  },
+  "footer": {
+    "developers": "Entwickler in Dubai",
+    "popularAreas": "Beliebte Gebiete in Dubai",
+    "propertyTypes": "Immobilienarten",
+    "usefulLinks": "Nützliche Links",
+    "privacy": "Datenschutzbestimmungen",
+    "agreement": "Nutzungsvereinbarung",
+    "join": "Treten Sie über 9500 Mitgliedern bei und erhalten Sie Updates zu neuen Off-Plan-Projekten & neuesten Immobiliennachrichten"
+  },
+  "offPlan": {
+  "heading": "Neue Off-Plan Immobilien in Dubai",
+  "description": "Off-Plan-Immobilien sind Projekte, die sich noch in der Planungs- oder Bauphase befinden. Der Kauf in Dubai bietet Vorteile wie Frühbucherrabatte und großzügige Zahlungspläne nach Übergabe.",
+  "icons": {
+    "brandNew": "Brandneue Projekte",
+    "support": "Umfassende Unterstützung",
+    "priority": "Prioritätsbuchung"
+  },
+  "cta": "Finden Sie Ihre Off-Plan Immobilie in Dubai",
+  "propertyTypes": {
+    "apartments": { "title": "Wohnungen zum Verkauf", "label": "AB AED 240.000" },
+    "townhouses": { "title": "Reihenhäuser zum Verkauf", "label": "AB AED 558.000" },
+    "villas": { "title": "Villen zum Verkauf", "label": "AB AED 1.000.000" },
+    "buildings": { "title": "Gebäude zum Verkauf", "label": "AB AED 47.000.000" },
+    "land": { "title": "Grundstücke zum Verkauf", "label": "ONLINE-VORGENEHMIGUNG" },
+    "all": { "title": "Alle Immobilien zum Verkauf", "label": "AB AED 240.000" }
+  }
+}
+
+
+}

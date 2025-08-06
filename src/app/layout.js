@@ -1,22 +1,27 @@
-// app/layout.js
-import { dir } from 'i18next';
-// import { languages } from '../i18n/settings';
-import { languages } from '../../i18n/settings';
 import './globals.css';
+import { NextIntlClientProvider } from 'next-intl';
+import { headers } from 'next/headers';
 
-export const metadata = {
-  title: 'Dubai Haus',
-  description: 'A Real Estate Platform',
-};
-
-export async function generateStaticParams() {
-  return languages.map((lng) => ({ lng }));
+async function getMessages(locale) {
+  try {
+    return (await import(`@/i18n/${locale}.json`)).default;
+  } catch {
+    return (await import('@/i18n/en.json')).default;
+  }
 }
 
-export default function RootLayout({ children, params }) {
+export default async function RootLayout({ children }) {
+  const headerStore =  await headers();
+  const locale = headerStore.get('x-locale') || 'en'; // set by middleware
+  const messages = await getMessages(locale);
+
   return (
-    <html lang={params.lng} dir="ltr">
-      <body>{children}</body>
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import LocaleSwitcher from './LocaleSwitcher'; // <-- Import Locale Switcher
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,26 +22,26 @@ export default function Navbar() {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex gap-6 items-center">
-                        {["Properties", "Events", "Coming Soon Projects", "Developers", "Areas", "Map", "Videos", "FAQ", "Blog"].map((item) => (
-                            <a key={item} href="#" className="text-sm hover:text-blue-600 transition">{item}</a>
+                        {["navbar.properties", "navbar.events", "navbar.comingSoon", "navbar.developers", "navbar.areas", "navbar.map", "navbar.videos", "navbar.faq", "navbar.blog"].map((key) => (
+                            <a key={key} href="#" className="text-sm hover:text-blue-600 transition">
+                                {/** Use translations */}
+                                <TranslatedText translationKey={key} />
+                            </a>
                         ))}
                     </div>
 
                     {/* Right Side */}
                     <div className="hidden md:flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                            <img src="https://flagcdn.com/gb.svg" alt="EN" className="h-4 w-6" />
-                            <span className="text-sm">EN</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
+                        {/* Locale Switcher */}
+                        <LocaleSwitcher />
+
+                        {/* Search Icon */}
                         <div className="bg-sky-500 text-white rounded-full p-2 cursor-pointer hover:bg-sky-600">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
-                        <span className="text-sm font-medium">Find</span>
+                        <span className="text-sm font-medium"><TranslatedText translationKey="navbar.find" /></span>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -54,16 +55,23 @@ export default function Navbar() {
                 {/* Mobile Menu */}
                 {isOpen && (
                     <div className="md:hidden mt-2 space-y-2">
-                        {["Properties", "Events", "Coming Soon Projects", "Developers", "Areas", "Map", "Videos", "FAQ", "Blog"].map((item) => (
-                            <a key={item} href="#" className="block text-sm py-2 border-b">{item}</a>
+                        {["navbar.properties", "navbar.events", "navbar.comingSoon", "navbar.developers", "navbar.areas", "navbar.map", "navbar.videos", "navbar.faq", "navbar.blog"].map((key) => (
+                            <a key={key} href="#" className="block text-sm py-2 border-b">
+                                <TranslatedText translationKey={key} />
+                            </a>
                         ))}
-                        <div className="flex items-center gap-2 mt-2">
-                            <img src="https://flagcdn.com/gb.svg" alt="EN" className="h-4 w-6" />
-                            <span className="text-sm">EN</span>
-                        </div>
+                        {/* Locale Switcher in Mobile Menu */}
+                        <LocaleSwitcher />
                     </div>
                 )}
             </div>
         </nav>
     );
+}
+
+// Helper component for translations
+import { useTranslations } from 'next-intl';
+function TranslatedText({ translationKey }) {
+    const t = useTranslations();
+    return t(translationKey);
 }

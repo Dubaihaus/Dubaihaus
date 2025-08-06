@@ -1,0 +1,51 @@
+{
+  "navbar": {
+    "properties": "Properties",
+    "events": "Events",
+    "comingSoon": "Coming Soon Projects",
+    "developers": "Developers",
+    "areas": "Areas",
+    "map": "Map",
+    "videos": "Videos",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "find": "Find"
+  },
+  "hero": {
+    "headline": "PALM JEBEL ALI",
+    "subheadline": "Beachfront Villa Plots for Sale on Palm Jebel Ali",
+    "button": "Discover More"
+  },
+  "section": {
+    "offPlanTitle": "New Off-Plan Properties for Sale in Dubai",
+    "offPlanDesc": "Off-plan properties are developments which are still in planning or construction. Buying in the UAE provides early-phase pricing and flexible payment plans."
+  },
+  "footer": {
+    "developers": "Developers in Dubai",
+    "popularAreas": "Popular Areas in Dubai",
+    "propertyTypes": "Property Types",
+    "usefulLinks": "Useful Links",
+    "privacy": "Privacy Policy",
+    "agreement": "User Agreement",
+    "join": "Join over 9500 members and get updates of new off-plan launches & latest real estate news"
+  },
+  "offPlan": {
+  "heading": "New Off-Plan Properties in Dubai",
+  "description": "Off-plan properties are those developments which are still in the planning or construction stages. Purchasing an off-plan property in Dubai (the UAE) comes with certain advantages as many real estate developers in the UAE offer special promotions in the early phases, such as generous post-handover payment plans.",
+  "icons": {
+    "brandNew": "Brand New Projects",
+    "support": "Full Support",
+    "priority": "Priority Booking"
+  },
+  "cta": "Find Your Off-Plan Property in Dubai",
+  "propertyTypes": {
+    "apartments": { "title": "Apartments for Sale", "label": "FROM AED 240,000" },
+    "townhouses": { "title": "Townhouses for Sale", "label": "FROM AED 558,000" },
+    "villas": { "title": "Villas for Sale", "label": "FROM AED 1,000,000" },
+    "buildings": { "title": "Buildings for Sale", "label": "FROM AED 47,000,000" },
+    "land": { "title": "Land Plots for Sale", "label": "ONLINE PRE-APPROVAL" },
+    "all": { "title": "All Properties for Sale", "label": "FROM AED 240,000" }
+  }
+}
+
+}
