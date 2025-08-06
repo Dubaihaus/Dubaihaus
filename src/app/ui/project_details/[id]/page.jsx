@@ -7,7 +7,9 @@ import ProjectAboutSection from "@/components/project_details/ProjectAboutSectio
 import LocationEconomicAppeal from "@/components/project_details/LocationEconomicAppeal";
 import PhotoGallerySection from "@/components/project_details/PhotoGallerySection";
 import FloorPlanSection from "@/components/project_details/FloorPlanSection";
-
+import PropertyInformation from "@/components/project_details/PropertyInformation";
+import BuildingInformation from "@/components/project_details/BuildingInformation";
+import Footer from "@/components/footer";
 const ProjectDetailsPage = async ({ params }) => {
     const { id } = await params;
     const property = await getPropertyById(id);
@@ -23,6 +25,9 @@ const ProjectDetailsPage = async ({ params }) => {
             <LocationEconomicAppeal property={property}/>
             <PhotoGallerySection property={property}/>
             <FloorPlanSection property={property} />
+            <PropertyInformation property={property} />
+            <BuildingInformation property={property} />
+            <Footer/>
         </main>
     );
 };
