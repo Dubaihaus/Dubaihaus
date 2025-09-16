@@ -1,4 +1,4 @@
-import { searchProperties } from "@/lib/bayutApi";
+import { searchProperties } from "@/lib/reellyApi";
 
 export default async function TestPage() {
     const data = await searchProperties();

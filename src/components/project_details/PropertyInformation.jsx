@@ -5,49 +5,45 @@ const PropertyInformation = ({ property }) => {
     const info = [
         {
             label: "Type",
-            value: property.type?.sub || "N/A",
+            value: property.unit_blocks?.[0]?.unit_type || "N/A",
             icon: "🏢"
         },
         {
             label: "Furnishing",
-            value: property.details?.is_furnished ? "Furnished" : "Unfurnished",
+            value: property.furnishing || "N/A",
             icon: "🛋️"
         },
         {
-            label: "Purpose",
-            value: property.purpose ? property.purpose.replace("-", " ") : "N/A",
+            label: "Status",
+            value: property.status || "N/A",
             icon: "🎯"
         },
         {
-            label: "TruCheck™ on",
-            value: property.verification?.truchecked_at
-                ? new Date(property.verification.truchecked_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                : "N/A",
+            label: "Sale Status",
+            value: property.sale_status || "N/A",
             icon: "✅"
         },
         {
             label: "Reference no.",
-            value: property.reference_number || "N/A",
+            value: property.id || "N/A",
             icon: "🔖"
         },
         {
-            label: "Added on",
-            value: property.meta?.created_at
-                ? new Date(property.meta.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            label: "Completion Date",
+            value: property.completion_datetime
+                ? new Date(property.completion_datetime).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                 : "N/A",
             icon: "📅"
         },
         {
-            label: "Completion",
-            value: property.details?.completion_status || "N/A",
+            label: "Area",
+            value: property.area || "N/A",
             icon: "🏗️"
         },
         {
-            label: "Handover date",
-            value: property.details?.completion_details?.completion_date
-                ? new Date(property.details.completion_details.completion_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-                : "N/A",
-            icon: "📦"
+            label: "Service Charge",
+            value: property.service_charge || "N/A",
+            icon: "💰"
         }
     ];
 

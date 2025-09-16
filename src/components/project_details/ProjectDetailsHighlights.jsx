@@ -2,14 +2,13 @@
 import Image from 'next/image';
 
 const ProjectDetailsHighlights = ({ property }) => {
-    const location = property?.location?.community?.name || "Dubai";
-    const propertyTypes = property?.type?.sub || "Apartments";
-    const description = property?.description || "";
-    const size = property?.area?.built_up ? `${property.area.built_up} ${property.area.unit}` : "Size TBA";
-    const completionDate = property?.details?.completion_details?.completion_date
-        ? new Date(property.details.completion_details.completion_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    const location = property.area || "Dubai";
+    const propertyTypes = property.unit_blocks?.map(block => block.unit_type).join(", ") || "Apartments";
+    const description = property.overview || "";
+    const completionDate = property.completion_datetime
+        ? new Date(property.completion_datetime).toLocaleDateString("en-US", { month: "short", year: "numeric" })
         : "TBA";
-    const price = property?.price ? `AED ${property.price.toLocaleString()}` : "Price on request";
+    const price = property.min_price_aed ? `AED ${property.min_price_aed.toLocaleString()}` : "Price on request";
 
     return (
         <>
@@ -23,7 +22,6 @@ const ProjectDetailsHighlights = ({ property }) => {
                         <ul className="list-disc pl-5 space-y-2 text-base text-gray-800">
                             <li><strong>Location:</strong> {location}</li>
                             <li><strong>Property Types:</strong> {propertyTypes}</li>
-                            <li><strong>Average Size:</strong> {size}</li>
                             <li><strong>Starting Price:</strong> {price}</li>
                             <li><strong>Completion Due Date:</strong> {completionDate}</li>
                             <li><strong>Ownership:</strong> 100% Foreign Ownership</li>
@@ -32,51 +30,52 @@ const ProjectDetailsHighlights = ({ property }) => {
                         </ul>
 
                         {/* Amenities */}
-                        <div>
-                            <h3 className="text-xl font-semibold mt-6 mb-2">🌟 Exclusive Amenities</h3>
-                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-                                <li>Basketball Court</li>
-                                <li>Kid's Play Area</li>
-                                <li>Outdoor Pool Deck</li>
-                                <li>Outdoor Fitness Area</li>
-                                <li>Yoga Area</li>
-                                <li>Outdoor Seating Area</li>
-                            </ul>
-                        </div>
+                        {property.facilities && property.facilities.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-semibold mt-6 mb-2">🌟 Exclusive Amenities</h3>
+                                <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                                    {property.facilities.slice(0, 6).map((facility, index) => (
+                                        <li key={index}>{facility.name}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Location Access */}
-                        <div>
-                            <h3 className="text-xl font-semibold mt-6 mb-2">📍 Prime Location Access</h3>
-                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-                                <li>3 mins from Dubai Hills Mall</li>
-                                <li>12 mins from Dubai Hills Golf Club</li>
-                                <li>12 mins from Al Barsha Mall</li>
-                                <li>15 mins from Mall of the Emirates</li>
-                                <li>20 mins from Dubai Mall</li>
-                            </ul>
-                        </div>
+                        {property.map_points && property.map_points.length > 0 && (
+                            <div>
+                                <h3 className="text-xl font-semibold mt-6 mb-2">📍 Prime Location Access</h3>
+                                <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                                    {property.map_points.slice(0, 5).map((point, index) => (
+                                        <li key={index}>{point.name} ({point.distance_km} km)</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Brochure Button */}
-                        <div>
-                            <a
-                                href={property?.meta?.url || "#"}
-                                className="inline-block mt-4 px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md transition-all"
-                            >
-                                📄 Download Free PDF Brochure
-                            </a>
-                        </div>
+                        {property.brochure_url && (
+                            <div>
+                                <a
+                                    href={property.brochure_url}
+                                    className="inline-block mt-4 px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md transition-all"
+                                >
+                                    📄 Download Free PDF Brochure
+                                </a>
+                            </div>
+                        )}
                     </div>
 
                     {/* RIGHT COLUMN */}
                     <div className="order-1 md:order-2">
                         <div className="bg-gray-100 rounded-xl shadow-md p-6">
-                            <h3 className="text-lg font-semibold mb-3 text-gray-800">💎 Why Choose Binghatti Hillviews?</h3>
+                            <h3 className="text-lg font-semibold mb-3 text-gray-800">💎 Why Choose {property.name}?</h3>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
                                 <li>New Launch – Be the first to own</li>
                                 <li>Freehold Property</li>
-                                <li>Upcoming Metro line nearby</li>
                                 <li>Direct from the Developer</li>
                                 <li>Ideal for both investors & residents</li>
+                                {property.has_escrow && <li>Escrow Account Protection</li>}
                             </ul>
                         </div>
                     </div>

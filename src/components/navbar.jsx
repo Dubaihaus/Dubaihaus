@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Menu, X } from 'lucide-react';
 import LocaleSwitcher from './LocaleSwitcher'; // <-- Import Locale Switcher
+import Link from 'next/link';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,14 +14,13 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <div className="flex items-center gap-2">
-                        <img src="/logo.jpg" alt="Dubai Off Plan" className="h-8 w-auto" />
-                        <div className="text-sm leading-tight">
-                            <span className="font-bold">DUBAI</span><br />
-                            <span className="text-xs text-blue-500">OFF PLAN</span>
-                        </div>
-                    </div>
-
+                    <Link href="/" className="flex items-center gap-2">
+    <img src="/logo.jpg" alt="Dubai Off Plan" className="h-8 w-auto" />
+    <div className="text-sm leading-tight">
+        <span className="font-bold">DUBAI</span><br />
+        <span className="text-xs text-blue-500">OFF PLAN</span>
+    </div>
+</Link>
                     {/* Desktop Menu */}
                     <div className="hidden md:flex gap-6 items-center">
                         {["navbar.properties", "navbar.events", "navbar.comingSoon", "navbar.developers", "navbar.areas", "navbar.map", "navbar.videos", "navbar.faq", "navbar.blog"].map((key) => (
@@ -70,7 +71,7 @@ export default function Navbar() {
 }
 
 // Helper component for translations
-import { useTranslations } from 'next-intl';
+
 function TranslatedText({ translationKey }) {
     const t = useTranslations();
     return t(translationKey);

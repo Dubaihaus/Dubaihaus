@@ -6,38 +6,26 @@ import { useTranslations } from 'next-intl';
 
 const OffPlanPropertyTypesSection = () => {
     const router = useRouter();
-    const t = useTranslations('offPlan'); // Namespace for this section
+    const t = useTranslations('offPlan');
 
     const propertyTypes = [
         {
             title: t('propertyTypes.apartments.title'),
             label: t('propertyTypes.apartments.label'),
             image: '/dashboard/apartments.jpg',
-            filters: { category: "apartments" },
+            filters: { unit_type: "Apartments" },
         },
         {
             title: t('propertyTypes.townhouses.title'),
             label: t('propertyTypes.townhouses.label'),
             image: '/dashboard/townhouses.jpg',
-            filters: { category: "townhouses" },
+            filters: { unit_type: "Townhouses" },
         },
         {
             title: t('propertyTypes.villas.title'),
             label: t('propertyTypes.villas.label'),
             image: '/dashboard/villas.jpg',
-            filters: { category: "villas" },
-        },
-        {
-            title: t('propertyTypes.buildings.title'),
-            label: t('propertyTypes.buildings.label'),
-            image: '/dashboard/building.jpg',
-            filters: { category: "residential-building" },
-        },
-        {
-            title: t('propertyTypes.land.title'),
-            label: t('propertyTypes.land.label'),
-            image: '/dashboard/property1.jpg',
-            filters: { category: "residential-plots" },
+            filters: { unit_type: "Villas" },
         },
         {
             title: t('propertyTypes.all.title'),
@@ -91,7 +79,7 @@ const OffPlanPropertyTypesSection = () => {
             </div>
 
             {/* Property Types Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {propertyTypes.map((item, index) => (
                     <div
                         key={index}

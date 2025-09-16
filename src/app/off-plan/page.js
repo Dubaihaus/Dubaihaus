@@ -26,9 +26,20 @@ export default function OffPlanPage({ limit }) {
     const fetchProjects = async () => {
         const params = new URLSearchParams({ ...filters, currency });
         const res = await fetch(`/api/off-plan?${params.toString()}`);
-        const data = await res.json();
-        const limitedProjects = limit ? data.results?.slice(0, limit) : data.results;
-        setProjects(limitedProjects || []);
+if (!res.ok) {
+  const text = await res.text();
+  console.error("off-plan API error:", res.status, text.slice(0, 300));
+  setProjects([]);
+  return;
+}
+const raw = await res.text();
+if (!raw) {
+  setProjects([]);
+  return;
+}
+const data = JSON.parse(raw);
+const limitedProjects = limit ? data.results?.slice(0, limit) : data.results;
+setProjects(limitedProjects || []);
     };
 
     useEffect(() => {

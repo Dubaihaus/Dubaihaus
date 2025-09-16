@@ -3,39 +3,38 @@ import Image from 'next/image';
 
 const LocationEconomicAppeal = ({ property }) => {
     // Use a few photos from the API for the appeal section
-    const appealImages = property?.media?.photos?.slice(2, 5) || [
-        "/project_detail_images/building.jpg",
-        "/project_detail_images/building.jpg",
-        "/project_detail_images/building.jpg"
-    ];
+    const appealImages = [
+        property.cover?.url,
+        ...(property.architecture || []).slice(0, 2).map(img => img.url)
+    ].filter(Boolean);
 
-    // Construct "location/economic appeal" highlights dynamically from available API data
+    // Construct "location/economic appeal" highlights from Reelly API data
     const locationAppeal = [
         {
             title: "Prime Location",
-            description: `${property?.location?.sub_community?.name || ""}, ${property?.location?.community?.name || "Dubai"}`
+            description: property.area || "Not specified"
         },
         {
             title: "Developer",
-            description: property?.project?.developer?.name || "Not specified"
+            description: property.developer || "Not specified"
         },
         {
             title: "Completion Date",
-            description: property?.details?.completion_details?.completion_date
-                ? new Date(property.details.completion_details.completion_date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+            description: property.completion_datetime
+                ? new Date(property.completion_datetime).toLocaleDateString("en-US", { month: "long", year: "numeric" })
                 : "TBA"
         },
         {
-            title: "Price",
-            description: property?.price ? `AED ${property.price.toLocaleString()}` : "Price on request"
+            title: "Starting Price",
+            description: property.min_price_aed ? `AED ${property.min_price_aed.toLocaleString()}` : "Price on request"
         },
         {
-            title: "Property Type",
-            description: property?.type?.sub || "Apartments"
+            title: "Property Types",
+            description: property.unit_blocks?.map(block => block.unit_type).join(", ") || "Not specified"
         }
     ];
 
-    const title = property?.title || "Project";
+    const title = property.name || "Project";
     return (
         <section className="px-4 py-12 md:px-16 bg-white" dir="ltr">
             {/* Title + Images Row */}
@@ -43,7 +42,7 @@ const LocationEconomicAppeal = ({ property }) => {
                 {/* Heading */}
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-800 md:w-1/2">
                     Location and{' '}
-                    <span className="text-sky-600">Economic Appeal</span> of {title} {/* <-- Dynamic title */}
+                    <span className="text-sky-600">Economic Appeal</span> of {title}
                 </h2>
 
                 {/* Images beside title */}
@@ -63,14 +62,14 @@ const LocationEconomicAppeal = ({ property }) => {
 
             {/* Text Content */}
             <div className="space-y-6 text-gray-700 text-sm leading-relaxed">
-                {locationAppeal.length > 0 ? locationAppeal.map((item, idx) => (
+                {locationAppeal.map((item, idx) => (
                     <div key={idx}>
                         <h4 className="font-semibold text-base text-gray-800 mb-1">
                             {item.title}
                         </h4>
                         <p className="text-gray-600">{item.description}</p>
                     </div>
-                )) : <p className="text-gray-500">No location/economic highlights available.</p>}
+                ))}
             </div>
         </section>
     );

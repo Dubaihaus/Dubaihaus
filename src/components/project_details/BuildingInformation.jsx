@@ -2,22 +2,16 @@
 import React from "react";
 
 const BuildingInformation = ({ property }) => {
-    const building = property.building_info || {};
-
     const buildingDetails = [
-        { label: "Building Name", value: building.name || "N/A", icon: "🏙️" },
-        { label: "Total Parking Spaces", value: building.total_parking_space || "N/A", icon: "🚗" },
-        { label: "Total Floors", value: building.floors || "N/A", icon: "🏢" },
-        {
-            label: "Total Building Area",
-            value: building.total_building_area
-                ? `${building.total_building_area.toLocaleString()} sqft`
-                : "N/A",
-            icon: "📐"
-        },
-        { label: "Retail Centres", value: building.shops || "N/A", icon: "🛍️" },
-        { label: "Elevators", value: building.elevators || "N/A", icon: "🛗" },
-        { label: "Swimming Pools", value: building.swimming_pools || "N/A", icon: "🏊" }
+        { label: "Building Name", value: property.name || "N/A", icon: "🏙️" },
+        { label: "Developer", value: property.developer || "N/A", icon: "🏢" },
+        { label: "Completion Date", value: property.completion_datetime 
+            ? new Date(property.completion_datetime).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            : "N/A", icon: "📅" },
+        { label: "Area", value: property.area || "N/A", icon: "📍" },
+        { label: "Status", value: property.status || "N/A", icon: "📊" },
+        { label: "Furnishing", value: property.furnishing || "N/A", icon: "🛋️" },
+        { label: "Service Charge", value: property.service_charge || "N/A", icon: "💰" }
     ];
 
     return (

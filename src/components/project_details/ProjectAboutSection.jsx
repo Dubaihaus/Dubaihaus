@@ -3,22 +3,22 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 const ProjectAboutSection = ({ property }) => {
-    const features = property?.amenities?.flatMap(a =>
-        a.items?.map(item => ({
-            icon: '/project_detail_images/building.jpg',
-            label: item
-        }))
-    ) || [];
+    // Get all images from Reelly API
+    const allImages = [
+        ...(property.architecture || []).map(img => img.url),
+        ...(property.interior || []).map(img => img.url),
+        ...(property.lobby || []).map(img => img.url),
+        property.cover?.url
+    ].filter(Boolean);
 
-    const title = property?.title || "the Project";
-    const description = property?.description || "No detailed description available.";
-    const allPhotos = property?.media?.photos || ["/project_detail_images/building.jpg"];
+    const title = property.name || "the Project";
+    const description = property.overview || "No detailed description available.";
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const showImages = allPhotos.slice(0, 7); // show first 7
-    const remainingImages = allPhotos.slice(7); // for popover
-    const hasMoreImages = allPhotos.length > 8;
+    const showImages = allImages.slice(0, 7); // show first 7
+    const remainingImages = allImages.slice(7); // for popover
+    const hasMoreImages = allImages.length > 8;
 
     return (
         <section className="bg-white px-4 md:px-12 py-12" dir="ltr">
@@ -55,7 +55,7 @@ const ProjectAboutSection = ({ property }) => {
                         className="relative cursor-pointer rounded-lg overflow-hidden group"
                     >
                         <Image
-                            src={allPhotos[7]}
+                            src={allImages[7]}
                             alt="See more"
                             width={400}
                             height={300}

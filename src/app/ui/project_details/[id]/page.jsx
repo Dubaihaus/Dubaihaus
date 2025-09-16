@@ -1,5 +1,5 @@
 
-import { getPropertyById } from "@/lib/bayutApi";
+import { getPropertyById } from "@/lib/reellyApi";
 import React from 'react';
 import ProjectHeaderSection from '@/components/project_details/ProjectHeaderSection';
 import ProjectDetailsHighlights from "@/components/project_details/ProjectDetailsHighlights";

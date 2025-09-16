@@ -3,27 +3,35 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 const PhotoGallerySection = ({ property }) => {
-    // All photos from API (no type differentiation in your response)
-    const allImages = property?.media?.photos || ["/project_detail_images/building.jpg"];
+    // Get images from Reelly API by category
+    const exteriorImages = property.architecture || [];
+    const interiorImages = property.interior || [];
+    
+    // Convert to URL arrays
+    const exteriorUrls = exteriorImages.map(img => img.url);
+    const interiorUrls = interiorImages.map(img => img.url);
+    
+    // If no specific category images, use all available images
+    const allImages = [
+        ...exteriorUrls,
+        ...interiorUrls,
+        ...(property.lobby || []).map(img => img.url),
+        property.cover?.url
+    ].filter(Boolean);
 
-    // We'll just split them manually (first half as exterior, second half as interior)
-    const midIndex = Math.ceil(allImages.length / 2);
-    const exteriorImages = allImages.slice(0, midIndex);
-    const interiorImages = allImages.slice(midIndex);
+    const hasInterior = interiorUrls.length > 0;
+    const hasExterior = exteriorUrls.length > 0;
 
-    // If no split is needed (e.g., only a few images), default to one group
-    const hasInterior = interiorImages.length > 0;
+    const [activeTab, setActiveTab] = useState(hasExterior ? 'exterior' : (hasInterior ? 'interior' : 'all'));
+    const [selectedImage, setSelectedImage] = useState(allImages[0] || "/project_detail_images/building.jpg");
 
-    const [activeTab, setActiveTab] = useState('exterior');
-    const [selectedImage, setSelectedImage] = useState(exteriorImages[0] || "/project_detail_images/building.jpg");
-
-    const images = activeTab === 'exterior' ? exteriorImages : interiorImages;
+    const images = activeTab === 'exterior' ? exteriorUrls : 
+                  activeTab === 'interior' ? interiorUrls : 
+                  allImages;
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
-        const defaultImg = tab === 'exterior'
-            ? (exteriorImages[0] || "/project_detail_images/building.jpg")
-            : (interiorImages[0] || "/project_detail_images/building.jpg");
+        const defaultImg = images[0] || "/project_detail_images/building.jpg";
         setSelectedImage(defaultImg);
     };
 
@@ -37,23 +45,36 @@ const PhotoGallerySection = ({ property }) => {
 
                 {/* Buttons */}
                 <div className="flex space-x-2">
+                    {hasExterior && (
+                        <button
+                            onClick={() => handleTabChange('exterior')}
+                            className={`px-4 py-1 border rounded-md text-sm font-medium ${activeTab === 'exterior'
+                                    ? 'bg-sky-500 text-white'
+                                    : 'border-sky-300 text-gray-700'
+                                }`}
+                        >
+                            Exteriors
+                        </button>
+                    )}
+                    {hasInterior && (
+                        <button
+                            onClick={() => handleTabChange('interior')}
+                            className={`px-4 py-1 border rounded-md text-sm font-medium ${activeTab === 'interior'
+                                    ? 'bg-sky-500 text-white'
+                                    : 'border-sky-300 text-gray-700'
+                                }`}
+                        >
+                            Interiors
+                        </button>
+                    )}
                     <button
-                        onClick={() => handleTabChange('exterior')}
-                        className={`px-4 py-1 border rounded-md text-sm font-medium ${activeTab === 'exterior'
+                        onClick={() => handleTabChange('all')}
+                        className={`px-4 py-1 border rounded-md text-sm font-medium ${activeTab === 'all'
                                 ? 'bg-sky-500 text-white'
                                 : 'border-sky-300 text-gray-700'
                             }`}
                     >
-                        Exteriors
-                    </button>
-                    <button
-                        onClick={() => handleTabChange('interior')}
-                        className={`px-4 py-1 border rounded-md text-sm font-medium ${activeTab === 'interior'
-                                ? 'bg-sky-500 text-white'
-                                : 'border-sky-300 text-gray-700'
-                            }`}
-                    >
-                        Interiors
+                        All Photos
                     </button>
                 </div>
             </div>

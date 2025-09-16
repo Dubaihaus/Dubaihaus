@@ -8,25 +8,26 @@ import {
     FaWhatsapp,
 } from 'react-icons/fa';
 
-const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as prop
-    // Extract dynamic data with safe fallbacks
-    const coverPhoto = property?.media?.cover_photo || "/project_detail_images/building.jpg";
-    const title = property?.title || "Project Title";
-    const community = `${property?.location?.sub_community?.name || ""} ${property?.location?.community?.name || "Dubai"}`;
-    const price = property?.price ? `AED ${property.price.toLocaleString()}` : "Price on request";
-    const handoverDate = property?.details?.completion_details?.completion_date
-        ? new Date(property.details.completion_details.completion_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+const ProjectHeaderSection = ({ property }) => {
+    // Extract dynamic data from Reelly API
+    const coverPhoto = property.cover?.url || "/project_detail_images/building.jpg";
+    const title = property.name || "Project Title";
+    const community = property.area || "Dubai";
+    const price = property.min_price_aed ? `AED ${property.min_price_aed.toLocaleString()}` : "Price on request";
+    const handoverDate = property.completion_datetime
+        ? new Date(property.completion_datetime).toLocaleDateString("en-US", { month: "short", year: "numeric" })
         : "TBA";
-    const paymentPlan = property?.payment_plans?.[0]
-        ? `${property.payment_plans[0].down_payment?.percent || 0}/${property.payment_plans[0].handover?.percent || 0} Plan`
-        : "Flexible Plan";
+    
+    // Get payment plan if available
+    const paymentPlan = property.payment_plans?.[0]?.Plan_name || "Flexible Plan";
+
     return (
         <section className="relative bg-gradient-to-r from-white to-[#fdfdfd] rounded-xl shadow-sm px-4 py-8 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
 
             {/* Right Side - Image */}
             <div className="relative">
                 <Image
-                    src={coverPhoto} // <-- API image
+                    src={coverPhoto}
                     alt={title}
                     width={600}
                     height={400}
@@ -36,13 +37,13 @@ const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as
                 {/* Floating Buttons */}
                 <div className="absolute bottom-4 right-4 flex flex-col items-center gap-2">
                     <a
-                        href={`tel:${property?.agent?.contact?.phone || "+97100000000"}`} // <-- API agent phone
+                        href={`tel:${property.developer_data?.phone || "+97100000000"}`}
                         className="bg-blue-500 hover:bg-blue-600 p-3 rounded-full shadow-md text-white"
                     >
                         <FaPhoneAlt />
                     </a>
                     <a
-                        href={`https://wa.me/${property?.agent?.contact?.whatsapp || "97100000000"}`} // <-- API WhatsApp
+                        href={`https://wa.me/${property.developer_data?.whatsapp || "97100000000"}`}
                         target="_blank"
                         className="bg-green-500 hover:bg-green-600 p-3 rounded-full shadow-md text-white"
                     >
@@ -56,16 +57,16 @@ const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as
                 {/* Breadcrumb */}
                 <div className="text-sm text-blue-600 text-left">
                     <span className="text-gray-400">Main Page &gt; Projects &gt;</span>{' '}
-                    {community} {/* <-- Community from API */}
+                    {community}
                 </div>
 
                 {/* Project Title */}
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-800 text-left">
-                        {title} {/* <-- Project title from API */}
+                        {title}
                     </h1>
                     <p className="text-xl md:text-2xl font-medium text-gray-700 mt-2 text-left">
-                        in {community} – Waterfront Living {/* <-- Community */}
+                        in {community}
                     </p>
                 </div>
 
@@ -89,7 +90,7 @@ const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as
                     <div className="flex items-center gap-2 text-sm justify-start">
                         <FaMoneyBillWave className="text-sky-500 text-xl" />
                         <div>
-                            <p className="font-semibold text-gray-700">{price}</p> {/* <-- API price */}
+                            <p className="font-semibold text-gray-700">{price}</p>
                             <span className="text-gray-500 text-xs">Starting Price</span>
                         </div>
                     </div>
@@ -98,7 +99,7 @@ const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as
                     <div className="flex items-center gap-2 text-sm">
                         <FaPercent className="text-sky-500 text-xl" />
                         <div>
-                            <p className="font-semibold text-gray-700">{paymentPlan}</p> {/* <-- API plan */}
+                            <p className="font-semibold text-gray-700">{paymentPlan}</p>
                             <span className="text-gray-500 text-xs">Payment Plan</span>
                         </div>
                     </div>
@@ -107,7 +108,7 @@ const ProjectHeaderSection = ({ property }) => {  // <-- Accept property data as
                     <div className="flex items-center justify-start gap-2 text-sm">
                         <FaCalendarAlt className="text-sky-500 text-xl" />
                         <div>
-                            <p className="font-semibold text-gray-700">{handoverDate}</p> {/* <-- API handover */}
+                            <p className="font-semibold text-gray-700">{handoverDate}</p>
                             <span className="text-gray-500 text-xs">Handover</span>
                         </div>
                     </div>
