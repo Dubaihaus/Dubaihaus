@@ -3,15 +3,15 @@ import React from "react";
 
 const BuildingInformation = ({ property }) => {
     const buildingDetails = [
-        { label: "Building Name", value: property.name || "N/A", icon: "🏙️" },
+        { label: "Building Name", value: property.title || property?.rawData?.name || "N/A", icon: "🏙️" },
         { label: "Developer", value: property.developer || "N/A", icon: "🏢" },
-        { label: "Completion Date", value: property.completion_datetime 
-            ? new Date(property.completion_datetime).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        { label: "Completion Date", value: property.completion_date 
+            ? new Date(property.completion_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
             : "N/A", icon: "📅" },
-        { label: "Area", value: property.area || "N/A", icon: "📍" },
-        { label: "Status", value: property.status || "N/A", icon: "📊" },
-        { label: "Furnishing", value: property.furnishing || "N/A", icon: "🛋️" },
-        { label: "Service Charge", value: property.service_charge || "N/A", icon: "💰" }
+        { label: "Area", value: property.location || "N/A", icon: "📍" },
+        { label: "Status", value: property.construction_status || "N/A", icon: "📊" },
+        {  label: "Furnishing", value: property?.rawData?.furnishing || "N/A",  icon: "🛋️" },
+        { label: "Service Charge", value: property?.rawData?.service_charge || "N/A", icon: "💰" }
     ];
 
     return (

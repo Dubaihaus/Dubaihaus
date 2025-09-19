@@ -13,19 +13,19 @@ const OffPlanPropertyTypesSection = () => {
             title: t('propertyTypes.apartments.title'),
             label: t('propertyTypes.apartments.label'),
             image: '/dashboard/apartments.jpg',
-            filters: { unit_type: "Apartments" },
+            filters: { unit_types: "Apartment" }, // Updated to match API enum values
         },
         {
             title: t('propertyTypes.townhouses.title'),
             label: t('propertyTypes.townhouses.label'),
             image: '/dashboard/townhouses.jpg',
-            filters: { unit_type: "Townhouses" },
+            filters: { unit_types: "townhouse" }, // Updated to match API enum values
         },
         {
             title: t('propertyTypes.villas.title'),
             label: t('propertyTypes.villas.label'),
             image: '/dashboard/villas.jpg',
-            filters: { unit_type: "Villas" },
+            filters: { unit_types: "villa" }, // Updated to match API enum values
         },
         {
             title: t('propertyTypes.all.title'),

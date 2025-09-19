@@ -4,7 +4,7 @@ import Image from 'next/image';
 const LocationEconomicAppeal = ({ property }) => {
     // Use a few photos from the API for the appeal section
     const appealImages = [
-        property.cover?.url,
+        property.cover_image?.url,
         ...(property.architecture || []).slice(0, 2).map(img => img.url)
     ].filter(Boolean);
 
@@ -12,7 +12,7 @@ const LocationEconomicAppeal = ({ property }) => {
     const locationAppeal = [
         {
             title: "Prime Location",
-            description: property.area || "Not specified"
+            description: property.location?.sector || property.location?.district || "Not specified"
         },
         {
             title: "Developer",
@@ -20,17 +20,17 @@ const LocationEconomicAppeal = ({ property }) => {
         },
         {
             title: "Completion Date",
-            description: property.completion_datetime
-                ? new Date(property.completion_datetime).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+            description: property.completion_date
+                ? new Date(property.completion_date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
                 : "TBA"
         },
         {
             title: "Starting Price",
-            description: property.min_price_aed ? `AED ${property.min_price_aed.toLocaleString()}` : "Price on request"
+            description: property.min_price ? `AED ${property.min_price.toLocaleString()}` : "Price on request"
         },
         {
             title: "Property Types",
-            description: property.unit_blocks?.map(block => block.unit_type).join(", ") || "Not specified"
+            description: property.typical_units?.map(unit => unit.unit_type).join(", ") || "Not specified"
         }
     ];
 

@@ -5,7 +5,7 @@ const PropertyInformation = ({ property }) => {
     const info = [
         {
             label: "Type",
-            value: property.unit_blocks?.[0]?.unit_type || "N/A",
+           value: property?.rawData?.unit_blocks?.[0]?.unit_type || "N/A",
             icon: "🏢"
         },
         {
@@ -15,12 +15,12 @@ const PropertyInformation = ({ property }) => {
         },
         {
             label: "Status",
-            value: property.status || "N/A",
+            value: property.constructionStatus || property.saleStatus || "N/A",
             icon: "🎯"
         },
         {
             label: "Sale Status",
-            value: property.sale_status || "N/A",
+           value: property.saleStatus || "N/A",
             icon: "✅"
         },
         {
@@ -30,19 +30,20 @@ const PropertyInformation = ({ property }) => {
         },
         {
             label: "Completion Date",
-            value: property.completion_datetime
-                ? new Date(property.completion_datetime).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                : "N/A",
+            value: property.completionDate
+  ? new Date(property.completionDate).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+  : "N/A",
+
             icon: "📅"
         },
         {
             label: "Area",
-            value: property.area || "N/A",
+            value: property.location || "N/A",
             icon: "🏗️"
         },
         {
             label: "Service Charge",
-            value: property.service_charge || "N/A",
+          value: property?.rawData?.service_charge || "N/A",
             icon: "💰"
         }
     ];

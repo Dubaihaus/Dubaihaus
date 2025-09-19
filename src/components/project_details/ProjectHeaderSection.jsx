@@ -10,16 +10,18 @@ import {
 
 const ProjectHeaderSection = ({ property }) => {
     // Extract dynamic data from Reelly API
-    const coverPhoto = property.cover?.url || "/project_detail_images/building.jpg";
-    const title = property.name || "Project Title";
-    const community = property.area || "Dubai";
-    const price = property.min_price_aed ? `AED ${property.min_price_aed.toLocaleString()}` : "Price on request";
-    const handoverDate = property.completion_datetime
-        ? new Date(property.completion_datetime).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-        : "TBA";
+   const coverPhoto = property?.media?.photos?.[0] || "/project_detail_images/building.jpg";
+ const title = property.title || property?.rawData?.name || "Project Title";
+ const community = property.location || "Dubai";
+ const price = property.price != null
+   ? `${property.priceCurrency || 'AED'} ${Number(property.price).toLocaleString()}`
+   : "Price on request";
+ const handoverDate = property.completionDate
+   ? new Date(property.completionDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+   : "TBA";
     
     // Get payment plan if available
-    const paymentPlan = property.payment_plans?.[0]?.Plan_name || "Flexible Plan";
+    const paymentPlan = property.payment_plans?.[0]?.name || "Flexible Plan";
 
     return (
         <section className="relative bg-gradient-to-r from-white to-[#fdfdfd] rounded-xl shadow-sm px-4 py-8 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
@@ -37,13 +39,13 @@ const ProjectHeaderSection = ({ property }) => {
                 {/* Floating Buttons */}
                 <div className="absolute bottom-4 right-4 flex flex-col items-center gap-2">
                     <a
-                        href={`tel:${property.developer_data?.phone || "+97100000000"}`}
+                       href={`tel:${property?.rawData?.developer_data?.phone || "+97100000000"}`}
                         className="bg-blue-500 hover:bg-blue-600 p-3 rounded-full shadow-md text-white"
                     >
                         <FaPhoneAlt />
                     </a>
                     <a
-                        href={`https://wa.me/${property.developer_data?.whatsapp || "97100000000"}`}
+                        href={`https://wa.me/${property?.rawData?.developer_data?.whatsapp || "97100000000"}`}
                         target="_blank"
                         className="bg-green-500 hover:bg-green-600 p-3 rounded-full shadow-md text-white"
                     >

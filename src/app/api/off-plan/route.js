@@ -1,4 +1,4 @@
-import { searchProperties } from "@/lib/reellyApi"; // Changed import
+import { searchProperties } from "@/lib/reellyApi";
 import { cookies } from "next/headers";
 import { batchTranslate } from "@/lib/batchTranslate";
 
@@ -13,7 +13,8 @@ export async function GET(request) {
     // Parse filters and map to Reelly API parameters
     searchParams.forEach((value, key) => {
         if (key === "page") filters.page = parseInt(value);
-        else if (key === "location") filters.area = value; // Map location to area
+        else if (key === "pageSize") filters.pageSize = parseInt(value);
+        else if (key === "location") filters.sector = value; // Map location to sector
         else if (value === "true" || value === "false") filters[key] = value === "true";
         else filters[key] = value;
     });

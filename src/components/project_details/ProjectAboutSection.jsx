@@ -1,101 +1,136 @@
 'use client';
-import { useState } from 'react';
-import Image from 'next/image';
+import { useMemo, useState } from 'react';
 
 const ProjectAboutSection = ({ property }) => {
-    // Get all images from Reelly API
-    const allImages = [
-        ...(property.architecture || []).map(img => img.url),
-        ...(property.interior || []).map(img => img.url),
-        ...(property.lobby || []).map(img => img.url),
-        property.cover?.url
-    ].filter(Boolean);
+  // Title + long description
+  const title = property.title || property?.rawData?.name || 'the Project';
+  const rawDesc =
+    property.description ||
+    property?.rawData?.overview ||
+    property?.rawData?.description ||
+    property?.rawData?.short_description ||
+    '';
 
-    const title = property.name || "the Project";
-    const description = property.overview || "No detailed description available.";
+  // Some APIs return HTML; keep it simple: prefer plain text, fallback to HTML render
+  const isLikelyHtml = /<\/?[a-z][\s\S]*>/i.test(rawDesc || '');
+  const [expanded, setExpanded] = useState(false);
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  // Key facts to add substance without repeating other sections
+  const facts = useMemo(() => {
+    const list = [];
+    if (property.location) list.push({ label: 'Location', value: property.location });
+    if (property.developer) list.push({ label: 'Developer', value: property.developer });
+    if (property.completionDate) {
+      list.push({
+        label: 'Completion',
+        value: new Date(property.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      });
+    }
+    if (property.price != null) {
+      list.push({
+        label: 'Starting Price',
+        value: `${property.priceCurrency || 'AED'} ${Number(property.price).toLocaleString()}`,
+      });
+    }
+    // Peek into rawData for optional extras
+    if (property?.rawData?.payment_plan_name) {
+      list.push({ label: 'Payment Plan', value: property.rawData.payment_plan_name });
+    }
+    return list;
+  }, [property]);
 
-    const showImages = allImages.slice(0, 7); // show first 7
-    const remainingImages = allImages.slice(7); // for popover
-    const hasMoreImages = allImages.length > 8;
+  // Amenities (names only) to hint at what’s special — not a full list
+  const amenityNames = Array.isArray(property.amenities)
+    ? property.amenities.map(a => a?.name).filter(Boolean).slice(0, 8)
+    : [];
 
-    return (
-        <section className="bg-white px-4 md:px-12 py-12" dir="ltr">
+  const shortText = isLikelyHtml
+    ? rawDesc // if HTML, don’t substring; just show fully with toggle disabled
+    : (rawDesc || '').trim();
 
-            {/* Title + CTA */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
-                    About {title}
-                </h2>
-                <div className="flex items-center gap-2 text-sky-600 font-medium cursor-pointer hover:underline">
-                    <div className="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center">
-                        &gt;
-                    </div>
-                    <span>Request Available Units & Prices</span>
-                </div>
+  const hasText = Boolean(shortText);
+
+  return (
+    <section className="bg-white px-4 md:px-12 py-12" dir="ltr">
+      {/* Title + CTA */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">About {title}</h2>
+
+        {/* Simple CTA (wire up later) */}
+        <a
+          href={property?.rawData?.brochure_url || '#'}
+          target={property?.rawData?.brochure_url ? '_blank' : undefined}
+          className="flex items-center gap-2 text-sky-600 font-medium hover:underline"
+        >
+          <span className="inline-flex w-8 h-8 rounded-full bg-sky-500 text-white items-center justify-center">
+            &gt;
+          </span>
+          <span>Request Available Units & Prices</span>
+        </a>
+      </div>
+
+      {/* Description */}
+      {hasText ? (
+        <div className="text-gray-700 leading-relaxed space-y-3">
+          {!isLikelyHtml ? (
+            <>
+              <p className={`${expanded ? '' : 'line-clamp-5'}`}>
+                {shortText || 'No detailed description available.'}
+              </p>
+              {shortText.length > 400 && (
+                <button
+                  onClick={() => setExpanded(v => !v)}
+                  className="text-sky-600 text-sm font-semibold hover:underline"
+                >
+                  {expanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
+            </>
+          ) : (
+            // If API sends HTML
+            <div
+              className="prose max-w-none prose-sky prose-p:my-2 prose-headings:mt-4 prose-headings:mb-2"
+              dangerouslySetInnerHTML={{ __html: shortText }}
+            />
+          )}
+        </div>
+      ) : (
+        <p className="text-gray-500">No detailed description available.</p>
+      )}
+
+      {/* Key Facts */}
+      {facts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-8">
+          {facts.map((f, i) => (
+            <div
+              key={`${f.label}-${i}`}
+              className="flex items-start gap-3 bg-gray-50 border border-gray-100 rounded-lg p-4"
+            >
+              <span className="text-sky-600 font-semibold">{f.label}:</span>
+              <span className="text-gray-800">{f.value}</span>
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Gallery */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {showImages.map((img, idx) => (
-                    <Image
-                        key={idx}
-                        src={img}
-                        alt={`Gallery ${idx + 1}`}
-                        width={400}
-                        height={300}
-                        className="rounded-lg object-cover w-full h-52"
-                    />
-                ))}
-
-                {hasMoreImages && (
-                    <div
-                        onClick={() => setIsModalOpen(true)}
-                        className="relative cursor-pointer rounded-lg overflow-hidden group"
-                    >
-                        <Image
-                            src={allImages[7]}
-                            alt="See more"
-                            width={400}
-                            height={300}
-                            className="object-cover w-full h-52 group-hover:brightness-75 transition-all"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white font-semibold text-lg">
-                            +{remainingImages.length} More
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Popover Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-6">
-                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative">
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute top-3 right-3 text-black text-xl font-bold hover:text-red-500"
-                        >
-                            ×
-                        </button>
-                        <h3 className="text-xl font-semibold mb-4">Gallery</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {remainingImages.map((img, idx) => (
-                                <Image
-                                    key={idx}
-                                    src={img}
-                                    alt={`Extra Image ${idx + 1}`}
-                                    width={400}
-                                    height={300}
-                                    className="rounded-lg object-cover w-full h-48"
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </section>
-    );
+      {/* Amenities preview (optional, small) */}
+      {amenityNames.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Highlights & Amenities</h3>
+          <ul className="flex flex-wrap gap-2">
+            {amenityNames.map((n, idx) => (
+              <li
+                key={`${n}-${idx}`}
+                className="text-sm bg-white border border-gray-200 rounded-full px-3 py-1 text-gray-700"
+              >
+                {n}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
 };
 
 export default ProjectAboutSection;

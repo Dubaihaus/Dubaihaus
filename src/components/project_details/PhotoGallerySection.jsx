@@ -4,20 +4,16 @@ import Image from 'next/image';
 
 const PhotoGallerySection = ({ property }) => {
     // Get images from Reelly API by category
-    const exteriorImages = property.architecture || [];
-    const interiorImages = property.interior || [];
-    
-    // Convert to URL arrays
-    const exteriorUrls = exteriorImages.map(img => img.url);
-    const interiorUrls = interiorImages.map(img => img.url);
+    const exteriorUrls = (property?.rawData?.architecture || []).map(img => img.url);
+const interiorUrls = (property?.rawData?.interior || []).map(img => img.url);
     
     // If no specific category images, use all available images
-    const allImages = [
-        ...exteriorUrls,
-        ...interiorUrls,
-        ...(property.lobby || []).map(img => img.url),
-        property.cover?.url
-    ].filter(Boolean);
+    const allImages = (property?.media?.photos?.length ? property.media.photos : [
+   ...exteriorUrls,
+   ...interiorUrls,
+   ...(property?.rawData?.lobby || []).map(img => img.url),
+   property?.rawData?.cover_image?.url,
+ ]).filter(Boolean);
 
     const hasInterior = interiorUrls.length > 0;
     const hasExterior = exteriorUrls.length > 0;
