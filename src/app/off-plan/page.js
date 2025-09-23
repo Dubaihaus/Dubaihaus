@@ -1,3 +1,4 @@
+// src/app/off-plan/page.js
 'use client';
 
 import { useState, useEffect } from "react";
@@ -11,7 +12,7 @@ export default function OffPlanPage({ limit }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // **Step 1: Initialize filters from query params**
+    // Initialize filters from query params
     const initialFilters = {};
     for (const [key, value] of searchParams.entries()) {
         initialFilters[key] = value;
@@ -24,44 +25,61 @@ export default function OffPlanPage({ limit }) {
     const [loading, setLoading] = useState(false);
 
     const fetchProjects = async () => {
-        const params = new URLSearchParams({ ...filters, currency });
-        const res = await fetch(`/api/off-plan?${params.toString()}`);
-if (!res.ok) {
-  const text = await res.text();
-  console.error("off-plan API error:", res.status, text.slice(0, 300));
-  setProjects([]);
-  return;
-}
-const raw = await res.text();
-if (!raw) {
-  setProjects([]);
-  return;
-}
-const data = JSON.parse(raw);
-const limitedProjects = limit ? data.results?.slice(0, limit) : data.results;
-setProjects(limitedProjects || []);
+        setLoading(true);
+        try {
+            // Create a clean params object
+            const paramsObj = { ...filters, currency };
+            
+            // Remove empty filters
+            Object.keys(paramsObj).forEach(key => {
+                if (!paramsObj[key] || paramsObj[key] === "") {
+                    delete paramsObj[key];
+                }
+            });
+            
+            const params = new URLSearchParams(paramsObj);
+            const res = await fetch(`/api/off-plan?${params.toString()}`);
+            
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("off-plan API error:", res.status, text.slice(0, 300));
+                setProjects([]);
+                return;
+            }
+            
+            const data = await res.json();
+            const limitedProjects = limit ? data.results?.slice(0, limit) : data.results;
+            setProjects(limitedProjects || []);
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            setProjects([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         fetchProjects();
-    }, [filters]);
+    }, [filters, currency]);
 
-
-    // **Step 4: Sync filters when the URL changes (e.g., user navigates via card click)**
+    // Update URL when filters change (for full version)
     useEffect(() => {
-        const updatedFilters = {};
-        for (const [key, value] of searchParams.entries()) {
-            updatedFilters[key] = value;
+        if (!limit) {
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) params.set(key, value);
+            });
+            
+            // Use replace instead of push to avoid adding to history
+            router.replace(`/off-plan?${params.toString()}`, { scroll: false });
         }
-        setFilters(updatedFilters);
-    }, [searchParams]); // <-- Runs whenever URL params change
-
+    }, [filters, limit, router]);
 
     const handleViewMore = () => {
         setLoading(true);
         setTimeout(() => {
             router.push('/off-plan');
-        }, 300); // delay to show loading animation
+        }, 300);
     };
 
     return (
@@ -129,21 +147,46 @@ setProjects(limitedProjects || []);
                             </div>
                         </SheetContent>
                     </Sheet>
+                    
+                    {/* Show active filters */}
+                    {Object.keys(filters).length > 0 && (
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setFilters({})}
+                            className="px-4"
+                        >
+                            Clear Filters
+                        </Button>
+                    )}
+                </div>
+            )}
+
+            {/* Loading state */}
+            {loading && (
+                <div className="flex justify-center my-8">
+                    <div className="h-8 w-8 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
                 </div>
             )}
 
             {/* Properties Grid */}
-            <div>
-                {projects.length === 0 ? (
-                    <p className="text-gray-500">No properties found.</p>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {projects.map((p) => (
-                            <PropertyCard key={p.id} property={p} currency={currency} />
-                        ))}
-                    </div>
-                )}
-            </div>
+            {!loading && (
+                <div>
+                    {projects.length === 0 ? (
+                        <p className="text-gray-500">No properties found. Try adjusting your filters.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                            {projects.map((p) => (
+                                <PropertyCard 
+                                    key={p.id} 
+                                    property={p} 
+                                    currency={currency} 
+                                    selectedUnitType={filters.unit_types || filters.unit_type} 
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

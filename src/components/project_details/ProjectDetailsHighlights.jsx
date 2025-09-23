@@ -1,5 +1,7 @@
+// ProjectDetailsHighlights component
 'use client';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 
 function formatAED(n) {
   if (n == null) return null;
@@ -10,23 +12,33 @@ function formatAED(n) {
   }
 }
 
-// Try to extract a sortable bedroom number from names like
-// "1 bedroom Apartments - Sol Luxe", "2,5 bedroom Apartments - Sol Luxe", etc.
 function extractBedrooms(name) {
   if (!name || typeof name !== 'string') return null;
   const m = name.match(/(\d+(?:[.,]\d+)?)(?=\s*bed)/i);
   if (!m) return null;
-  // accept comma as decimal separator
   return parseFloat(m[1].replace(',', '.'));
 }
 
 export default function ProjectDetailsHighlights({ property }) {
- const location = property.location || "Dubai";
+  const sp = useSearchParams();
+ const selectedFromUrl =
+   (sp.get('unit_types') || sp.get('unit_type') || '')
+    .split(',')
+         .map(s => s.trim())
+     .filter(Boolean);
+  const location = property.location || "Dubai";
 
-  const propertyTypes = (property?.rawData?.unit_blocks || [])
-  .map(b => b?.unit_type).filter(Boolean).join(", ") || "Apartments";
+  // Extract property types more reliably
+   const propertyTypes =
+     (() => {
+     const fromBlocks = (property?.rawData?.unit_blocks || [])
+       .map(b => b?.unit_type)
+       .filter(Boolean);
+     const merged = [...new Set([...fromBlocks, ...selectedFromUrl])];
+     return merged.length ? merged.join(', ') : 'Unspecified';
+   })();
 
- const completionDate = property.completionDate ? new Date(property.completionDate).toLocaleDateString("en-US", {
+  const completionDate = property.completionDate ? new Date(property.completionDate).toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
       })
@@ -38,11 +50,11 @@ export default function ProjectDetailsHighlights({ property }) {
 
   // Build a clean list of unit options (name + price)
   const unitBlocks = Array.isArray(property?.rawData?.unit_blocks) ? property.rawData.unit_blocks : [];
- const unitOptions = unitBlocks.map((b) => ({
+  const unitOptions = unitBlocks.map((b) => ({
       name: b?.name || b?.unit_type || "Unit",
       unitType: b?.unit_type || null,
       priceFromAED: b?.units_price_from_aed ?? null,
-      bedrooms: extractBedrooms(u?.name),
+      bedrooms: extractBedrooms(b?.name),
     }))
     // remove rows with no meaningful info
     .filter((u) => u.name && (u.priceFromAED != null || u.unitType))

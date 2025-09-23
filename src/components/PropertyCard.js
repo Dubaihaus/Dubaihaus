@@ -1,58 +1,76 @@
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getHandoverLabel } from '../lib/FormatHandover'; // <-- correct path/casing
 
-export default function PropertyCard({ property, currency }) {
-  // Reelly transform returns `coverPhoto`
-const coverPhoto =
+function fmtLocation(loc) {
+  if (!loc) return "Unknown location";
+  if (typeof loc === "string") return loc;
+  const parts = [loc.sector, loc.district, loc.region].filter(Boolean);
+  return parts.join(", ") || "Unknown location";
+}
+
+function TypeBadges({ types, brRange }) {
+  const list = Array.isArray(types) && types.length ? types : null;
+  if (!list && !brRange) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-2">
+      {list?.map((t) => (
+        <span
+          key={t}
+          className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-700"
+        >
+          {t}
+        </span>
+      ))}
+      {brRange && (
+        <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">
+          {brRange}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export default function PropertyCard({ property, currency, selectedUnitType }) {
+  const coverPhoto =
     property.coverPhoto ||
     property?.media?.photos?.[0] ||
+    property?.cover_image?.url ||
     property?.rawData?.cover_image?.url ||
     "/project_detail_images/building.jpg";
-  // Reelly: `status` / `sale_status` (no `sale_type`/`purpose`)
+
   const status = property.status || property.sale_status || "For Sale";
 
-  // Reelly: `price` already in AED (you set it in transform)
-  const priceAED = property.price ?? null;
+  const priceAED = property.price ?? property.minPrice ?? property.min_price ?? null;
   const price =
-  currency === "EUR" && priceAED != null ? Math.round(priceAED * 0.25) : priceAED;
-const shownCurrency = currency || property.priceCurrency || "AED";
+    currency === "EUR" && priceAED != null ? Math.round(priceAED * 0.25) :
+    currency === "USD" && priceAED != null ? Math.round(priceAED * 0.27) :
+    priceAED;
 
-  // Reelly: `location` is a plain string (area name)
-  const location = property.location || "Dubai";
-
-  // Reelly: `developer`
+  const shownCurrency = currency || property.priceCurrency || property.price_currency || "AED";
+  const locationLabel = fmtLocation(property.location || property.locationObj);
   const developer = property.developer || "N/A";
 
-  // Reelly: `completionDate` is an ISO string
-  const handover = property.completionDate
-    ? new Date(property.completionDate).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
-    : "TBA";
+  const handover = getHandoverLabel(property);
 
-  // (Optional) You can still show a category badge, but Reelly doesn't give `type.sub`
-  const category = "Property";
+  // Multi-type support from normalizer
+  const types = property.propertyTypes || (property.propertyType ? [property.propertyType] : []);
+  const brRange = property.bedroomsRange || null;
+  const categoryBadge = types[0] || "Property";
+
+  const queryParams = {};
+  if (selectedUnitType) queryParams.unit_type = selectedUnitType;
 
   return (
-    <div
-      className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-lg transition transform hover:-translate-y-1"
-      dir="ltr"
-    >
-      <Link href={`/ui/project_details/${property.id}`}>
+    <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-lg transition transform hover:-translate-y-1" dir="ltr">
+      <Link href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}>
         {/* Image */}
         <div className="relative">
-          <img
-            src={coverPhoto}
-            alt={property.title}
-            className="w-full h-64 object-cover"
-          />
-          {/* Left badge */}
+          <img src={coverPhoto} alt={property.title || property.name} className="w-full h-64 object-cover" />
           <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
-            {category}
+            {categoryBadge}
           </span>
-          {/* Right badge */}
           <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded">
             {status}
           </span>
@@ -60,32 +78,26 @@ const shownCurrency = currency || property.priceCurrency || "AED";
 
         {/* Content */}
         <div className="p-6 flex flex-col flex-1">
-          {/* Price */}
           <p className="text-blue-600 font-bold text-lg mb-2">
             from {shownCurrency} {price?.toLocaleString() ?? "—"}
           </p>
 
-          {/* Title */}
           <h3 className="text-gray-800 font-semibold text-lg mb-1 line-clamp-2">
-            {property.title}
+            {property.title || property.name}
           </h3>
 
-          {/* Location */}
-          <p className="text-gray-500 text-sm flex items-center gap-1 mb-3">
-            <MapPin size={14} /> {location}
+          <p className="text-gray-500 text-sm flex items-center gap-1 mb-1">
+            <MapPin size={14} /> {locationLabel}
           </p>
 
-          {/* Developer + Handover */}
-          <div className="text-sm text-gray-600 space-y-1 mb-5">
-            <p>
-              <span className="font-medium">Developer:</span> {developer}
-            </p>
-            <p>
-              <span className="font-medium">Handover:</span> {handover}
-            </p>
+          {/* badges for multiple types + bedrooms range */}
+          <TypeBadges types={types} brRange={brRange} />
+
+          <div className="text-sm text-gray-600 space-y-1 mb-5 mt-3">
+            <p><span className="font-medium">Developer:</span> {developer}</p>
+            <p><span className="font-medium">Handover:</span> {handover}</p>
           </div>
 
-          {/* Discover more button */}
           <Button className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
             Discover more
           </Button>

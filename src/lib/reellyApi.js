@@ -1,5 +1,6 @@
 // src/lib/reellyApi.js
 import dns from "node:dns";
+import { normalizeProject } from './ProjectNormalizer';
 dns.setDefaultResultOrder("ipv4first");
 
 const RAW_BASE_URL =
@@ -20,7 +21,7 @@ function buildHeaders(extra = {}) {
   };
 }
 
-export async function searchProperties({ page = 1, pageSize = 20, ...filters } = {}) {
+export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = true, ...filters } = {}) {
   const url = `${BASE_URL}/projects`;
   
   // Convert page to offset (new API uses offset/limit instead of page/per_page)
@@ -41,6 +42,10 @@ export async function searchProperties({ page = 1, pageSize = 20, ...filters } =
     currency: "price_currency",
     // Add other mappings as needed
   };
+ // If we only want projects that have a real starting price, push min_price=1
+if (pricedOnly && !('minPrice' in filters) && !('min_price' in filters)) {
+   qs.set('min_price', '1'); // excludes null/0
+ }
 
   for (const [key, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === "") continue;
@@ -104,10 +109,11 @@ export async function getPropertyById(id) {
 // ---------- transforms ----------
 
 function transformPropertiesResponse(reellyData, page, pageSize) {
-  const items = reellyData?.results || [];
+ const items = (reellyData?.results || []).filter(i => Number(i?.min_price) > 0);
   
-  return {
-    results: items.map((item) => ({
+    // return normalizeProject(reellyData);
+    return {
+     results: items.map((item) => ({
       id: item.id,
       title: item.name,
       location: item.location?.sector || item.location?.district || item.location?.region || "Unknown location",
@@ -204,3 +210,4 @@ const testApiConnection = async () => {
 };
 
 testApiConnection();
+

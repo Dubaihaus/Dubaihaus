@@ -39,7 +39,7 @@
   },
   "cta": "Find Your Off-Plan Property in Dubai",
   "propertyTypes": {
-    "apartments": { "title": "Apartments for Sale", "label": "FROM AED 240,000" },
+    "penthouses": { "title": "Penthouses for Sale", "label": "FROM AED 240,000" },
     "townhouses": { "title": "Townhouses for Sale", "label": "FROM AED 558,000" },
     "villas": { "title": "Villas for Sale", "label": "FROM AED 1,000,000" },
     "buildings": { "title": "Buildings for Sale", "label": "FROM AED 47,000,000" },
