@@ -1,0 +1,125 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// --- USERS ---
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+// --- PROPERTIES ---
+model Property {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  location    String
+  price       Float
+  area        Float
+  bedrooms    Int
+  bathrooms   Int
+  status      PropertyStatus
+  featured    Boolean           @default(false)
+  images      PropertyImage[]
+  amenities   PropertyAmenity[] // 👈 relation instead of String[]
+  media       Media[]
+  seo         SEO?              @relation(fields: [seoId], references: [id])
+  seoId       String?           @unique // 👈 fixed
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+enum PropertyStatus {
+  FOR_SALE
+  FOR_RENT
+  SOLD
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  url        String
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+}
+
+model PropertyAmenity {
+  id         String   @id @default(cuid())
+  name       String
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+}
+
+// --- BLOG POSTS ---
+model BlogPost {
+  id          String         @id @default(cuid())
+  title       String
+  content     String
+  featuredImg String?
+  categories  BlogCategory[]
+  tags        BlogTag[]
+  media       Media[]
+  seo         SEO?           @relation(fields: [seoId], references: [id])
+  seoId       String?        @unique // 👈 fixed
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model BlogCategory {
+  id     String   @id @default(cuid())
+  name   String
+  blog   BlogPost @relation(fields: [blogId], references: [id])
+  blogId String
+}
+
+model BlogTag {
+  id     String   @id @default(cuid())
+  name   String
+  blog   BlogPost @relation(fields: [blogId], references: [id])
+  blogId String
+}
+
+// --- SEO META ---
+model SEO {
+  id        String  @id @default(cuid())
+  metaTitle String?
+  metaDesc  String?
+  slug      String  @unique
+
+  property Property?
+  blog     BlogPost?
+}
+
+// --- MEDIA ---
+model Media {
+  id         String    @id @default(cuid())
+  url        String
+  type       MediaType
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  blog       BlogPost? @relation(fields: [blogId], references: [id])
+  blogId     String?
+  createdAt  DateTime  @default(now())
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  FLOORPLAN
+  FILE
+}
