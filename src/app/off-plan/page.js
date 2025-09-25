@@ -7,6 +7,7 @@ import PropertyCard from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useRouter, useSearchParams } from "next/navigation"; 
+// import MapSection from "@/components/map/MapSection";
 
 export default function OffPlanPage({ limit }) {
     const router = useRouter();
@@ -83,6 +84,7 @@ export default function OffPlanPage({ limit }) {
     };
 
     return (
+        
         <div className="p-6 max-w-7xl mx-auto" dir="ltr">
             {/* Title & Currencies */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
@@ -186,7 +188,16 @@ export default function OffPlanPage({ limit }) {
                         </div>
                     )}
                 </div>
+                
             )}
+             <div className="mt-12">
+    {/* <MapSection
+      projects={projects}
+      title="Find your properties on the map"
+      height={520}              // optional
+      // initialView={{ longitude: 55.27, latitude: 25.20, zoom: 10 }} // optional
+    /> */}
+  </div>
         </div>
     );
 }

@@ -20,38 +20,69 @@ function buildHeaders(extra = {}) {
     ...extra,
   };
 }
+let _regionsCache = { at: 0, data: [] };
+const REGIONS_TTL_MS = 1000 * 60 * 60; // 1h
+
+export async function listRegions() {
+  const now = Date.now();
+  if (now - _regionsCache.at < REGIONS_TTL_MS && _regionsCache.data?.length) {
+    return _regionsCache.data;
+  }
+  const res = await fetch(`${BASE_URL}/regions?format=json`, {
+    headers: buildHeaders(),
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  _regionsCache = { at: now, data };
+  return data;
+}
 
 export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = true, ...filters } = {}) {
   const url = `${BASE_URL}/projects`;
   
-  // Convert page to offset (new API uses offset/limit instead of page/per_page)
   const offset = (page - 1) * pageSize;
   const qs = new URLSearchParams({
     limit: String(pageSize),
     offset: String(offset),
   });
 
-  // Map filter parameters to API expected parameters
+  // Enhanced filter mappings including area-specific filters
   const filterMappings = {
-    location: "sector", // Map location to sector
+    location: "search_query", // Use search_query for location text search
+    sector: "search_query",   // Map sector to search_query
+    area: "search_query",     // Map area to search_query
     bedrooms: "unit_bedrooms",
-    minPrice: "min_price",
-    maxPrice: "max_price",
-    minSize: "min_size",
-    maxSize: "max_size",
-    currency: "price_currency",
-    // Add other mappings as needed
+    minPrice: "unit_price_from",
+    maxPrice: "unit_price_to",
+    minSize: "unit_area_from",
+    maxSize: "unit_area_to",
+    currency: "preferred_currency",
+    region: "region",
+    // Bounding box filters
+    bbox_sw_lat: "bbox_sw_lat",
+    bbox_sw_lng: "bbox_sw_lng", 
+    bbox_ne_lat: "bbox_ne_lat",
+    bbox_ne_lng: "bbox_ne_lng",
   };
- // If we only want projects that have a real starting price, push min_price=1
-if (pricedOnly && !('minPrice' in filters) && !('min_price' in filters)) {
-   qs.set('min_price', '1'); // excludes null/0
- }
 
+  // Price filtering - only apply if explicitly requested
+  if (pricedOnly && !('minPrice' in filters) && !('unit_price_from' in filters)) {
+    qs.set('unit_price_from', '1'); // excludes null/0
+  }
+
+  // Apply all filters
   for (const [key, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === "") continue;
     
     const apiParam = filterMappings[key] || key;
-    qs.append(apiParam, String(value));
+    
+    // Handle array parameters (comma-separated)
+    if (Array.isArray(value)) {
+      qs.append(apiParam, value.join(','));
+    } else {
+      qs.append(apiParam, String(value));
+    }
   }
 
   try {
@@ -63,14 +94,6 @@ if (pricedOnly && !('minPrice' in filters) && !('min_price' in filters)) {
     if (!res.ok) {
       const errText = await res.text();
       console.error("Reelly API error:", res.status, res.statusText, errText.slice(0, 300));
-      
-      // More detailed error information
-      if (res.status === 404) {
-        console.error("Endpoint not found. Please check the API URL structure.");
-      } else if (res.status === 401) {
-        console.error("Authentication failed. Please check your API token.");
-      }
-      
       return null;
     }
 
@@ -81,7 +104,6 @@ if (pricedOnly && !('minPrice' in filters) && !('min_price' in filters)) {
     return null;
   }
 }
-
 export async function getPropertyById(id) {
   const url = `${BASE_URL}/projects/${encodeURIComponent(id)}`;
 
@@ -112,29 +134,41 @@ function transformPropertiesResponse(reellyData, page, pageSize) {
  const items = (reellyData?.results || []).filter(i => Number(i?.min_price) > 0);
   
     // return normalizeProject(reellyData);
-    return {
-     results: items.map((item) => ({
-      id: item.id,
-      title: item.name,
-      location: item.location?.sector || item.location?.district || item.location?.region || "Unknown location",
-      price: item.min_price ?? null,
-      coverPhoto: item.cover_image?.url || null,
-      area: item.location ? `${item.location.sector}, ${item.location.district}` : "Unknown area",
-      completionDate: item.completion_date || item.completion_datetime,
-      developer: item.developer,
-      status: item.construction_status || item.sale_status,
-      // Additional fields you might need
-      minSize: item.min_size,
-      maxSize: item.max_size,
-      priceCurrency: item.price_currency,
-    })),
-    total: reellyData?.count ?? items.length,
-    page: page,
-    pageSize: pageSize,
-    next: reellyData?.next,
-    previous: reellyData?.previous,
+
+      const results = items.map(normalizeProject);
+
+  return {
+    results,
+    total: reellyData?.count ?? results.length,
+    page,
+    pageSize,
+    next: reellyData?.next ?? null,
+    previous: reellyData?.previous ?? null,
   };
 }
+    // return {
+    //  results: items.map((item) => ({
+    //   id: item.id,
+    //   title: item.name,
+    //   location: item.location?.sector || item.location?.district || item.location?.region || "Unknown location",
+    //   price: item.min_price ?? null,
+    //   coverPhoto: item.cover_image?.url || null,
+    //   area: item.location ? `${item.location.sector}, ${item.location.district}` : "Unknown area",
+    //   completionDate: item.completion_date || item.completion_datetime,
+    //   developer: item.developer,
+    //   status: item.construction_status || item.sale_status,
+    //   // Additional fields you might need
+    //   minSize: item.min_size,
+    //   maxSize: item.max_size,
+    //   priceCurrency: item.price_currency,
+    // })),
+//     total: reellyData?.count ?? items.length,
+//     page: page,
+//     pageSize: pageSize,
+//     next: reellyData?.next,
+//     previous: reellyData?.previous,
+//   };
+// }
 
 function transformPropertyResponse(reellyProperty) {
   // Extract images from various sources
@@ -178,36 +212,3 @@ function transformPropertyResponse(reellyProperty) {
     rawData: reellyProperty
   };
 }
-// Test script to verify the API endpoint
-const testApiConnection = async () => {
-  const BASE_URL = "https://api-reelly.up.railway.app/api/v2/clients";
-  const API_TOKEN = process.env.REELLY_API_TOKEN;
-  
-  try {
-    // Test without any parameters first
-    const response = await fetch(`${BASE_URL}/projects`, {
-      headers: {
-        Accept: "application/json",
-    "Content-Type": "application/json",
-    // IMPORTANT: Reelly expects X-API-Key (not Authorization)
-    "X-API-Key": API_TOKEN,
-      }
-    });
-    
-    console.log(`Status: ${response.status}`);
-    console.log(`Status Text: ${response.statusText}`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log("Success! Data:", data);
-    } else {
-      const errorText = await response.text();
-      console.log("Error response:", errorText);
-    }
-  } catch (error) {
-    console.error("Connection error:", error);
-  }
-};
-
-testApiConnection();
-

@@ -1,6 +1,5 @@
-import { searchProperties } from "@/lib/reellyApi";
+import { searchProperties, listRegions } from "@/lib/reellyApi";
 import { cookies } from "next/headers";
-import { batchTranslate } from "@/lib/batchTranslate";
 
 // Cache for Reelly API responses
 const reellyCache = new Map();
@@ -10,58 +9,66 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const filters = {};
 
-    // Parse filters and map to Reelly API parameters
+    // Parse all query parameters
     searchParams.forEach((value, key) => {
         if (key === "page") filters.page = parseInt(value);
         else if (key === "pageSize") filters.pageSize = parseInt(value);
-        else if (key === "location") filters.sector = value; // Map location to sector
+        else if (key === "pricedOnly") filters.pricedOnly = value === "true";
         else if (value === "true" || value === "false") filters[key] = value === "true";
         else filters[key] = value;
     });
+
+    // Handle area filtering using regions data
+    const areaName = filters.area || filters.sector || filters.region || null;
+    
+    if (areaName) {
+        try {
+            const regions = await listRegions();
+            const match = regions.find(r =>
+                String(r.name || "").toLowerCase().includes(String(areaName).toLowerCase()) ||
+                String(areaName).toLowerCase().includes(String(r.name || "").toLowerCase())
+            );
+            
+            if (match) {
+                // Use bounding box for precise area filtering
+                filters.bbox_sw_lat = match.sw_latitude;
+                filters.bbox_sw_lng = match.sw_longitude;
+                filters.bbox_ne_lat = match.ne_latitude;
+                filters.bbox_ne_lng = match.ne_longitude;
+                console.log(`Using bounding box for area: ${areaName}`, match);
+            } else {
+                // Fallback to text search if no bounding box found
+                filters.search_query = areaName;
+                console.log(`Using search_query for area: ${areaName}`);
+            }
+        } catch (error) {
+            console.error('Error fetching regions:', error);
+            // Fallback to text search
+            filters.search_query = areaName;
+        }
+    }
 
     // Detect locale from cookie
     const cookieStore = await cookies();
     const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
 
-    // ✅ Include locale in cache key
-    const reellyCacheKey = JSON.stringify({ filters, locale });
+    // Cache key with filters and locale
+    const cacheKey = JSON.stringify({ filters, locale });
     const now = Date.now();
     let data;
 
     // Cache check
-    if (reellyCache.has(reellyCacheKey) && now - reellyCache.get(reellyCacheKey).timestamp < CACHE_DURATION) {
+    if (reellyCache.has(cacheKey) && now - reellyCache.get(cacheKey).timestamp < CACHE_DURATION) {
         console.log("⚡ Reelly data from cache");
-        data = reellyCache.get(reellyCacheKey).data;
+        data = reellyCache.get(cacheKey).data;
     } else {
-        console.log("🔍 Fetching Reelly API:", filters);
+        console.log("🔍 Fetching Reelly API with filters:", filters);
         data = await searchProperties(filters);
         console.log("✅ Reelly API returned:", data?.results?.length || 0, "results");
-        if (data) reellyCache.set(reellyCacheKey, { timestamp: now, data });
+        if (data) {
+            reellyCache.set(cacheKey, { timestamp: now, data });
+        }
     }
 
-    // ✅ Translate only if locale is German
-    if (locale === "de" && data?.results?.length) {
-        console.log("🌐 Translating API data to German...");
-
-        // Collect all texts (titles, descriptions, locations)
-        const textsToTranslate = [];
-        data.results.forEach(prop => {
-            textsToTranslate.push(prop.title);
-            if (prop.description) textsToTranslate.push(prop.description);
-            if (prop.location) textsToTranslate.push(prop.location);
-        });
-
-        // Batch translate
-        const translated = await batchTranslate(textsToTranslate, "de");
-
-        // Reapply translations in correct order
-        let idx = 0;
-        data.results.forEach(prop => {
-            prop.title = translated[idx++];
-            if (prop.description) prop.description = translated[idx++];
-            if (prop.location) prop.location = translated[idx++];
-        });
-    }
-
-    return Response.json(data || { results: [] });
+    return Response.json(data || { results: [], total: 0 });
 }

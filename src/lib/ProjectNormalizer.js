@@ -27,29 +27,31 @@ function guessTypeFromMetrics(bedrooms, sizeM2, sizeSqft) {
 }
 
 function bedroomsRange(units) {
-  const brs = units.map(u => Number(u.bedrooms)).filter(n => Number.isFinite(n));
+  const brs = units.map(u => Number(u.bedrooms)).filter(Number.isFinite);
   if (!brs.length) return null;
-  const min = Math.min(...brs);
-  const max = Math.max(...brs);
+  const min = Math.min(...brs), max = Math.max(...brs);
   return min === max ? `${min}BR` : `${min}–${max}BR`;
 }
 
 export function normalizeProject(project) {
   if (!project) return null;
 
+  const loc = project.location || null;
+  const rawLat = loc?.latitude ?? project.location_marker?.latitude ?? null;
+  const rawLng = loc?.longitude ?? project.location_marker?.longitude ?? null;
+  const lat = Number(rawLat);
+  const lng = Number(rawLng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+
   // Build per-unit info and infer category
   const unitTypes = (project.typical_units || []).map(u => {
     const layoutName = u?.layout?.[0]?.name || u?.layout?.[0]?.title || null;
-    const hinted =
-      guessTypeFromText(u.unitType) ||
-      guessTypeFromText(layoutName);
-
+    const hinted = guessTypeFromText(u.unitType) || guessTypeFromText(layoutName);
     const derived = hinted || guessTypeFromMetrics(
       u.bedrooms,
       u.from_size_m2 ?? u.to_size_m2,
       u.from_size_sqft ?? u.to_size_sqft
     );
-
     return {
       bedrooms: u.bedrooms,
       priceFromAED: u.from_price_aed,
@@ -61,34 +63,32 @@ export function normalizeProject(project) {
       sizeFromM2: u.from_size_m2,
       sizeToM2: u.to_size_m2,
       layouts: u.layout || [],
-      unitCategory: derived, // 'Apartment' | 'Townhouse' | 'Villa' | …
+      unitCategory: derived,
     };
   });
 
-  const propertyTypes = [
-    ...new Set(unitTypes.map(u => u.unitCategory).filter(Boolean)),
-  ];
+  const propertyTypes = [...new Set(unitTypes.map(u => u.unitCategory).filter(Boolean))];
   const brRange = bedroomsRange(unitTypes);
 
-  const locationStr = project.location
-    ? [project.location.sector, project.location.district, project.location.region]
-        .filter(Boolean)
-        .join(', ')
+  const locationStr = loc
+    ? [loc.sector, loc.district, loc.region].filter(Boolean).join(', ')
     : 'Location not specified';
 
   return {
     id: project.id,
-    name: project.name,
     title: project.name,
+    name: project.name,
     developer: project.developer,
     constructionStatus: project.construction_status,
     saleStatus: project.sale_status,
     description: project.description ?? project.short_description ?? null,
-    completionDate: project.completion_date ?? null,
+    completionDate: project.completion_date ?? project.completion_datetime ?? null,
 
-    // Location
+    // Location for UI + Map
     location: locationStr,
-    locationObj: project.location || null,
+    locationObj: loc,
+    lat: hasCoords ? lat : null,
+    lng: hasCoords ? lng : null,
 
     // Prices and sizes
     minPrice: project.min_price ?? null,
@@ -105,30 +105,26 @@ export function normalizeProject(project) {
     lobbyImages: project.lobby || [],
     generalPlan: project.general_plan || null,
 
-    // Amenities
+    // Amenities etc.
     amenities: (project.project_amenities || []).map(a => ({
-      id: a.id,
-      name: a.amenity?.name,
-      icon: a.icon?.url,
+      id: a.id, name: a.amenity?.name, icon: a.icon?.url
     })),
-
-    // Extras
     pointsOfInterest: project.project_map_points || [],
     paymentPlans: project.payment_plans || [],
     buildings: project.buildings || [],
     parking: project.parkings || [],
-    serviceCharge: project.service_charge || null,
+    serviceCharge: project.service_charge ?? null,
     furnishing: project.furnishing ?? null,
-    depositDescription: project.deposit_description || null,
-    escrowNumber: project.escrow_number || null,
-    marketingBrochure: project.marketing_brochure || null,
+    depositDescription: project.deposit_description ?? null,
+    escrowNumber: project.escrow_number ?? null,
+    marketingBrochure: project.marketing_brochure ?? null,
     unitsCount: project.units_count ?? null,
 
     // Derived
     unitTypes,
-    propertyTypes,                 // e.g. ['Apartment','Townhouse']
+    propertyTypes,
     propertyType: propertyTypes[0] || 'Property',
-    bedroomsRange: brRange || null,
+    bedroomsRange: brRange,
 
     rawData: project,
   };

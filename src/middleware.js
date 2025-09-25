@@ -1,6 +1,6 @@
 // /src/middleware.js
 import { NextResponse } from "next/server";
-import { withAuth } from "next-auth/middleware";
+// import { withAuth } from "next-auth/middleware";
 
 const LOCALES = ["en", "de"];
 const DEFAULT_LOCALE = "en";
