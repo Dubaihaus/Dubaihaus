@@ -37,7 +37,37 @@ export async function listRegions() {
   _regionsCache = { at: now, data };
   return data;
 }
+let _developersCache = { at: 0, data: [] };
+const DEVELOPERS_TTL_MS = 1000 * 60 * 60 * 12; // 12h
 
+export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
+  const now = Date.now();
+  if (now - _developersCache.at < DEVELOPERS_TTL_MS && _developersCache.data?.length) {
+    return _developersCache.data;
+  }
+
+  const qs = new URLSearchParams({ limit: String(limit), offset: String(offset), format: 'json' });
+  const res = await fetch(`${BASE_URL}/developers?${qs.toString()}`, {
+    headers: buildHeaders(),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) return [];
+  const json = await res.json();
+
+  // normalize a little for UI
+  const rows = (json?.results || json || []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    website: d.website ?? null,
+    logoUrl: d.logo?.url ?? null,
+    // keep raw for later if needed
+    raw: d,
+  }));
+
+  _developersCache = { at: now, data: rows };
+  return rows;
+}
 export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = true, ...filters } = {}) {
   const url = `${BASE_URL}/projects`;
   
@@ -59,6 +89,9 @@ export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = t
     maxSize: "unit_area_to",
     currency: "preferred_currency",
     region: "region",
+    developer: 'developer',       // allow ?developer=<id or name>
+  developerId: 'developer',     // alias
+  developer_id: 'developer', 
     // Bounding box filters
     bbox_sw_lat: "bbox_sw_lat",
     bbox_sw_lng: "bbox_sw_lng", 
