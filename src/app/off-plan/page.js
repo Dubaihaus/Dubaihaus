@@ -190,14 +190,8 @@ export default function OffPlanPage({ limit }) {
                 </div>
                 
             )}
-             <div className="mt-12">
-    {/* <MapSection
-      projects={projects}
-      title="Find your properties on the map"
-      height={520}              // optional
-      // initialView={{ longitude: 55.27, latitude: 25.20, zoom: 10 }} // optional
-    /> */}
-  </div>
+            
+ 
         </div>
     );
 }

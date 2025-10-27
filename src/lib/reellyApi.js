@@ -7,38 +7,95 @@ const RAW_BASE_URL =
   process.env.REELLY_BASE_URL ||
   "https://api-reelly.up.railway.app/api/v2/clients";
 
-// 🔧 remove any trailing slashes to avoid `//projects`
 const BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
 const API_TOKEN = process.env.REELLY_API_TOKEN || process.env.RELLY_API_TOKEN;
 
 function buildHeaders(extra = {}) {
   return {
-      Accept: "application/json",
+    Accept: "application/json",
     "Content-Type": "application/json",
-    // IMPORTANT: Reelly expects X-API-Key (not Authorization)
     "X-API-Key": API_TOKEN,
     ...extra,
   };
 }
+
+// Cache configurations
 let _regionsCache = { at: 0, data: [] };
 const REGIONS_TTL_MS = 1000 * 60 * 60; // 1h
+
+let _developersCache = { at: 0, data: [] };
+const DEVELOPERS_TTL_MS = 1000 * 60 * 60 * 12; // 12h
+
+let _districtsCache = { at: 0, data: [] };
+const DISTRICTS_TTL_MS = 1000 * 60 * 60; // 1h
+
+let _countriesCache = { at: 0, data: [] };
+const COUNTRIES_TTL_MS = 1000 * 60 * 60 * 24; // 24h
+
+// New API functions based on documentation
+export async function listCountries() {
+  const now = Date.now();
+  if (now - _countriesCache.at < COUNTRIES_TTL_MS && _countriesCache.data?.length) {
+    return _countriesCache.data;
+  }
+  
+  const res = await fetch(`${BASE_URL}/countries?format=json`, {
+    headers: buildHeaders(),
+    cache: "no-store",
+  });
+  
+  if (!res.ok) return [];
+  const data = await res.json();
+  _countriesCache = { at: now, data };
+  return data;
+}
+
+export async function listDistricts(search = '') {
+  const now = Date.now();
+  const cacheKey = search || 'all';
+  
+  // Simple cache implementation - in production you might want a more robust solution
+  if (now - _districtsCache.at < DISTRICTS_TTL_MS && _districtsCache.data[cacheKey]) {
+    return _districtsCache.data[cacheKey];
+  }
+
+  const params = new URLSearchParams({ format: 'json' });
+  if (search) {
+    params.append('search', search);
+  }
+
+  const res = await fetch(`${BASE_URL}/districts?${params.toString()}`, {
+    headers: buildHeaders(),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return [];
+  const data = await res.json();
+  
+  // Initialize cache if needed
+  if (!_districtsCache.data) _districtsCache.data = {};
+  _districtsCache.data[cacheKey] = data;
+  _districtsCache.at = now;
+  
+  return data;
+}
 
 export async function listRegions() {
   const now = Date.now();
   if (now - _regionsCache.at < REGIONS_TTL_MS && _regionsCache.data?.length) {
     return _regionsCache.data;
   }
+  
   const res = await fetch(`${BASE_URL}/regions?format=json`, {
     headers: buildHeaders(),
     cache: "no-store",
   });
+  
   if (!res.ok) return [];
   const data = await res.json();
   _regionsCache = { at: now, data };
   return data;
 }
-let _developersCache = { at: 0, data: [] };
-const DEVELOPERS_TTL_MS = 1000 * 60 * 60 * 12; // 12h
 
 export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
   const now = Date.now();
@@ -46,7 +103,12 @@ export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
     return _developersCache.data;
   }
 
-  const qs = new URLSearchParams({ limit: String(limit), offset: String(offset), format: 'json' });
+  const qs = new URLSearchParams({ 
+    limit: String(limit), 
+    offset: String(offset), 
+    format: 'json' 
+  });
+  
   const res = await fetch(`${BASE_URL}/developers?${qs.toString()}`, {
     headers: buildHeaders(),
     cache: 'no-store',
@@ -55,43 +117,54 @@ export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
   if (!res.ok) return [];
   const json = await res.json();
 
-  // normalize a little for UI
   const rows = (json?.results || json || []).map((d) => ({
     id: d.id,
     name: d.name,
     website: d.website ?? null,
     logoUrl: d.logo?.url ?? null,
-    // keep raw for later if needed
     raw: d,
   }));
 
   _developersCache = { at: now, data: rows };
   return rows;
 }
-export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = true, ...filters } = {}) {
+
+// Updated searchProperties function
+export async function searchProperties({ 
+  page = 1, 
+  pageSize = 20, 
+  pricedOnly = true, 
+  ...filters 
+} = {}) {
   const url = `${BASE_URL}/projects`;
   
   const offset = (page - 1) * pageSize;
   const qs = new URLSearchParams({
     limit: String(pageSize),
     offset: String(offset),
+    format: 'json'
   });
 
-  // Enhanced filter mappings including area-specific filters
+  // Enhanced filter mappings for new API
   const filterMappings = {
-    location: "search_query", // Use search_query for location text search
-    sector: "search_query",   // Map sector to search_query
-    area: "search_query",     // Map area to search_query
+    location: "search",
+    sector: "search", 
+    area: "search",
     bedrooms: "unit_bedrooms",
     minPrice: "unit_price_from",
-    maxPrice: "unit_price_to",
+    maxPrice: "unit_price_to", 
     minSize: "unit_area_from",
     maxSize: "unit_area_to",
     currency: "preferred_currency",
     region: "region",
-    developer: 'developer',       // allow ?developer=<id or name>
-  developerId: 'developer',     // alias
-  developer_id: 'developer', 
+    developer: 'developer',
+    developerId: 'developer',
+    developer_id: 'developer',
+    country: "country",
+    district: "district",
+     districts: "districts",
+    district_ids: "districts",
+    // district: "districts",
     // Bounding box filters
     bbox_sw_lat: "bbox_sw_lat",
     bbox_sw_lng: "bbox_sw_lng", 
@@ -99,9 +172,9 @@ export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = t
     bbox_ne_lng: "bbox_ne_lng",
   };
 
-  // Price filtering - only apply if explicitly requested
+  // Price filtering
   if (pricedOnly && !('minPrice' in filters) && !('unit_price_from' in filters)) {
-    qs.set('unit_price_from', '1'); // excludes null/0
+    qs.set('unit_price_from', '1');
   }
 
   // Apply all filters
@@ -110,7 +183,6 @@ export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = t
     
     const apiParam = filterMappings[key] || key;
     
-    // Handle array parameters (comma-separated)
     if (Array.isArray(value)) {
       qs.append(apiParam, value.join(','));
     } else {
@@ -137,8 +209,9 @@ export async function searchProperties({ page = 1, pageSize = 20, pricedOnly = t
     return null;
   }
 }
+
 export async function getPropertyById(id) {
-  const url = `${BASE_URL}/projects/${encodeURIComponent(id)}`;
+  const url = `${BASE_URL}/projects/${encodeURIComponent(id)}?format=json`;
 
   try {
     const res = await fetch(url, {
@@ -161,14 +234,33 @@ export async function getPropertyById(id) {
   }
 }
 
-// ---------- transforms ----------
+// Get project markers specifically for map
+export async function getProjectMarkers() {
+  const url = `${BASE_URL}/projects/markers?format=json`;
 
+  try {
+    const res = await fetch(url, {
+      headers: buildHeaders(),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.error("Reelly Markers API error:", res.status, res.statusText);
+      return [];
+    }
+
+    const data = await res.json();
+    return data || [];
+  } catch (err) {
+    console.error("Reelly Markers API fetch failed:", err);
+    return [];
+  }
+}
+
+// Transform functions
 function transformPropertiesResponse(reellyData, page, pageSize) {
- const items = (reellyData?.results || []).filter(i => Number(i?.min_price) > 0);
-  
-    // return normalizeProject(reellyData);
-
-      const results = items.map(normalizeProject);
+  const items = (reellyData?.results || reellyData || []).filter(i => Number(i?.min_price) > 0);
+  const results = items.map(normalizeProject);
 
   return {
     results,
@@ -179,69 +271,12 @@ function transformPropertiesResponse(reellyData, page, pageSize) {
     previous: reellyData?.previous ?? null,
   };
 }
-    // return {
-    //  results: items.map((item) => ({
-    //   id: item.id,
-    //   title: item.name,
-    //   location: item.location?.sector || item.location?.district || item.location?.region || "Unknown location",
-    //   price: item.min_price ?? null,
-    //   coverPhoto: item.cover_image?.url || null,
-    //   area: item.location ? `${item.location.sector}, ${item.location.district}` : "Unknown area",
-    //   completionDate: item.completion_date || item.completion_datetime,
-    //   developer: item.developer,
-    //   status: item.construction_status || item.sale_status,
-    //   // Additional fields you might need
-    //   minSize: item.min_size,
-    //   maxSize: item.max_size,
-    //   priceCurrency: item.price_currency,
-    // })),
-//     total: reellyData?.count ?? items.length,
-//     page: page,
-//     pageSize: pageSize,
-//     next: reellyData?.next,
-//     previous: reellyData?.previous,
-//   };
-// }
 
 function transformPropertyResponse(reellyProperty) {
-  // Extract images from various sources
-  const arch = (reellyProperty?.architecture || []).map((img) => img?.url).filter(Boolean);
-  const interior = (reellyProperty?.interior || []).map((img) => img?.url).filter(Boolean);
-  const lobby = (reellyProperty?.lobby || []).map((img) => img?.url).filter(Boolean);
-  const cover = reellyProperty?.cover_image?.url;
-
-  const allImages = [...arch, ...interior, ...lobby, cover].filter(Boolean);
-
-  return {
-    id: reellyProperty?.id,
-    title: reellyProperty?.name,
-    description: reellyProperty?.description || reellyProperty?.short_description,
-    location: reellyProperty?.location ? 
-      `${reellyProperty.location.sector}, ${reellyProperty.location.district}, ${reellyProperty.location.region}` : 
-      "Unknown location",
-    price: reellyProperty?.min_price ?? null,
-    maxPrice: reellyProperty?.max_price ?? null,
-    media: { photos: allImages },
-    amenities: Array.isArray(reellyProperty?.project_amenities)
-      ? reellyProperty.project_amenities.map((amenity) => ({ 
-          name: amenity.amenity?.name, 
-          icon: amenity.icon?.url 
-        }))
-      : [],
-    building_info: { 
-      name: reellyProperty?.name,
-      building_count: reellyProperty?.building_count,
-      units_count: reellyProperty?.units_count
-    },
-    developer: reellyProperty?.developer,
-    completionDate: reellyProperty?.completion_date || reellyProperty?.completion_datetime,
-    constructionStatus: reellyProperty?.construction_status,
-    saleStatus: reellyProperty?.sale_status,
-    minSize: reellyProperty?.min_size,
-    maxSize: reellyProperty?.max_size,
-    priceCurrency: reellyProperty?.price_currency,
-    areaUnit: reellyProperty?.area_unit,
-    // Include the raw data for debugging or future use
-    rawData: reellyProperty
-  };
+  return normalizeProject(reellyProperty);
 }
+
+export {
+  listCountries,
+  listDistricts
+};

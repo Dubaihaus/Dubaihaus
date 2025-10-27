@@ -1,14 +1,30 @@
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getHandoverLabel } from '../lib/FormatHandover'; // <-- correct path/casing
 
-function fmtLocation(loc) {
-  if (!loc) return "Unknown location";
-  if (typeof loc === "string") return loc;
-  const parts = [loc.sector, loc.district, loc.region].filter(Boolean);
-  return parts.join(", ") || "Unknown location";
+import { useRouter } from "next/navigation";
+import { useMemo, useCallback } from "react";
+
+import { getHandoverLabel } from '../lib/FormatHandover'; // <-- correct path/casing
+function fmtLocation(locOrString) {
+  // If object: safely build without numeric country ids
+  if (locOrString && typeof locOrString === 'object') {
+    const { sector, district, city, region, country } = locOrString;
+    const countryStr = typeof country === 'string' && !/^\d+$/.test(country) ? country : null;
+    const parts = [sector, district, city, region, countryStr].filter(Boolean);
+    return parts.join(', ') || 'Unknown location';
+  }
+
+  // If string: drop standalone numeric tokens like ", 219"
+  const s = String(locOrString || '').trim();
+  if (!s) return 'Unknown location';
+  return s
+    .split(',')
+    .map(p => p.trim())
+    .filter(p => p && !/^\d+$/.test(p))   // remove numeric-only segments
+    .join(', ') || 'Unknown location';
 }
+
 
 function TypeBadges({ types, brRange }) {
   const list = Array.isArray(types) && types.length ? types : null;
@@ -32,7 +48,8 @@ function TypeBadges({ types, brRange }) {
   );
 }
 
-export default function PropertyCard({ property, currency, selectedUnitType }) {
+  export default function PropertyCard({ property, currency, selectedUnitType }) {
+const router = useRouter();
   const coverPhoto =
     property.coverPhoto ||
     property?.media?.photos?.[0] ||
@@ -49,7 +66,7 @@ export default function PropertyCard({ property, currency, selectedUnitType }) {
     priceAED;
 
   const shownCurrency = currency || property.priceCurrency || property.price_currency || "AED";
-  const locationLabel = fmtLocation(property.location || property.locationObj);
+const locationLabel = fmtLocation(property.locationObj || property.rawData?.location || property.location);
   const developer = property.developer || "N/A";
 
   const handover = getHandoverLabel(property);
@@ -61,10 +78,28 @@ export default function PropertyCard({ property, currency, selectedUnitType }) {
 
   const queryParams = {};
   if (selectedUnitType) queryParams.unit_type = selectedUnitType;
+  // Build an href STRING for router.prefetch (Link can still use object)
+  const href = useMemo(() => {
+    const pathname = `/ui/project_details/${property.id}`;
+    const search = new URLSearchParams(queryParams).toString();
+    return search ? `${pathname}?${search}` : pathname;
+  }, [property.id, queryParams]);
+
+  const prefetchDetail = useCallback(() => {
+    // Prefetch the route so data & bundle are warm on click
+    router.prefetch(href);
+  }, [router, href]);
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-lg transition transform hover:-translate-y-1" dir="ltr">
-      <Link href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}>
+      {/* <Link href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}> */}
+      <Link
+        href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}
+        prefetch
+        onMouseEnter={prefetchDetail}
+        onFocus={prefetchDetail}
+        onTouchStart={prefetchDetail}
+      >
         {/* Image */}
         <div className="relative">
           <img src={coverPhoto} alt={property.title || property.name} className="w-full h-64 object-cover" />

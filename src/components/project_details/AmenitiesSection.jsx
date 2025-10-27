@@ -78,96 +78,100 @@ export default function AmenitiesSection({ property }) {
 
   const next = () => setIdx((i) => (i + 1) % images.length);
   const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
-
+  
   return (
-    <section className="bg-gray-50 py-12 px-4 md:px-12" dir="ltr">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* LEFT: Carousel */}
-        <div className="relative rounded-2xl overflow-hidden bg-white shadow-sm">
-          <div className="relative w-full h-[340px] md:h-[420px]">
-            {hasImages ? (
-              <Image
-                key={images[idx]}
-                src={images[idx]}
-                alt={`Amenity ${idx + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={false}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                No amenity images
+    <section className="bg-gray-50 py-12" dir="ltr">
+      {/* Increased container width from max-w-6xl to max-w-7xl */}
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
+        {/* Increased gap from gap-10 to gap-16 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* LEFT: Carousel */}
+          <div className="relative rounded-2xl overflow-hidden bg-white shadow-sm">
+            <div className="relative w-full h-[370px] md:h-[420px]">
+              {hasImages ? (
+                <Image
+                  key={images[idx]}
+                  src={images[idx]}
+                  alt={`Amenity ${idx + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority={false}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  No amenity images
+                </div>
+              )}
+            </div>
+
+            {/* arrows */}
+            {hasImages && images.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md"
+                  aria-label="Previous image"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={next}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md"
+                  aria-label="Next image"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            {/* dots */}
+            {hasImages && images.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                {images.map((_, i) => (
+                  <span
+                    key={i}
+                    onClick={() => setIdx(i)}
+                    className={`h-2.5 w-2.5 rounded-full cursor-pointer ${
+                      i === idx ? 'bg-white' : 'bg-white/60'
+                    }`}
+                  />
+                ))}
               </div>
             )}
           </div>
 
-          {/* arrows */}
-          {hasImages && images.length > 1 && (
-            <>
-              <button
-                onClick={prev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md"
-                aria-label="Previous image"
-              >
-                ‹
-              </button>
-              <button
-                onClick={next}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md"
-                aria-label="Next image"
-              >
-                ›
-              </button>
-            </>
-          )}
+          {/* RIGHT: copy + amenity list */}
+          <div>
+            <h2 className="text-2xl md:text-4xl font-semibold text-gray-900 leading-tight">
+              Signature Features & Resort-Style Amenities
+            </h2>
 
-          {/* dots */}
-          {hasImages && images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((_, i) => (
-                <span
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  className={`h-2.5 w-2.5 rounded-full cursor-pointer ${
-                    i === idx ? 'bg-white' : 'bg-white/60'
-                  }`}
-                />
+            <p className="text-gray-600 mt-3">
+              {property?.description
+                ? property.description
+                : "Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities."}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+              {amenities.slice(0, 12).map((a, i) => (
+                <div
+                  key={`${a.name}-${i}`}
+                  className="flex items-start gap-2 rounded-lg bg-white shadow-sm border border-gray-100 p-3"
+                >
+                  <CheckCircle className="mt-0.5 h-5 w-5 text-sky-600 shrink-0" />
+                  <div className="text-sm font-medium text-gray-800">{a.name}</div>
+                </div>
               ))}
             </div>
-          )}
-        </div>
 
-        {/* RIGHT: copy + amenity list */}
-        <div>
-          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-            Signature Features & Resort-Style Amenities
-          </h2>
-
-          <p className="text-gray-600 mt-3">
-            {property?.description
-              ? property.description
-              : "Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities."}
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-            {amenities.slice(0, 12).map((a, i) => (
-              <div
-                key={`${a.name}-${i}`}
-                className="flex items-start gap-2 rounded-lg bg-white shadow-sm border border-gray-100 p-3"
-              >
-                <CheckCircle className="mt-0.5 h-5 w-5 text-sky-600 shrink-0" />
-                <div className="text-sm font-medium text-gray-800">{a.name}</div>
+            {/* if there are more amenities, show a small "+N more" */}
+            {amenities.length > 12 && (
+              <div className="mt-3 text-sm text-gray-500">
+                +{amenities.length - 12} more amenities
               </div>
-            ))}
+            )}
           </div>
-
-          {/* if there are more amenities, show a small "+N more" */}
-          {amenities.length > 12 && (
-            <div className="mt-3 text-sm text-gray-500">
-              +{amenities.length - 12} more amenities
-            </div>
-          )}
         </div>
       </div>
     </section>

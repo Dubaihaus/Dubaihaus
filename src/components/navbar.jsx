@@ -8,6 +8,7 @@ import LocaleSwitcher from './LocaleSwitcher';
 import Link from 'next/link';
 import MegaMenu from './nav/MegaMenu';
 import DevelopersMegaMenu from './nav/Developers';
+import AreasMegaMenu from './nav/Areas';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function Navbar() {
     'navbar.events',
     'navbar.comingSoon',
     // 'navbar.developers'  // ← removed (we render custom)
-    'navbar.areas',
+    //'navbar.areas',
     'navbar.map',
     'navbar.videos',
     'navbar.faq',
@@ -42,6 +43,7 @@ export default function Navbar() {
           {/* Desktop menu */}
           <div className="hidden md:flex gap-6 items-center">
             <MegaMenu label={t('navbar.properties')} />
+            <AreasMegaMenu label={t('navbar.areas')} />
             <DevelopersMegaMenu label={t('navbar.developers')} />
             {OTHER_LINKS.map((key) => (
               <a key={key} href="#" className="text-sm hover:text-blue-600 transition">

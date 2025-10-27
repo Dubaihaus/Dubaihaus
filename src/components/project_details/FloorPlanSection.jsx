@@ -1,323 +1,435 @@
+// src/components/project_details/PropertyTypesAndPlans.jsx
 'use client';
-import { useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
-const isImage = (u = '') =>
-  /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u);
+/* ------------------- helpers (unchanged logic) ------------------- */
+const norm = (s) => (s ?? '').toString().trim();
+const isImg = (u = '') => /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u);
+const isPdf = (u = '') => /\.pdf(\?.*)?$/i.test(u); // kept in case you expand later
 
-const isPdf = (u = '') => /\.pdf(\?.*)?$/i.test(u);
+const N = (v) => { const x = Number(v); return Number.isFinite(x) ? x : null; };
+const fmt = (v) => Number(v).toLocaleString();
 
-function parseTypicalImage(val) {
-  if (!val) return null;
-  try {
-    const parsed = typeof val === 'string' ? JSON.parse(val) : val;
-    if (Array.isArray(parsed)) return parsed[0]?.url || null;
-    return parsed?.url || null;
-  } catch {
-    return typeof val === 'string' ? val : null;
-  }
-}
+const brLabelShort = (b) => (Number(b) === 0 ? 'Studio' : `${Number(b)}-BR`);
+const brLabelLong  = (b) => (Number(b) === 0 ? 'Studio' : `${Number(b)}-Bedroom`);
 
-const norm = (s) => (s || '').trim();
+const sizeStrSqft = (min, max) => {
+  const lo = N(min), hi = N(max);
+  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} sq.ft.`;
+  if (lo) return `${fmt(lo)} sq.ft.`;
+  if (hi) return `${fmt(hi)} sq.ft.`;
+  return 'Upon Request';
+};
+const sizeStrM2 = (min, max) => {
+  const lo = N(min), hi = N(max);
+  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} m²`;
+  if (lo) return `${fmt(lo)} m²`;
+  if (hi) return `${fmt(hi)} m²`;
+  return null;
+};
+const priceStrAED = (min, max) => {
+  const lo = N(min), hi = N(max);
+  if (lo && hi) return `AED ${fmt(lo)} – ${fmt(hi)}`;
+  if (lo) return `AED ${fmt(lo)}`;
+  if (hi) return `AED ${fmt(hi)}`;
+  return 'Upon Request';
+};
 
-export default function FloorPlanSection({ property }) {
-  const sp = useSearchParams();
-  const urlSelectedType =
-    (sp.get('unit_types') || sp.get('unit_type') || '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean)[0] || null;
-
-  const title = property?.title || property?.rawData?.name || 'Project';
+/** Normalize API into flat entries (unchanged) */
+function extractEntries(property) {
   const unitBlocks = Array.isArray(property?.rawData?.unit_blocks)
     ? property.rawData.unit_blocks
+    : null;
+
+  if (unitBlocks && unitBlocks.length) {
+    return unitBlocks.map((b, i) => {
+      const files = (Array.isArray(b.floor_plans) ? b.floor_plans : [])
+        .map((fp) => fp?.file)
+        .filter(Boolean);
+      const layoutImgs = (Array.isArray(b.layouts) ? b.layouts : [])
+        .map((x) => x?.image?.url)
+        .filter(Boolean);
+      return {
+        key: `ub-${i}`,
+        unitType: b?.unit_type || b?.type || (property?.rawData?.property_type || 'Residence'),
+        bedrooms: N(b?.bedrooms),
+        name: b?.name || brLabelLong(b?.bedrooms),
+        fromSizeSqft: N(b?.size_from_sqft ?? b?.sizeFromSqft),
+        toSizeSqft:   N(b?.size_to_sqft   ?? b?.sizeToSqft),
+        fromSizeM2:   N(b?.size_from_m2   ?? b?.sizeFromM2),
+        toSizeM2:     N(b?.size_to_m2     ?? b?.sizeToM2),
+        fromPrice:    N(b?.price_from_aed ?? b?.units_price_from_aed),
+        toPrice:      N(b?.price_to_aed   ?? b?.units_price_to_aed),
+        media: [...files, ...layoutImgs].filter(Boolean),
+      };
+    });
+  }
+
+  // Fallback: typical_units (DaVinci case)
+  const tus = Array.isArray(property?.rawData?.typical_units)
+    ? property.rawData.typical_units
+    : Array.isArray(property?.typical_units)
+    ? property.typical_units
     : [];
 
-  // Group by unit_type
-  const grouped = useMemo(() => {
-    const g = new Map();
-    for (const b of unitBlocks) {
-      const t = norm(b?.unit_type) || 'Other';
-      if (!g.has(t)) g.set(t, []);
-      g.get(t).push(b);
+  return tus.map((t, i) => {
+    const layoutImgs = (Array.isArray(t.layout) ? t.layout : [])
+      .map((x) => x?.image?.url)
+      .filter(Boolean);
+    return {
+      key: `tu-${i}`,
+      unitType: property?.rawData?.property_type || 'Apartment',
+      bedrooms: N(t?.bedrooms),
+      name: brLabelLong(t?.bedrooms),
+      fromSizeSqft: N(t?.from_size_sqft),
+      toSizeSqft:   N(t?.to_size_sqft),
+      fromSizeM2:   N(t?.from_size_m2),
+      toSizeM2:     N(t?.to_size_m2),
+      fromPrice:    N(t?.from_price_aed),
+      toPrice:      N(t?.to_price_aed),
+      media: layoutImgs, // images only
+    };
+  });
+}
+
+/** Summary using ALL entries (unchanged logic) */
+function buildSummary(title, entries, fallbackType = 'residences') {
+  const total = entries.length;
+  const typeGuess  = norm(entries[0]?.unitType) || fallbackType;
+  const typePlural = /s$/i.test(typeGuess) ? typeGuess : `${typeGuess}s`;
+
+  const byBr = new Map();
+  for (const e of entries) {
+    const k = Number.isFinite(e.bedrooms) ? e.bedrooms : e.name || 'Unit';
+    if (!byBr.has(k)) {
+      byBr.set(k, {
+        label: brLabelLong(Number.isFinite(e.bedrooms) ? e.bedrooms : k),
+        minSqft: Number.POSITIVE_INFINITY,
+        maxSqft: 0,
+      });
     }
-    return g;
-  }, [unitBlocks]);
+    const g = byBr.get(k);
+    if (N(e.fromSizeSqft)) g.minSqft = Math.min(g.minSqft, e.fromSizeSqft);
+    if (N(e.toSizeSqft))   g.maxSqft = Math.max(g.maxSqft, e.toSizeSqft || e.fromSizeSqft || 0);
+  }
 
-  const unitTypes = Array.from(grouped.keys());
-  const [activeType, setActiveType] = useState(
-    urlSelectedType && unitTypes.includes(urlSelectedType) ? urlSelectedType : unitTypes[0] || 'Floor Plans'
+  const parts = [];
+  for (const [, g] of byBr) {
+    const has = Number.isFinite(g.minSqft) && g.maxSqft > 0;
+    parts.push(`${g.label} (${has ? `${fmt(Math.round(g.minSqft))}–${fmt(Math.round(g.maxSqft))} sq.ft.` : 'size on request'})`);
+  }
+
+  return `${title} features ${total} ${typePlural.toLowerCase()} — ${parts.join(', ')}.`;
+}
+
+/* ------------------- Row reveal helper ------------------- */
+// Each row fades/slides when it enters viewport (with slight stagger).
+function useRevealOnScroll(delayMs = 0) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            // Stagger with delay per row
+            setTimeout(() => setVisible(true), delayMs);
+            obs.disconnect();
+          }
+        });
+      },
+      { root: null, threshold: 0.12 }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [delayMs]);
+
+  return { ref, visible };
+}
+
+/* ------------------- Component ------------------- */
+export default function PropertyTypesAndPlans({ property }) {
+  const title =
+    property?.title || property?.rawData?.name || property?.name || 'Project';
+
+  const allEntries = useMemo(() => extractEntries(property), [property]);
+
+  // Summary counts ALL entries (with or without plans)
+  const summary = useMemo(
+    () => buildSummary(title, allEntries, property?.rawData?.property_type || 'residences'),
+    [title, allEntries, property?.rawData?.property_type]
   );
 
-  const blocksForType = grouped.get(activeType) || [];
-  const blockLabels = blocksForType.map(
-    (b) => norm(b?.name) || norm(b?.unit_type) || 'Floor Plan'
-  );
-  const [activeBlockLabel, setActiveBlockLabel] = useState(blockLabels[0] || 'Floor Plan');
+  // Group rows by bedroom, but ONLY include groups having at least one media item
+  const groups = useMemo(() => {
+    const by = new Map();
+    for (const e of allEntries) {
+      const label = brLabelLong(e.bedrooms);
+      if (!by.has(label)) by.set(label, []);
+      by.get(label).push(e);
+    }
 
-  const currentBlock =
-    blocksForType.find(
-      (b) => (norm(b?.name) || norm(b?.unit_type)) === activeBlockLabel
-    ) || {};
+    const result = [];
+    for (const [label, arr] of by.entries()) {
+      const withMedia = arr.filter((x) => Array.isArray(x.media) && x.media.some(isImg));
+      if (!withMedia.length) continue;
 
-  // Collect media for current block
-  const typical = parseTypicalImage(currentBlock?.typical_unit_image_url);
-  const blockFiles = Array.isArray(currentBlock?.floor_plans)
-    ? currentBlock.floor_plans.map(fp => fp?.file).filter(Boolean)
-    : [];
+      const minSqft  = Math.min(...withMedia.map((x) => N(x.fromSizeSqft) || Infinity));
+      const maxSqft  = Math.max(...withMedia.map((x) => N(x.toSizeSqft) || N(x.fromSizeSqft) || 0));
+      const minM2    = Math.min(...withMedia.map((x) => N(x.fromSizeM2) || Infinity));
+      const maxM2    = Math.max(...withMedia.map((x) => N(x.toSizeM2) || N(x.fromSizeM2) || 0));
+      const minPrice = Math.min(...withMedia.map((x) => N(x.fromPrice) || Infinity));
+      const maxPrice = Math.max(...withMedia.map((x) => N(x.toPrice) || N(x.fromPrice) || 0));
 
-  // Project-level files (fallback)
-  const projectFiles = Array.isArray(property?.rawData?.floor_plans)
-    ? property.rawData.floor_plans.map(fp => fp?.file).filter(Boolean)
-    : [];
+      result.push({
+        label,
+        bedroom: Number(arr[0]?.bedrooms),
+        variants: withMedia,
+        sizeSqftText: sizeStrSqft(Number.isFinite(minSqft) ? minSqft : null, maxSqft > 0 ? maxSqft : null),
+        priceText:    priceStrAED(Number.isFinite(minPrice) ? minPrice : null, maxPrice > 0 ? maxPrice : null),
+        sizeM2Min:    Number.isFinite(minM2) ? minM2 : null,
+        sizeM2Max:    maxM2 > 0 ? maxM2 : null,
+      });
+    }
 
-  // All candidates
-  const candidateImages = [
-    typical,
-    ...blockFiles.filter(isImage),
-    ...projectFiles.filter(isImage),
-  ].filter(Boolean);
+    result.sort((a, b) => {
+      const A = Number.isFinite(a.bedroom) ? a.bedroom : 9999;
+      const B = Number.isFinite(b.bedroom) ? b.bedroom : 9999;
+      return A - B;
+    });
 
-  const candidatePdfs = [
-    ...blockFiles.filter(isPdf),
-    ...projectFiles.filter(isPdf),
-  ];
-
-  const [mainImg, setMainImg] = useState(
-    candidateImages[0] || '/project_detail_images/design.jpg'
-  );
-
-  // Reset main image when block/type changes
-  useMemo(() => {
-    const first = (candidateImages[0] || '/project_detail_images/design.jpg');
-    setMainImg(first);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeType, activeBlockLabel]);
-
-  // Price
-  const unitPrice = currentBlock?.units_price_from_aed ?? currentBlock?.price_from_aed ?? null;
-  const projectMin = property?.price ?? property?.rawData?.min_price ?? null;
-  const displayPrice =
-    unitPrice != null
-      ? `AED ${Number(unitPrice).toLocaleString()}`
-      : projectMin != null
-      ? `AED ${Number(projectMin).toLocaleString()}`
-      : 'N/A';
-
-  // PDFs (aggregated)
-  const allPlansHref =
-    property?.rawData?.layouts_pdf ||
-    property?.rawData?.floor_plans_pdf ||
-    null;
+    return result;
+  }, [allEntries]);
 
   const brochureHref =
     property?.rawData?.brochure_url ||
     property?.rawData?.marketing_brochure ||
+    property?.marketing_brochure ||
     null;
 
-  const hasAnyMedia =
-    candidateImages.length > 0 ||
-    candidatePdfs.length > 0 ||
-    Boolean(allPlansHref);
+  const [openIdx, setOpenIdx] = useState(null);
+  const [slideIdx, setSlideIdx] = useState({}); // { rowIndex: slideIndex }
 
-  // If no unit_types at all, show a simple fallback from project files/links
-  if (!unitTypes.length) {
-    return (
-      <section className="px-4 py-12 md:px-16 bg-white" dir="ltr">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b border-gray-200 pb-2">
-          Floor Plans of {title}
-        </h2>
+  useEffect(() => {
+    setOpenIdx(null);
+    setSlideIdx({});
+  }, [title]);
 
-        {!hasAnyMedia ? (
-          <div className="text-gray-500">No floor plans available.</div>
-        ) : (
-          <div className="bg-white border rounded-xl shadow-md p-6">
-            {candidateImages.length > 0 && (
-              <>
-                <div className="relative w-full h-[360px] mb-4">
-                  <Image src={candidateImages[0]} alt="Floor plan" fill className="object-contain rounded-md bg-white" />
-                </div>
-                {candidateImages.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto">
-                    {candidateImages.map((u, i) => (
-                      <Image key={i} src={u} alt={`Plan ${i + 1}`} width={120} height={80} className="rounded-md border object-contain bg-white" />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {candidatePdfs.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="text-sm text-gray-600">Floor plans available as PDF:</div>
-                <div className="flex flex-wrap gap-2">
-                  {candidatePdfs.map((u, i) => (
-                    <a
-                      key={i}
-                      href={u}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1.5 rounded-md border text-sm hover:bg-sky-50"
-                    >
-                      View floor plan #{i + 1} (PDF)
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              {allPlansHref && (
-                <a href={allPlansHref} target="_blank" rel="noreferrer" className="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2 rounded-md text-sm font-medium text-center">
-                  Open All Floor Plans (PDF)
-                </a>
-              )}
-              {brochureHref && (
-                <a href={brochureHref} target="_blank" rel="noreferrer" className="border border-sky-500 hover:bg-sky-100 text-sky-600 px-5 py-2 rounded-md text-sm font-medium text-center">
-                  Download Brochure
-                </a>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
-    );
-  }
-
-  // Full UI with tabs/chips
+  /* ------------------- Layout ------------------- */
+  // Match header vibe: same container and airy background
   return (
-    <section className="px-4 py-12 md:px-16 bg-white" dir="ltr">
-      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b border-gray-200 pb-2">
-        Floor Plans of {title}
-      </h2>
-
-      {/* Unit-type tabs */}
-      <div className="flex gap-3 mb-4 overflow-x-auto">
-        {unitTypes.map((t) => (
-          <button
-            key={t}
-            onClick={() => {
-              setActiveType(t);
-              const first = (grouped.get(t) || [])[0];
-              const label = norm(first?.name) || norm(first?.unit_type) || 'Floor Plan';
-              setActiveBlockLabel(label);
-            }}
-            className={`px-4 py-2 rounded-md text-sm font-medium border ${
-              activeType === t ? 'bg-sky-500 text-white' : 'border-sky-300 text-gray-700'
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* Block chips */}
-      {blockLabels.length > 1 && (
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          {blockLabels.map((label) => (
-            <button
-              key={label}
-              onClick={() => setActiveBlockLabel(label)}
-              className={`px-3 py-1.5 rounded-full text-xs border ${
-                activeBlockLabel === label ? 'bg-sky-600 text-white' : 'border-sky-300 text-gray-700'
-              }`}
+    <section className="bg-white/80 py-12 md:py-14">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        {/* Heading + CTA */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+            Property Types
+          </h2>
+          {brochureHref && (
+            <a
+              href={brochureHref}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2 rounded-lg border border-sky-600 text-sky-700 text-sm font-semibold hover:bg-sky-50 transition"
             >
-              {label}
-            </button>
+              Download brochure
+            </a>
+          )}
+        </div>
+
+        {/* Summary (ALL entries) */}
+        <p className="text-slate-700 mb-8">{summary}</p>
+
+        {/* Table header */}
+        <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_56px] items-center px-6 py-3
+                        bg-slate-50 border border-slate-200 rounded-t-2xl text-sm font-semibold text-slate-700">
+          <div>Property Type</div>
+          <div>Living area</div>
+          <div>Price</div>
+          <div></div>
+        </div>
+
+        {/* Rows */}
+        <div className="border border-slate-200 border-t-0 rounded-b-2xl divide-y overflow-hidden shadow-[0_6px_22px_rgba(17,24,39,0.05)]">
+          {groups.map((g, idx) => (
+            <AnimatedRow
+              key={`row-${idx}`}
+              idx={idx}
+              group={g}
+              openIdx={openIdx}
+              setOpenIdx={setOpenIdx}
+              slideIdx={slideIdx}
+              setSlideIdx={setSlideIdx}
+            />
           ))}
         </div>
-      )}
+      </div>
+    </section>
+  );
+}
 
-      {/* Card */}
-      {!hasAnyMedia ? (
-        <div className="text-gray-500">No floor plans available.</div>
-      ) : (
-        <div className="bg-white border rounded-xl shadow-md p-6">
+/* ------------------- Animated Row ------------------- */
+function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx }) {
+  const open = openIdx === idx;
+  const i = slideIdx[idx] ?? 0;
+  const v = g.variants[i] || g.variants[0];
+
+  const imgs = Array.isArray(v.media) ? v.media.filter(isImg) : [];
+  const firstImg = imgs[0] || null;
+
+  const thisSizeSqft = sizeStrSqft(v.fromSizeSqft, v.toSizeSqft);
+  const thisSizeM2   = sizeStrM2(v.fromSizeM2, v.toSizeM2);
+  const thisPrice    = priceStrAED(v.fromPrice, v.toPrice);
+
+  // Reveal on scroll with stagger ~80ms per row
+  const { ref, visible } = useRevealOnScroll(Math.min(idx * 80, 600));
+
+  return (
+    <div
+      ref={ref}
+      className={`bg-white transition-all duration-700 ease-out
+                  ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
+    >
+      {/* collapsed row */}
+      <button
+        className={`w-full grid md:grid-cols-[2fr_1fr_1fr_56px] grid-cols-1 gap-3 items-center px-6 py-4 
+                    text-left hover:bg-slate-50 transition
+                    ${open ? 'bg-slate-50/70' : ''}`}
+        onClick={() => {
+          setOpenIdx(open ? null : idx);
+          setSlideIdx((s) => ({ ...s, [idx]: 0 }));
+        }}
+        aria-expanded={open}
+        aria-controls={`row-panel-${idx}`}
+      >
+        <div className="text-sm md:text-base font-medium text-slate-900">
+          <span className="block md:inline">{g.label}</span>
+          <span className="md:hidden block text-slate-500">{g.sizeSqftText}</span>
+        </div>
+        <div className="hidden md:block text-slate-600">{g.sizeSqftText}</div>
+        <div className="hidden md:block text-slate-600">{g.priceText}</div>
+        <div className="hidden md:flex items-center justify-center">
+          <span
+            className={`inline-flex w-7 h-7 items-center justify-center rounded-full border border-slate-300 text-slate-600
+                        transition-transform ${open ? 'rotate-45' : ''}`}
+          >
+            +
+          </span>
+        </div>
+      </button>
+
+      {/* expanded content */}
+      {open && (
+        <div id={`row-panel-${idx}`} className="px-6 pb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            {/* Gallery (only for images) */}
+            {/* Left: image + mini carousel */}
             <div>
-              {candidateImages.length > 0 ? (
-                <>
-                  <div className="relative w-full h-[360px]">
-                    <Image src={mainImg} alt={`${activeBlockLabel} floor plan`} fill className="rounded-md object-contain bg-white" />
-                  </div>
-                  {candidateImages.length > 1 && (
-                    <div className="flex gap-2 mt-3 overflow-x-auto">
-                      {candidateImages.map((u, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setMainImg(u)}
-                          className={`border rounded-md overflow-hidden min-w-[100px] ${
-                            mainImg === u ? 'border-sky-500' : 'border-gray-200'
-                          }`}
-                        >
-                          <Image src={u} alt={`thumb ${i + 1}`} width={120} height={80} className="object-contain bg-white" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
+              {firstImg ? (
+                <div className="relative w-full h-[340px] rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                  <Image
+                    src={firstImg}
+                    alt={`${g.label} floor plan variant ${i + 1}`}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
               ) : (
-                <div className="text-sm text-gray-600">
-                  Floor plans are available as PDF files.
+                <div className="text-sm text-slate-500">No image preview available.</div>
+              )}
+
+              {imgs.length > 1 && (
+                <div className="flex gap-2 mt-3 overflow-x-auto">
+                  {imgs.map((u, j) => (
+                    <button
+                      key={`thumb-${idx}-${j}`}
+                      onClick={() => setSlideIdx((s) => ({ ...s, [idx]: j }))}
+                      className={`relative w-[110px] h-[80px] border rounded-lg overflow-hidden bg-white
+                                  transition shadow-sm hover:shadow-md
+                                  ${i === j ? 'ring-2 ring-sky-500 border-transparent' : 'border-slate-200'}`}
+                      aria-label={`Variant ${j + 1}`}
+                    >
+                      <Image src={u} alt={`thumb ${j + 1}`} fill className="object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* prev/next for variants */}
+              {g.variants.length > 1 && (
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    className="px-3 py-1.5 rounded-md text-sm border border-slate-300 hover:bg-slate-50"
+                    onClick={() =>
+                      setSlideIdx((s) => ({
+                        ...s,
+                        [idx]: (i - 1 + g.variants.length) % g.variants.length,
+                      }))
+                    }
+                  >
+                    ‹ Prev
+                  </button>
+                  <div className="text-sm text-slate-600">
+                    Variant {i + 1} of {g.variants.length}
+                  </div>
+                  <button
+                    className="px-3 py-1.5 rounded-md text-sm border border-slate-300 hover:bg-slate-50"
+                    onClick={() =>
+                      setSlideIdx((s) => ({
+                        ...s,
+                        [idx]: (i + 1) % g.variants.length,
+                      }))
+                    }
+                  >
+                    Next ›
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Info + PDF CTAs */}
-            <div className="flex flex-col justify-between">
+            {/* Right: variant-specific info */}
+            <div className="flex flex-col gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">{activeBlockLabel}</h3>
-                <p className="text-sm text-gray-500 mt-1">Price: {displayPrice}</p>
-              </div>
-
-              {/* Block-level PDFs */}
-              {candidatePdfs.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <div className="text-sm text-gray-600">Floor plans (PDF):</div>
-                  <div className="flex flex-wrap gap-2">
-                    {candidatePdfs.map((u, i) => (
-                      <a
-                        key={i}
-                        href={u}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 rounded-md border text-sm hover:bg-sky-50"
-                      >
-                        View plan #{i + 1}
-                      </a>
-                    ))}
+                <h3 className="text-lg font-semibold text-slate-900">{g.label}</h3>
+                <div className="mt-1 text-sm text-slate-600 space-y-1">
+                  <div>
+                    <span className="font-medium">Living area: </span>
+                    {thisSizeSqft}
+                    {thisSizeM2 ? ` (${thisSizeM2})` : ''}
+                  </div>
+                  <div>
+                    <span className="font-medium">Price: </span>
+                    {thisPrice}
                   </div>
                 </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                {allPlansHref && (
-                  <a
-                    href={allPlansHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2 rounded-md text-sm font-medium transition-all text-center"
-                  >
-                    Open All Floor Plans (PDF)
-                  </a>
-                )}
-                {brochureHref && (
-                  <a
-                    href={brochureHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="border border-sky-500 hover:bg-sky-100 text-sky-600 px-5 py-2 rounded-md text-sm font-medium transition-all text-center"
-                  >
-                    Download Brochure
-                  </a>
-                )}
               </div>
+
+              {/* list all variant facts for quick scan */}
+              {g.variants.length > 1 && (
+                <div className="text-xs text-slate-600">
+                  <div className="font-semibold mb-1">All {g.label} variants:</div>
+                  <ul className="space-y-1 list-disc ml-5">
+                    {g.variants.map((vv, k) => (
+                      <li key={`li-${idx}-${k}`}>
+                        {sizeStrSqft(vv.fromSizeSqft, vv.toSizeSqft)}
+                        {vv.fromPrice || vv.toPrice
+                          ? ` • ${priceStrAED(vv.fromPrice, vv.toPrice)}`
+                          : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

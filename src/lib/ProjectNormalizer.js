@@ -33,17 +33,104 @@ function bedroomsRange(units) {
   return min === max ? `${min}BR` : `${min}–${max}BR`;
 }
 
+// SIMPLE COORDINATE EXTRACTION - GUARANTEED TO WORK
+function extractCoordinates(project) {
+  console.log('🔍 EXTRACTING COORDINATES FOR PROJECT:', project?.id, project?.name);
+  
+  if (!project) {
+    console.log('❌ No project provided');
+    return { lat: null, lng: null };
+  }
+
+  // METHOD 1: Check location object (THIS IS WHERE YOUR DATA IS!)
+  if (project.location && project.location.latitude !== undefined && project.location.longitude !== undefined) {
+    const lat = parseFloat(project.location.latitude);
+    const lng = parseFloat(project.location.longitude);
+    console.log('✅ FOUND COORDINATES in location:', lat, lng);
+    return { lat, lng };
+  }
+
+  // METHOD 2: Check raw coordinates
+  if (project.latitude !== undefined && project.longitude !== undefined) {
+    const lat = parseFloat(project.latitude);
+    const lng = parseFloat(project.longitude);
+    console.log('✅ FOUND COORDINATES in root:', lat, lng);
+    return { lat, lng };
+  }
+
+  // METHOD 3: Check location marker
+  if (project.location_marker && project.location_marker.latitude !== undefined && project.location_marker.longitude !== undefined) {
+    const lat = parseFloat(project.location_marker.latitude);
+    const lng = parseFloat(project.location_marker.longitude);
+    console.log('✅ FOUND COORDINATES in location_marker:', lat, lng);
+    return { lat, lng };
+  }
+
+  console.log('❌ NO COORDINATES FOUND in any field');
+  console.log('📍 Available location data:', {
+    hasLocation: !!project.location,
+    locationKeys: project.location ? Object.keys(project.location) : 'none',
+    hasLatLng: project.location ? {
+      hasLat: 'latitude' in project.location,
+      hasLng: 'longitude' in project.location,
+      latValue: project.location.latitude,
+      lngValue: project.location.longitude
+    } : 'no location'
+  });
+
+  return { lat: null, lng: null };
+}
+
+function detectPropertyType(project) {
+  console.log('🏠 Detecting property type for:', project?.name);
+  
+  // Check parking allocations
+  if (project.parkings && project.parkings.length > 0) {
+    const unitTypes = project.parkings.map(p => p.unit_type).filter(Boolean);
+    console.log('📦 Parking unit types:', unitTypes);
+    
+    if (unitTypes.includes('villa')) return 'Villa';
+    if (unitTypes.includes('townhouse')) return 'Townhouse';
+    if (unitTypes.includes('apartment')) return 'Apartment';
+  }
+
+  // Check building count
+  if (project.building_count > 1) return 'Residential Complex';
+  if (project.building_count === 1) return 'Apartment Building';
+
+  // Check name
+  const name = (project.name || '').toLowerCase();
+  if (name.includes('villa')) return 'Villa';
+  if (name.includes('townhouse') || name.includes('town house')) return 'Townhouse';
+  if (name.includes('residence') || name.includes('apartment')) return 'Apartment';
+
+  return 'Property';
+}
+
 export function normalizeProject(project) {
-  if (!project) return null;
+  console.log('🔄 STARTING NORMALIZATION FOR:', project?.id, project?.name);
+  
+  if (!project) {
+    console.log('❌ normalizeProject: No project data');
+    return null;
+  }
+
+  // EXTRACT COORDINATES - THIS IS THE MOST IMPORTANT PART
+  const { lat, lng } = extractCoordinates(project);
+  const hasCoords = lat !== null && lng !== null && Number.isFinite(lat) && Number.isFinite(lng);
+  
+  console.log('📍 COORDINATE RESULT:', {
+    projectId: project.id,
+    projectName: project.name,
+    hasCoords,
+    lat,
+    lng,
+    locationData: project.location
+  });
 
   const loc = project.location || null;
-  const rawLat = loc?.latitude ?? project.location_marker?.latitude ?? null;
-  const rawLng = loc?.longitude ?? project.location_marker?.longitude ?? null;
-  const lat = Number(rawLat);
-  const lng = Number(rawLng);
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
-
-  // Build per-unit info and infer category
+  
+  // Build unit types
   const unitTypes = (project.typical_units || []).map(u => {
     const layoutName = u?.layout?.[0]?.name || u?.layout?.[0]?.title || null;
     const hinted = guessTypeFromText(u.unitType) || guessTypeFromText(layoutName);
@@ -69,12 +156,13 @@ export function normalizeProject(project) {
 
   const propertyTypes = [...new Set(unitTypes.map(u => u.unitCategory).filter(Boolean))];
   const brRange = bedroomsRange(unitTypes);
+  const detectedType = detectPropertyType(project);
 
   const locationStr = loc
-    ? [loc.sector, loc.district, loc.region].filter(Boolean).join(', ')
+    ? [loc.sector, loc.district, loc.region, loc.country].filter(Boolean).join(', ')
     : 'Location not specified';
 
-  return {
+  const normalizedProject = {
     id: project.id,
     title: project.name,
     name: project.name,
@@ -84,7 +172,7 @@ export function normalizeProject(project) {
     description: project.description ?? project.short_description ?? null,
     completionDate: project.completion_date ?? project.completion_datetime ?? null,
 
-    // Location for UI + Map
+    // LOCATION DATA - CRITICAL FOR MAP
     location: locationStr,
     locationObj: loc,
     lat: hasCoords ? lat : null,
@@ -107,7 +195,9 @@ export function normalizeProject(project) {
 
     // Amenities etc.
     amenities: (project.project_amenities || []).map(a => ({
-      id: a.id, name: a.amenity?.name, icon: a.icon?.url
+      id: a.id, 
+      name: a.amenity?.name, 
+      icon: a.icon?.url
     })),
     pointsOfInterest: project.project_map_points || [],
     paymentPlans: project.payment_plans || [],
@@ -123,9 +213,19 @@ export function normalizeProject(project) {
     // Derived
     unitTypes,
     propertyTypes,
-    propertyType: propertyTypes[0] || 'Property',
+    propertyType: propertyTypes[0] || detectedType,
     bedroomsRange: brRange,
 
     rawData: project,
   };
+
+  console.log('✅ NORMALIZATION COMPLETE:', {
+    id: normalizedProject.id,
+    name: normalizedProject.name,
+    hasCoordinates: !!normalizedProject.lat && !!normalizedProject.lng,
+    coordinates: { lat: normalizedProject.lat, lng: normalizedProject.lng },
+    propertyType: normalizedProject.propertyType
+  });
+
+  return normalizedProject;
 }
