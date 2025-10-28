@@ -6,7 +6,9 @@ export const AREAS = [
     image: "/dashboard/downtown.jpg",
     filters: { 
       area: "Downtown Dubai",
-      region: "Dubai" // Additional filter for better results
+        sector: "Downtown Dubai",
+      region: "Dubai" ,
+      id:"201"// Additional filter for better results
     },
   },
   {
@@ -54,15 +56,7 @@ export const AREAS = [
       region: "Dubai"
     },
   },
-  {
-    slug: "emaar-beachfront",
-    title: "Emaar Beachfront",
-    image: "/dashboard/emaar-beachfront.jpg",
-    filters: { 
-      area: "Emaar Beachfront",
-      region: "Dubai"
-    },
-  },
+
 ];
 
 export function getAreaBySlug(slug) {

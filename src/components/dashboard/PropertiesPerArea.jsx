@@ -36,7 +36,7 @@ export default function AreasShowcaseClient() {
           AREAS.map(async (area) => {
             const qs = new URLSearchParams({
               page: "1",
-              pageSize: "6",
+              pageSize: "80",
               pricedOnly: "false",
               ...area.filters,
             });

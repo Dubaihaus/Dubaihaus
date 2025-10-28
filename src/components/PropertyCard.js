@@ -58,12 +58,16 @@ const router = useRouter();
     "/project_detail_images/building.jpg";
 
   const status = property.status || property.sale_status || "For Sale";
+const rawPrice = property.price ?? property.minPrice ?? property.min_price ?? null;
 
-  const priceAED = property.price ?? property.minPrice ?? property.min_price ?? null;
-  const price =
-    currency === "EUR" && priceAED != null ? Math.round(priceAED * 0.25) :
-    currency === "USD" && priceAED != null ? Math.round(priceAED * 0.27) :
-    priceAED;
+// currency conversion first, then round to nearest integer
+let converted = rawPrice;
+if (currency === "EUR" && rawPrice != null) converted = rawPrice * 0.25;
+else if (currency === "USD" && rawPrice != null) converted = rawPrice * 0.27;
+
+// remove any decimals — ensure integer
+const price = converted != null ? Math.round(Number(converted)) : null;
+
 
   const shownCurrency = currency || property.priceCurrency || property.price_currency || "AED";
 const locationLabel = fmtLocation(property.locationObj || property.rawData?.location || property.location);

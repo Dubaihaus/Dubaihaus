@@ -34,15 +34,28 @@ function pickCoverUrl(property) {
   return '/project_detail_images/building.jpg';
 }
 function getStartingPriceAED(raw) {
-  if (raw?.min_price != null) return raw.min_price;
-  const unitBlocks = Array.isArray(raw?.unit_blocks) ? raw.unit_blocks : [];
-  const typical    = Array.isArray(raw?.typical_units) ? raw.typical_units : [];
+  if (!raw) return null;
+
+  // 1️⃣ Direct min_price field (with rounding)
+  if (raw.min_price != null) {
+    return Math.round(Number(raw.min_price));
+  }
+
+  // 2️⃣ Extract nested prices
+  const unitBlocks = Array.isArray(raw.unit_blocks) ? raw.unit_blocks : [];
+  const typical    = Array.isArray(raw.typical_units) ? raw.typical_units : [];
+
   const prices = [
     ...unitBlocks.map(b => b?.units_price_from_aed ?? b?.price_from_aed ?? null),
     ...typical.map(t => t?.from_price_aed ?? null),
-  ].filter(v => v != null);
+  ]
+    .filter(v => v != null && !isNaN(v)) // only valid numbers
+    .map(v => Math.round(Number(v)));    // 🔥 clean rounding at source
+
+  // 3️⃣ Return smallest valid price (already rounded)
   return prices.length ? Math.min(...prices) : null;
 }
+
 
 /* ---------- Component ---------- */
 export default function ProjectHeaderSection({ property }) {

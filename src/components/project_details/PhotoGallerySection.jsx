@@ -370,6 +370,39 @@ const PhotoGallerySection = ({ property }) => {
           )}
         </div>
       </div>
+          {/* Thumbnail Strip */}
+{images.length > 1 && (
+  <div className="mt-6 flex flex-wrap justify-center gap-3">
+    {images.map((img, index) => (
+      <button
+        key={index}
+        onClick={() => {
+          setCurrentImageIndex(index);
+          setIsSlideshowActive(false);
+        }}
+        className={`relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+          index === currentImageIndex
+            ? 'border-sky-500 scale-105 shadow-md'
+            : 'border-transparent hover:border-sky-300'
+        }`}
+        style={{ width: '100px', height: '65px' }}
+      >
+        <Image
+          src={img.thumbnail || img.original}
+          alt={`Thumbnail ${index + 1}`}
+          fill
+          className="object-cover"
+          sizes="100px"
+          placeholder="blur"
+          blurDataURL={img.blur}
+        />
+        {index === currentImageIndex && (
+          <div className="absolute inset-0 bg-sky-500/20"></div>
+        )}
+      </button>
+    ))}
+  </div>
+)}
 
       {/* Thumbnails removed as requested */}
     </section>
