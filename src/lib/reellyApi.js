@@ -152,6 +152,8 @@ export async function searchProperties({
     area: "search",
     bedrooms: "unit_bedrooms",
     minPrice: "unit_price_from",
+     sector: "search_query", // Map sector to search_query for better results
+    area: "search_query",   // Map area to search_query
     maxPrice: "unit_price_to", 
     minSize: "unit_area_from",
     maxSize: "unit_area_to",
@@ -276,7 +278,3 @@ function transformPropertyResponse(reellyProperty) {
   return normalizeProject(reellyProperty);
 }
 
-export {
-  listCountries,
-  listDistricts
-};
