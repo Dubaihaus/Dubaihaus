@@ -16,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch('/api/off-plan?pageSize=1'); // or whatever you want
+      const res = await fetch('/api/off-plan?pageSize=600'); // or whatever you want
       const data = await res.json();
       setHomeProjects(Array.isArray(data?.results) ? data.results : []);
     })();
