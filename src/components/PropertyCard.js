@@ -140,10 +140,10 @@ const locationLabel = fmtLocation(property.locationObj || property.rawData?.loca
           <Button
   className="mt-auto w-full text-white rounded-lg"
   style={{
-    backgroundColor: '#004C99',
+    backgroundColor: '#00C6FF',
   }}
   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
-  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00C6FF')}
 >
   Discover more
 </Button>

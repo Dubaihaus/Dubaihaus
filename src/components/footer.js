@@ -13,7 +13,7 @@ import { SiX } from 'react-icons/si';
 
 export default function Footer() {
     return (
-        <footer className="bg-brand-dark text-white">
+        <footer className="bg-brand-sky text-white">
             <div className="max-w-screen-xl mx-auto px-4 py-10 space-y-8">
                 <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-8">
                     {/* Developers */}
@@ -124,7 +124,7 @@ export default function Footer() {
                 </div>
             </div>
 
-           <div className="text-center py-4 text-sm bg-brand-dark text-white">
+           <div className="text-center py-4 text-sm bg-brand-sky text-white">
   © {new Date().getFullYear()} Dubai Haus
 </div>
 
