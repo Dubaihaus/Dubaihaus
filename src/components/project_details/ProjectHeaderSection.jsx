@@ -142,7 +142,7 @@ export default function ProjectHeaderSection({ property }) {
           <h1 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-slate-900 leading-tight tracking-tight">
             {title}
           </h1>
-          <p className="text-xl md:text-2xl font-medium text-slate-700">
+          <p className="text-xl md:text-2xl font-medium text-slate-#004C99">
             in <span className="text-sky-600">{community}</span>
           </p>
         </header>
@@ -152,7 +152,7 @@ export default function ProjectHeaderSection({ property }) {
           <button
             onClick={() => setOpen(true)}
             className="min-w-[172px] rounded-xl px-7 py-3.5 text-white font-semibold
-                       bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700
+                       bg-gradient-to-r from-sky-400 to-blue-400 hover:from-sky-500 hover:to-blue-600
                        shadow-[0_10px_20px_rgba(56,189,248,0.25)] hover:shadow-[0_12px_24px_rgba(56,189,248,0.35)]
                        transition-all"
           >
@@ -181,7 +181,7 @@ export default function ProjectHeaderSection({ property }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5 mt-4">
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
             <div className="bg-sky-50 p-3 rounded-lg">
-              <FaMoneyBillWave className="text-sky-500 text-2xl" />
+              <FaMoneyBillWave className="text-sky-400 text-2xl" />
             </div>
             <div>
               <p className="font-bold text-slate-900 text-lg">{priceLabel}</p>
@@ -191,7 +191,7 @@ export default function ProjectHeaderSection({ property }) {
 
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
             <div className="bg-sky-50 p-3 rounded-lg">
-              <FaPercent className="text-sky-500 text-2xl" />
+              <FaPercent className="text-sky-400 text-2xl" />
             </div>
             <div>
               <p className="font-bold text-slate-900 text-lg">{paymentPlan}</p>
@@ -201,7 +201,7 @@ export default function ProjectHeaderSection({ property }) {
 
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
             <div className="bg-sky-50 p-3 rounded-lg">
-              <FaCalendarAlt className="text-sky-500 text-2xl" />
+              <FaCalendarAlt className="text-sky-400 text-2xl" />
             </div>
             <div>
               <p className="font-bold text-slate-900 text-lg">{handoverDate}</p>

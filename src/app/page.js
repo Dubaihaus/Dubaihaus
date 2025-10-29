@@ -8,6 +8,7 @@ import OffPlanPage from "@/app/off-plan/page";
 import OffPlanPropertyTypesSection from "@/components/dashboard/OffPlanPropertyTypesSection";
 import React from "react";
 import Footer from "@/components/footer";
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import AreasShowcaseClient from "@/components/dashboard/PropertiesPerArea";
 import MapSection from "@/components/map/MapSection";
@@ -26,6 +27,7 @@ export default function Home() {
         <>
             {/* <Navbar /> */}
             <DashboardHeader />
+            
             <OffPlanPage limit={6} />
             <OffPlanPropertyTypesSection />
              <MapSection

@@ -250,7 +250,7 @@ function FaqItem({ i, q, a, open, onToggle }) {
         onClick={onToggle}
         className="w-full flex items-center justify-between text-left py-4 px-4 md:px-6
                    transition-colors rounded-xl focus:outline-none
-                   focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1f7ccf]
+                   focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#00C6FF]
                    hover:bg-gray-50"
       >
         <span className="text-base md:text-lg font-medium text-gray-900">
@@ -312,7 +312,7 @@ export default function ProjectFAQ({ property }) {
     <section className="px-4 py-12 md:px-16 bg-white" dir="ltr">
       {/* Heading: property name in bluish color only here */}
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-        FAQ about <span className="text-[#1f7ccf]">{name}</span>
+        FAQ about <span className="text-[#00C6FF]">{name}</span>
       </h2>
       <p className="text-gray-600 mb-6 text-sm md:text-base">
         Answers to the most common questions buyers ask.

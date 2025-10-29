@@ -134,8 +134,8 @@ export default function CombinedPropertyDetails({ property }) {
 
           {/* Summary */}
           <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-            <p className="text-blue-900 font-semibold">Comprehensive Details</p>
-            <p className="text-blue-700 text-sm">
+            <p className="text-brand-dark font-semibold">Comprehensive Details</p>
+            <p className="text-brand-dark text-sm">
               {leftCardInfo.length} key specifications provided
             </p>
           </div>

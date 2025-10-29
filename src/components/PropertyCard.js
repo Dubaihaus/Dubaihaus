@@ -117,9 +117,9 @@ const locationLabel = fmtLocation(property.locationObj || property.rawData?.loca
 
         {/* Content */}
         <div className="p-6 flex flex-col flex-1">
-          <p className="text-blue-600 font-bold text-lg mb-2">
-            from {shownCurrency} {price?.toLocaleString() ?? "—"}
-          </p>
+          <p className="font-bold text-lg mb-2" style={{ color: '#00C6FF' }}>
+  from {shownCurrency} {price?.toLocaleString() ?? "—"}
+</p>
 
           <h3 className="text-gray-800 font-semibold text-lg mb-1 line-clamp-2">
             {property.title || property.name}
@@ -137,9 +137,16 @@ const locationLabel = fmtLocation(property.locationObj || property.rawData?.loca
             <p><span className="font-medium">Handover:</span> {handover}</p>
           </div>
 
-          <Button className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
-            Discover more
-          </Button>
+          <Button
+  className="mt-auto w-full text-white rounded-lg"
+  style={{
+    backgroundColor: '#004C99',
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+>
+  Discover more
+</Button>
         </div>
       </Link>
     </div>

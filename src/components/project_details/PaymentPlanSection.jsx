@@ -49,7 +49,7 @@ export default function PaymentPlanSection({ property }) {
           return (
             <div key={index} className="mb-10 last:mb-0">
               {/* Banner */}
-              <div className="rounded-2xl overflow-hidden shadow-lg border border-sky-700/20 bg-gradient-to-b from-sky-600 to-sky-700">
+              <div className="rounded-2xl overflow-hidden shadow-lg border border-sky-700/20 bg-gradient-to-b from-brand-dark to-sky-700">
                 {/* Title */}
                 <div className="px-6 md:px-10 pt-8 text-center">
                   <h2 className="text-white text-2xl md:text-4xl font-bold tracking-tight">

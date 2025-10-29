@@ -253,7 +253,7 @@ const PhotoGallerySection = ({ property }) => {
               onClick={() => handleTabChange('exterior')}
               className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                 activeTab === 'exterior'
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -265,7 +265,7 @@ const PhotoGallerySection = ({ property }) => {
               onClick={() => handleTabChange('interior')}
               className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                 activeTab === 'interior'
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -276,7 +276,7 @@ const PhotoGallerySection = ({ property }) => {
             onClick={() => handleTabChange('all')}
             className={`px-6 py-3 rounded-xl font-semibold transition-all ${
               activeTab === 'all'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >

@@ -36,7 +36,7 @@ export default function AreasShowcaseClient() {
           AREAS.map(async (area) => {
             const qs = new URLSearchParams({
               page: "1",
-              pageSize: "80",
+              pageSize: "6",
               pricedOnly: "false",
               ...area.filters,
             });
@@ -105,7 +105,13 @@ export default function AreasShowcaseClient() {
                       "Explore premium off-plan developments in this sought-after Dubai community."}
                   </p>
 
-                  <Button asChild className="mt-auto bg-blue-600 hover:bg-blue-700 text-white w-full">
+                  <Button asChild className="mt-auto "
+                    style={{
+    backgroundColor: '#004C99',
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+>
                     <Link href={loadMoreHref}>Load more</Link>
                   </Button>
                 </div>
@@ -118,8 +124,14 @@ export default function AreasShowcaseClient() {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Can’t find your preferred area?</h3>
           <Link
             href="/off-plan"
-            className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
-          >
+            className="inline-flex items-center text-white px-6 py-3 rounded-lg  font-medium"
+              style={{
+    backgroundColor: '#004C99',
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+>
+          
             Explore All Properties
             <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

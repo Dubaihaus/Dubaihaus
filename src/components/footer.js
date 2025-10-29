@@ -13,7 +13,7 @@ import { SiX } from 'react-icons/si';
 
 export default function Footer() {
     return (
-        <footer className="bg-cyan-600 text-white">
+        <footer className="bg-brand-dark text-white">
             <div className="max-w-screen-xl mx-auto px-4 py-10 space-y-8">
                 <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-8">
                     {/* Developers */}
@@ -115,7 +115,7 @@ export default function Footer() {
 
                 {/* Floating Contact Buttons */}
                 <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-                    <button className="bg-blue-700 p-3 rounded-full shadow-lg">
+                    <button className="bg-brand-dark p-3 rounded-full shadow-lg">
                         <FaPhoneAlt className="text-white text-xl" />
                     </button>
                     <button className="bg-green-500 p-3 rounded-full shadow-lg">
@@ -124,9 +124,10 @@ export default function Footer() {
                 </div>
             </div>
 
-            <div className="text-center py-4 text-sm bg-cyan-700">
-                © 2025 Metropolitan Premium Properties
-            </div>
+           <div className="text-center py-4 text-sm bg-brand-dark text-white">
+  © {new Date().getFullYear()} Dubai Haus
+</div>
+
         </footer>
     );
 }

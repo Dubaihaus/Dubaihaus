@@ -53,9 +53,9 @@ export default function ProjectAboutSection({ property }) {
           href={p.marketing_brochure || '#'}
           target={p.marketing_brochure ? '_blank' : undefined}
           rel="noreferrer"
-          className="flex items-center gap-2 text-sky-600 font-medium hover:underline"
+          className="flex items-center gap-2 text-brand-sky font-medium hover:underline"
         >
-          <span className="inline-flex w-8 h-8 rounded-full bg-sky-500 text-white items-center justify-center">
+          <span className="inline-flex w-8 h-8 rounded-full bg-brand-sky text-white items-center justify-center">
             &gt;
           </span>
           <span>Request Available Units & Prices</span>

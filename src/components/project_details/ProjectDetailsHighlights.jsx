@@ -311,7 +311,7 @@ export default function ProjectDetailsHighlights({ property }) {
                   href={brochureUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 transition-colors"
+                  className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-sky hover:bg-sky-500 text-white font-semibold py-3 transition-colors"
                 >
                   Download Brochure
                 </a>

@@ -33,11 +33,8 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.jpg" alt="Dubai Off Plan" className="h-8 w-auto" />
-            <div className="text-sm leading-tight">
-              <span className="font-bold">DUBAI</span><br />
-              <span className="text-xs text-blue-500">OFF PLAN</span>
-            </div>
+            <img src="/logo.png" alt="Dubai Off Plan" className="h-8 w-auto" />
+           
           </Link>
 
           {/* Desktop menu */}

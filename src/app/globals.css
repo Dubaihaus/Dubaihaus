@@ -3,9 +3,14 @@
 @import "mapbox-gl/dist/mapbox-gl.css";
 
 
+@tailwind utilities;
 @custom-variant dark (&:is(.dark *));
-
+  @theme {
+  --color-brand-sky:  #00C6FF; /* logo sky */
+  --color-brand-dark: #004C99; /* logo dark blue */
+}
 @theme inline {
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -113,7 +118,32 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+/* ===== Shimmer animation ===== */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
+/* ===== Base skeleton utility ===== */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    rgba(148,163,184,0.28) 25%,           /* slate-400/28% */
+    rgba(255,255,255,0.55) 37%,           /* light sweep */
+    rgba(148,163,184,0.28) 63%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.15s linear infinite;
+  border-radius: 0.75rem; /* rounded-xl default */
+}
+
+/* Helper sizes */
+.skel-line { height: 0.9rem; }
+.skel-title { height: 1.6rem; }
+.skel-btn { height: 2.4rem; border-radius: 0.75rem; }
+.skel-img { height: 10rem; }            
 @layer base {
   * {
     @apply border-border outline-ring/50;
