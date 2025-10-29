@@ -107,10 +107,10 @@ export default function AreasShowcaseClient() {
 
                   <Button asChild className="mt-auto "
                     style={{
-    backgroundColor: '#004C99',
+    backgroundColor: '#00C6FF',
   }}
   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
-  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00C6FF')}
 >
                     <Link href={loadMoreHref}>Load more</Link>
                   </Button>
