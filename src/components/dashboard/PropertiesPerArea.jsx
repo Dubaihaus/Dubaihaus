@@ -126,10 +126,10 @@ export default function AreasShowcaseClient() {
             href="/off-plan"
             className="inline-flex items-center text-white px-6 py-3 rounded-lg  font-medium"
               style={{
-    backgroundColor: '#004C99',
+    backgroundColor: '#00C6FF',
   }}
   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
-  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#004C99')}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00C6FF')}
 >
           
             Explore All Properties
