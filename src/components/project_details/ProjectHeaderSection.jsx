@@ -111,14 +111,14 @@ export default function ProjectHeaderSection({ property }) {
         {/* Floating action bubbles */}
         <div className="absolute bottom-4 right-4 md:right-6 flex flex-col items-center gap-3">
           <a
-            href={`tel:${raw?.developer_data?.phone || '+97100000000'}`}
+            href={`tel:${raw?.developer_data?.phone || '+971505231194'}`}
             className="bg-sky-500 hover:bg-sky-600 p-4 rounded-full shadow-lg text-white transition-all hover:scale-110 hover:shadow-xl"
             aria-label="Call"
           >
             <FaPhoneAlt className="text-lg" />
           </a>
           <a
-            href={`https://wa.me/${raw?.developer_data?.whatsapp || '97100000000'}`}
+            href={`https://wa.me/${raw?.developer_data?.whatsapp || '971505231194'}`}
             target="_blank"
             rel="noreferrer"
             className="bg-green-500 hover:bg-green-600 p-4 rounded-full shadow-lg text-white transition-all hover:scale-110 hover:shadow-xl"
