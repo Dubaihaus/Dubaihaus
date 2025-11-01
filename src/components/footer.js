@@ -1,7 +1,6 @@
 'use client';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   FaFacebookF,
@@ -12,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
 import { SiX } from 'react-icons/si';
+import { useFooterData } from '@/hooks/useFooterData';
 
 /* --------- tiny helper to render safe links ---------- */
 function SafeInternalLink({ href, children, className }) {
@@ -43,32 +43,15 @@ const SkeletonList = () => (
 );
 
 export default function Footer() {
-  const [data, setData] = useState({
+  const { data, isLoading, error } = useFooterData();
+
+  // Default data in case of error or loading
+  const footerData = data || {
     developers: [],
     areas: [],
     propertyTypes: [],
     usefulLinks: [],
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetch('/api/footer', { cache: 'no-store' });
-        const json = res.ok ? await res.json() : null;
-        if (mounted && json) setData({
-          developers: Array.isArray(json?.developers) ? json.developers : [],
-          areas: Array.isArray(json?.areas) ? json.areas : [],
-          propertyTypes: Array.isArray(json?.propertyTypes) ? json.propertyTypes : [],
-          usefulLinks: Array.isArray(json?.usefulLinks) ? json.usefulLinks : [],
-        });
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+  };
 
   return (
     <footer className="relative bg-brand-sky text-white overflow-hidden">
@@ -84,11 +67,11 @@ export default function Footer() {
           {/* Developers */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Developers in Dubai</h3>
-            {loading ? (
+            {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {data.developers.map((d, idx) => (
+                {footerData.developers.map((d, idx) => (
                   <li key={`${d?.name || 'dev'}-${idx}`}>
                     <SafeInternalLink href={d?.href} className="hover:underline">
                       {d?.name || 'Developer'}
@@ -102,11 +85,11 @@ export default function Footer() {
           {/* Popular Areas (footer-specific, not the same as cards) */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Popular Areas in Dubai</h3>
-            {loading ? (
+            {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {data.areas.map((a, idx) => (
+                {footerData.areas.map((a, idx) => (
                   <li key={`${a?.name || 'area'}-${idx}`}>
                     <SafeInternalLink href={a?.href} className="hover:underline">
                       {a?.name || 'Area'}
@@ -120,11 +103,11 @@ export default function Footer() {
           {/* Property Types */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Property Types</h3>
-            {loading ? (
+            {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {data.propertyTypes.map((t, idx) => (
+                {footerData.propertyTypes.map((t, idx) => (
                   <li key={`${t?.name || 'ptype'}-${idx}`}>
                     <SafeInternalLink href={t?.href} className="hover:underline">
                       {t?.name || 'Property'}
@@ -138,11 +121,11 @@ export default function Footer() {
           {/* Useful Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Useful Links</h3>
-            {loading ? (
+            {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {data.usefulLinks.map((u, idx) => (
+                {footerData.usefulLinks.map((u, idx) => (
                   <li key={`${u?.name || 'link'}-${idx}`}>
                     <SafeInternalLink href={u?.href} className="hover:underline">
                       {u?.name || 'Link'}

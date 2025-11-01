@@ -2,6 +2,7 @@ import './globals.css';
 import {headers} from 'next/headers';
 import {NextIntlClientProvider} from 'next-intl';
 import Navbar from '@/components/navbar';
+import { Providers } from './providers';
 
 async function getMessages(locale) {
   try {
@@ -23,7 +24,7 @@ export default async function RootLayout({ children }) {
         {/* Provide locale and messages to the app */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Navbar />
-          {children}
+         <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>

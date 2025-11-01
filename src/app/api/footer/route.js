@@ -125,13 +125,27 @@ export async function GET() {
       { name: "Get Mortgage in Dubai", href: "/services/mortgage" },
     ].map((u) => ({ name: u.name, href: u.href || "/" }));
 
-    return Response.json({ developers, areas, propertyTypes, usefulLinks });
+    // Set proper caching headers for CDN
+    const headers = {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400', // 1 hour fresh, 1 day stale
+    };
+
+    return new Response(JSON.stringify({ developers, areas, propertyTypes, usefulLinks }), {
+      headers,
+    });
   } catch (e) {
     console.error("Footer API error:", e);
     // Always return a valid JSON shape (null-safe client)
-    return Response.json(
-      { developers: [], areas: [], propertyTypes: [], usefulLinks: [] },
-      { status: 200 }
+    return new Response(
+      JSON.stringify({ developers: [], areas: [], propertyTypes: [], usefulLinks: [] }),
+      { 
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, s-maxage=300', // 5 minutes on error
+        }
+      }
     );
   }
 }

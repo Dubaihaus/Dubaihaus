@@ -1,45 +1,181 @@
 // src/components/map/MapSection.jsx
 'use client';
 
+import { useMapData } from '@/hooks/useMapData';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropertiesMap from './PropertiesMap';
 
+const BATCH_SIZE = 80;
+const BATCH_DELAY = 60;
+
+function MapLoading({ height }) {
+  return (
+    <div
+      className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex items-center justify-center"
+      style={{ height: `${height}px` }}
+    >
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-gray-600 text-sm">Loading map…</p>
+      </div>
+    </div>
+  );
+}
+
 export default function MapSection({
-  projects = [],
+  projects,
   title = 'Find your properties on the map',
   initialView,
   className = '',
   height = 480,
-  maxWidthClass = 'max-w-5xl', // << new, controls content width
+  maxWidthClass = 'max-w-5xl',
 }) {
-  const projectsWithCoords = projects.filter(
-    (p) => p?.lat != null && p?.lng != null && Number.isFinite(p.lat) && Number.isFinite(p.lng)
+  // Data fetching
+  const { data: mapData, isLoading, error } = useMapData({
+    enabled: !projects,
+  });
+
+  // Memoize projects to prevent unnecessary re-renders
+  const rawProjects = useMemo(() => 
+    projects || mapData?.results || [], 
+    [projects, mapData?.results]
   );
 
-  return (
-    <section className={`w-full ${className}`}>
-      <div className={`mx-auto ${maxWidthClass}`}>
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">
-          {title}
-        </h2>
+  // Memoize filtered projects
+  const projectsWithCoords = useMemo(() => 
+    rawProjects.filter(p => 
+      p?.lat != null && 
+      p?.lng != null && 
+      Number.isFinite(p.lat) && 
+      Number.isFinite(p.lng)
+    ),
+    [rawProjects]
+  );
 
-        {projectsWithCoords.length > 0 ? (
-          <div
-            className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
-            style={{ height: `${height}px` }}
-          >
-            <PropertiesMap projects={projectsWithCoords} initialView={initialView} />
-          </div>
-        ) : (
+  // State
+  const [visibleMarkers, setVisibleMarkers] = useState([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  
+  // Refs for batching
+  const batchRef = useRef({ timer: null, currentIndex: 0, cancelled: false });
+
+  // Reset and start streaming when projects change
+  useEffect(() => {
+    // Cancel any existing batch
+    if (batchRef.current.timer) {
+      clearTimeout(batchRef.current.timer);
+      batchRef.current.cancelled = true;
+    }
+
+    if (projectsWithCoords.length === 0) {
+      setVisibleMarkers([]);
+      setIsStreaming(false);
+      return;
+    }
+
+    // Reset state
+    setVisibleMarkers([]);
+    setIsStreaming(true);
+    batchRef.current.currentIndex = 0;
+    batchRef.current.cancelled = false;
+
+    // Start batching
+    const processBatch = () => {
+      if (batchRef.current.cancelled) return;
+
+      const start = batchRef.current.currentIndex;
+      const end = Math.min(start + BATCH_SIZE, projectsWithCoords.length);
+      const batch = projectsWithCoords.slice(start, end);
+
+      setVisibleMarkers(prev => [...prev, ...batch]);
+      batchRef.current.currentIndex = end;
+
+      if (end < projectsWithCoords.length) {
+        batchRef.current.timer = setTimeout(processBatch, BATCH_DELAY);
+      } else {
+        setIsStreaming(false);
+      }
+    };
+
+    // Start first batch after short delay
+    batchRef.current.timer = setTimeout(processBatch, 200);
+
+    // Cleanup
+    return () => {
+      batchRef.current.cancelled = true;
+      if (batchRef.current.timer) {
+        clearTimeout(batchRef.current.timer);
+      }
+    };
+  }, [projectsWithCoords]); // Only depends on projectsWithCoords
+
+  // Loading states
+  if (!projects && isLoading) {
+    return (
+      <section className={`w-full ${className}`}>
+        <div className={`mx-auto ${maxWidthClass}`}>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+          <MapLoading height={height} />
+        </div>
+      </section>
+    );
+  }
+
+  if (!projects && error) {
+    return (
+      <section className={`w-full ${className}`}>
+        <div className={`mx-auto ${maxWidthClass}`}>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
           <div
             className="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-500 flex items-center justify-center"
             style={{ height: `${height}px` }}
           >
             <div className="text-center">
-              <p className="text-red-500 font-semibold">No properties with valid coordinates available.</p>
-              <p className="text-xs mt-2">Found {projects.length} projects but {projects.length - projectsWithCoords.length} have no location data.</p>
+              <p className="text-red-500 font-semibold">Failed to load map data.</p>
+              <p className="text-xs mt-2">Please try refreshing the page.</p>
             </div>
           </div>
-        )}
+        </div>
+      </section>
+    );
+  }
+
+  if (projectsWithCoords.length === 0) {
+    return (
+      <section className={`w-full ${className}`}>
+        <div className={`mx-auto ${maxWidthClass}`}>
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+          <div
+            className="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-500 flex items-center justify-center"
+            style={{ height: `${height}px` }}
+          >
+            <div className="text-center">
+              <p className="text-red-500 font-semibold">No properties with valid coordinates.</p>
+              <p className="text-xs mt-2">
+                Found {rawProjects.length} projects but none have location data.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className={`w-full ${className}`}>
+      <div className={`mx-auto ${maxWidthClass}`}>
+        <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+        <div
+          className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative"
+          style={{ height: `${height}px` }}
+        >
+          <PropertiesMap
+            projects={visibleMarkers}
+            initialView={initialView}
+            showMarkers={visibleMarkers.length > 0}
+            markersLoading={isStreaming}
+          />
+        </div>
       </div>
     </section>
   );

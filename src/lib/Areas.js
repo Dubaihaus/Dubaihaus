@@ -3,7 +3,7 @@ export const AREAS = [
   {
     slug: "downtown-dubai",
     title: "Downtown Dubai",
-    image: "/dashboard/downtown.jpg",
+    image: "/dashboard/downtown.webp",
     filters: { 
       area: "Downtown Dubai",
         sector: "Downtown Dubai",
@@ -14,7 +14,7 @@ export const AREAS = [
   {
     slug: "dubai-hills-estate",
     title: "Dubai Hills Estate",
-    image: "/dashboard/dubai-hills.jpg",
+    image: "/dashboard/building.jpg",
     filters: { 
       area: "Dubai Hills",
       region: "Dubai"

@@ -17,7 +17,7 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch('/api/off-plan?pageSize=600'); // or whatever you want
+      const res = await fetch('/api/off-plan?pageSize=200'); // or whatever you want
       const data = await res.json();
       setHomeProjects(Array.isArray(data?.results) ? data.results : []);
     })();
@@ -35,7 +35,8 @@ export default function Home() {
   title="Find your properties on the map"
   height={520}
   initialView={{ longitude: 55.27, latitude: 25.20, zoom: 10 }}
-  maxWidthClass="max-w-6xl" // tweak if you want wider/narrower
+  maxWidthClass="max-w-6xl"
+   showMarkersInitially={false} // tweak if you want wider/narrower
 />
 
             <AreasShowcaseClient />
