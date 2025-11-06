@@ -170,6 +170,7 @@ export function normalizeProject(project) {
     constructionStatus: project.construction_status,
     saleStatus: project.sale_status,
     description: project.description ?? project.short_description ?? null,
+     updatedAt: project.updated_at,
     completionDate: project.completion_date ?? project.completion_datetime ?? null,
 
     // LOCATION DATA - CRITICAL FOR MAP

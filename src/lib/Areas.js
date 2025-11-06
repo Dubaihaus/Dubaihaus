@@ -23,7 +23,7 @@ export const AREAS = [
   {
     slug: "palm-jumeirah",
     title: "Palm Jumeirah",
-    image: "/dashboard/palm-jumeirah.jpg",
+    image: "/dashboard/palm1.jpg",
     filters: { 
       area: "Palm Jumeirah",
       region: "Dubai"
@@ -32,7 +32,7 @@ export const AREAS = [
   {
     slug: "dubai-marina",
     title: "Dubai Marina",
-    image: "/dashboard/dubai-marina.jpg",
+    image: "/dashboard/Marina.jpg",
     filters: { 
       area: "Dubai Marina",
       region: "Dubai"
@@ -41,7 +41,7 @@ export const AREAS = [
   {
     slug: "jumeirah-village-circle",
     title: "Jumeirah Village Circle (JVC)",
-    image: "/dashboard/jvc.jpg",
+    image: "/dashboard/building.jpg",
     filters: { 
       area: "Jumeirah Village Circle",
       region: "Dubai"
@@ -50,7 +50,7 @@ export const AREAS = [
   {
     slug: "business-bay",
     title: "Business Bay",
-    image: "/dashboard/business-bay.jpg",
+    image: "/dashboard/downtown.jpg",
     filters: { 
       area: "Business Bay",
       region: "Dubai"

@@ -13,7 +13,7 @@ const ScaleControl = lazy(() => import('react-map-gl').then(mod => ({ default: m
 import MapMarker from './MapMarker';
 import MapPopup from './MapPopup';
 
-const MAPBOX_STYLE = 'mapbox://styles/mapbox/mapbox-streets-v12';
+const MAPBOX_STYLE = 'mapbox://styles/mapbox/light-v11';
 
 function MapLoading() {
   return (
