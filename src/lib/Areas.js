@@ -1,5 +1,5 @@
 // src/lib/Areas.js
-export const AREAS = [
+export const DUBAI_AREAS = [
   {
     slug: "downtown-dubai",
     title: "Downtown Dubai",
@@ -59,8 +59,68 @@ export const AREAS = [
 
 ];
 
+// 🔹 Abu Dhabi areas (NEW)
+export const ABU_DHABI_AREAS = [
+  {
+    slug: "al-reem-island",
+    title: "Al Reem Island",
+    image: "/dashboard/abu-dhabi/reem-island.jpg", // create this in /public
+    filters: {
+      area: "Al Reem Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "yas-island",
+    title: "Yas Island",
+    image: "/dashboard/abu-dhabi/yas-island.jpg",
+    filters: {
+      area: "Yas Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "saadiyat-island",
+    title: "Saadiyat Island",
+    image: "/dashboard/abu-dhabi/saadiyat-island.jpg",
+    filters: {
+      area: "Saadiyat Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "al-raha-beach",
+    title: "Al Raha Beach",
+    image: "/dashboard/abu-dhabi/al-raha-beach.jpg",
+    filters: {
+      area: "Al Raha Beach",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "masdar-city",
+    title: "Masdar City",
+    image: "/dashboard/abu-dhabi/masdar-city.jpg",
+    filters: {
+      area: "Masdar City",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "al-ghadeer",
+    title: "Al Ghadeer",
+    image: "/dashboard/abu-dhabi/al-ghadeer.jpg",
+    filters: {
+      area: "Al Ghadeer",
+      region: "Abu Dhabi",
+    },
+  },
+];
+export const AREAS = DUBAI_AREAS;
+const ALL_AREAS = [...DUBAI_AREAS, ...ABU_DHABI_AREAS];
+
 export function getAreaBySlug(slug) {
-  return AREAS.find(a => a.slug === slug) || null;
+  return ALL_AREAS.find((a) => a.slug === slug) || null;
 }
 
 // Helper function to get area filters for API

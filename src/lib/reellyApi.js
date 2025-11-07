@@ -130,6 +130,8 @@ export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
 }
 
 // Updated searchProperties function
+// src/lib/reellyApi.js
+// Updated searchProperties function
 export async function searchProperties({ 
   page = 1, 
   pageSize = 20, 
@@ -145,16 +147,17 @@ export async function searchProperties({
     format: 'json'
   });
 
-  // Enhanced filter mappings for new API
+  // ✅ Default ORDERING: latest updated first
+  if (!filters.ordering) {
+    qs.set('ordering', '-updated_at');
+  }
+
+  // Clean filter mappings (no duplicate keys)
   const filterMappings = {
     location: "search",
-    sector: "search", 
-    area: "search",
     bedrooms: "unit_bedrooms",
     minPrice: "unit_price_from",
-     sector: "search_query", // Map sector to search_query for better results
-    area: "search_query",   // Map area to search_query
-    maxPrice: "unit_price_to", 
+    maxPrice: "unit_price_to",
     minSize: "unit_area_from",
     maxSize: "unit_area_to",
     currency: "preferred_currency",
@@ -164,17 +167,20 @@ export async function searchProperties({
     developer_id: 'developer',
     country: "country",
     district: "district",
-     districts: "districts",
+    districts: "districts",
     district_ids: "districts",
-    // district: "districts",
-    // Bounding box filters
     bbox_sw_lat: "bbox_sw_lat",
     bbox_sw_lng: "bbox_sw_lng", 
     bbox_ne_lat: "bbox_ne_lat",
     bbox_ne_lng: "bbox_ne_lng",
+    sector: "search_query",
+    area: "search_query",
+    ordering: "ordering",
+    status: "status",
+    sale_status: "sale_status",
   };
 
-  // Price filtering
+  // Price filtering hint: only tell Reelly to filter if user didn't specify anything
   if (pricedOnly && !('minPrice' in filters) && !('unit_price_from' in filters)) {
     qs.set('unit_price_from', '1');
   }
@@ -261,7 +267,12 @@ export async function getProjectMarkers() {
 
 // Transform functions
 function transformPropertiesResponse(reellyData, page, pageSize) {
-  const items = (reellyData?.results || reellyData || []).filter(i => Number(i?.min_price) > 0);
+  const items = (reellyData?.results || reellyData || []);
+
+  // ❗ Do NOT filter by min_price here.
+  // If you don't want to show 0-price projects, hide them in the UI,
+  // but let them through at the API layer.
+
   const results = items.map(normalizeProject);
 
   return {
@@ -273,6 +284,7 @@ function transformPropertiesResponse(reellyData, page, pageSize) {
     previous: reellyData?.previous ?? null,
   };
 }
+
 
 function transformPropertyResponse(reellyProperty) {
   return normalizeProject(reellyProperty);

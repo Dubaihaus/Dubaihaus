@@ -220,13 +220,13 @@ export function normalizeProject(project) {
     rawData: project,
   };
 
-  console.log('✅ NORMALIZATION COMPLETE:', {
-    id: normalizedProject.id,
-    name: normalizedProject.name,
-    hasCoordinates: !!normalizedProject.lat && !!normalizedProject.lng,
-    coordinates: { lat: normalizedProject.lat, lng: normalizedProject.lng },
-    propertyType: normalizedProject.propertyType
-  });
+  // console.log('✅ NORMALIZATION COMPLETE:', {
+  //   id: normalizedProject.id,
+  //   name: normalizedProject.name,
+  //   hasCoordinates: !!normalizedProject.lat && !!normalizedProject.lng,
+  //   coordinates: { lat: normalizedProject.lat, lng: normalizedProject.lng },
+  //   propertyType: normalizedProject.propertyType
+  // });
 
   return normalizedProject;
 }

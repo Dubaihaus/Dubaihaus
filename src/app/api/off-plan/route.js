@@ -59,6 +59,16 @@ async function dedupedSearchProperties(filters) {
   return promise;
 }
 
+// ✅ LATEST PROJECTS FILTER LOGIC — updated per Reelly
+function getLatestProjectsFilters() {
+  return {
+    sale_status: "on_sale",    // Reelly: use on_sale
+    status: "Presale",        // Reelly: and status=pre_sale
+    // ordering: "-updated_at",
+    pricedOnly: true,
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const filters = {};
@@ -68,9 +78,20 @@ export async function GET(request) {
     if (key === "page") filters.page = parseInt(value);
     else if (key === "pageSize") filters.pageSize = parseInt(value);
     else if (key === "pricedOnly") filters.pricedOnly = value === "true";
+    else if (key === "latest") filters.latest = value === "true";
     else if (value === "true" || value === "false") filters[key] = value === "true";
     else filters[key] = value;
   });
+
+  // 🔹 LATEST MODE: only when latest=true is passed
+  if (filters.latest) {
+    const latestFilters = getLatestProjectsFilters();
+    Object.assign(filters, latestFilters);
+    delete filters.latest;
+
+    // ⚠️ remove date filter for now, to avoid weird 500s / empty results
+    // If you really want 90-day recency later, add updated_at_after here *after* confirming.
+  }
 
   // Enhanced area resolution
   const areaName = filters.area || filters.sector || filters.region || filters.search || null;
@@ -89,17 +110,13 @@ export async function GET(request) {
     }
   }
 
-  // Get locale from cookie for proper CDN caching
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
 
-  // Generate cache key without locale for CDN (we'll handle locale via Vary header)
-  const cacheKey = JSON.stringify(filters);
-  
   console.log("🔍 Fetching Reelly API with filters:", filters);
   let data = await dedupedSearchProperties(filters);
   
-  // Multi-strategy fallback for empty results
+  // Multi-strategy fallback for empty results (keep as-is)
   if ((data?.results?.length ?? 0) === 0 && areaName) {
     console.log("🔄 Trying fallback strategies for:", areaName);
     
@@ -111,6 +128,9 @@ export async function GET(request) {
         delete fallbackFilters.bbox_sw_lng;
         delete fallbackFilters.bbox_ne_lat;
         delete fallbackFilters.bbox_ne_lng;
+        // Relax filters for fallback:
+        delete fallbackFilters.sale_status;
+        delete fallbackFilters.status;
         return await dedupedSearchProperties(fallbackFilters);
       },
       
@@ -134,12 +154,9 @@ export async function GET(request) {
     }
   }
 
-  // Production CDN caching headers
   const responseHeaders = {
     'Content-Type': 'application/json',
-    // CDN caching - public, 5 minutes fresh, 30 minutes stale
     'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
-    // Vary by these headers to ensure proper cache segmentation
     'Vary': 'Accept-Encoding, Cookie, Next-Locale',
   };
 

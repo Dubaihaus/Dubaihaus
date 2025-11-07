@@ -1,3 +1,4 @@
+// src/components/footer.js
 'use client';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -18,7 +19,6 @@ function SafeInternalLink({ href, children, className }) {
   if (!href || typeof href !== 'string') {
     return <span className={className}>{children}</span>;
   }
-  // treat absolute external differently if ever passed (we only pass internal here)
   const isExternal = /^https?:\/\//i.test(href);
   if (isExternal) {
     return (
@@ -45,13 +45,11 @@ const SkeletonList = () => (
 export default function Footer() {
   const { data, isLoading, error } = useFooterData();
 
-  // Default data in case of error or loading
-  const footerData = data || {
-    developers: [],
-    areas: [],
-    propertyTypes: [],
-    usefulLinks: [],
-  };
+  // Always keep arrays safe, even if API doesn't return a key yet
+  const developers   = data?.developers    ?? [];
+  const areas        = data?.areas         ?? [];
+  const abuDhabiAreas = data?.abuDhabiAreas ?? [];
+  const usefulLinks  = data?.usefulLinks   ?? [];
 
   return (
     <footer className="relative bg-brand-sky text-white overflow-hidden">
@@ -71,7 +69,7 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {footerData.developers.map((d, idx) => (
+                {developers.map((d, idx) => (
                   <li key={`${d?.name || 'dev'}-${idx}`}>
                     <SafeInternalLink href={d?.href} className="hover:underline">
                       {d?.name || 'Developer'}
@@ -82,14 +80,14 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Popular Areas (footer-specific, not the same as cards) */}
+          {/* Popular Areas (Dubai) */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Popular Areas in Dubai</h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {footerData.areas.map((a, idx) => (
+                {areas.map((a, idx) => (
                   <li key={`${a?.name || 'area'}-${idx}`}>
                     <SafeInternalLink href={a?.href} className="hover:underline">
                       {a?.name || 'Area'}
@@ -100,17 +98,17 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Property Types */}
+          {/* Properties in Abu Dhabi (replaces Property Types) */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Property Types</h3>
+            <h3 className="text-lg font-semibold mb-4">Properties in Abu Dhabi</h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {footerData.propertyTypes.map((t, idx) => (
-                  <li key={`${t?.name || 'ptype'}-${idx}`}>
+                {abuDhabiAreas.map((t, idx) => (
+                  <li key={`${t?.name || 'abu-dhabi-area'}-${idx}`}>
                     <SafeInternalLink href={t?.href} className="hover:underline">
-                      {t?.name || 'Property'}
+                      {t?.name || 'Area'}
                     </SafeInternalLink>
                   </li>
                 ))}
@@ -125,7 +123,7 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {footerData.usefulLinks.map((u, idx) => (
+                {usefulLinks.map((u, idx) => (
                   <li key={`${u?.name || 'link'}-${idx}`}>
                     <SafeInternalLink href={u?.href} className="hover:underline">
                       {u?.name || 'Link'}
@@ -145,7 +143,11 @@ export default function Footer() {
             { label: 'Properties in Sharjah', href: '/off-plan?region=Sharjah' },
             { label: 'Properties in Ajman', href: '/off-plan?region=Ajman' },
           ].map((item) => (
-            <SafeInternalLink key={item.label} href={item.href} className="flex items-center space-x-2 hover:underline">
+            <SafeInternalLink
+              key={item.label}
+              href={item.href}
+              className="flex items-center space-x-2 hover:underline"
+            >
               <FiArrowRight className="text-xl" />
               <span>{item.label}</span>
             </SafeInternalLink>
@@ -165,8 +167,12 @@ export default function Footer() {
         {/* Bottom Links & Social Icons */}
         <div className="flex flex-wrap items-center justify-between border-t border-white/20 pt-6 relative z-10">
           <div className="flex gap-6 text-sm mb-4 sm:mb-0">
-            <Link href="/legal/user-agreement" className="hover:underline">User Agreement</Link>
-            <Link href="/legal/privacy-policy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/legal/user-agreement" className="hover:underline">
+              User Agreement
+            </Link>
+            <Link href="/legal/privacy-policy" className="hover:underline">
+              Privacy Policy
+            </Link>
           </div>
 
           {/* Socials */}

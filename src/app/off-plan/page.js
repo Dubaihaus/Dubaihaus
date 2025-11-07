@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useRouter, useSearchParams } from "next/navigation"; 
 // import MapSection from "@/components/map/MapSection";
 
-export default function OffPlanPage({ limit }) {
+export default function OffPlanPage({ limit, latest = false }) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -30,6 +30,9 @@ export default function OffPlanPage({ limit }) {
         try {
             // Create a clean params object
             const paramsObj = { ...filters, currency };
+             if (latest) {
+        paramsObj.latest = "true";
+      }
             
             // Remove empty filters
             Object.keys(paramsObj).forEach(key => {
@@ -61,7 +64,7 @@ export default function OffPlanPage({ limit }) {
 
     useEffect(() => {
         fetchProjects();
-    }, [filters, currency]);
+    }, [filters, currency,latest]);
 
     // Update URL when filters change (for full version)
     useEffect(() => {

@@ -1,13 +1,13 @@
-// src/components/dashboard/PropertiesPerArea.jsx
-'use client';
+// src/components/dashboard/AbuDhabiAreas.jsx
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { AREAS } from "@/lib/Areas";
+import { ABU_DHABI_AREAS } from "@/lib/Areas";
 import { useAreaProperties } from "@/hooks/useProperties";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { useState,useRef,useEffect } from "react";
 
 const PLACEHOLDER = "/project_detail_images/building.jpg";
 
@@ -42,7 +42,9 @@ function AreaCard({ area, index }) {
 
   const firstProperty = data?.results?.[0];
   const imageSrc = firstProperty?.coverImage || area.image || PLACEHOLDER;
-  const loadMoreHref = `/off-plan?${new URLSearchParams(area.filters).toString()}`;
+
+  const params = new URLSearchParams(area.filters || {});
+  const loadMoreHref = `/off-plan?${params.toString()}`;
 
   // Loading state
   if (isLoading) {
@@ -110,9 +112,6 @@ function AreaCard({ area, index }) {
           } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onLoad={() => setImageLoaded(true)}
-          onError={(e) => {
-            e.target.src = PLACEHOLDER;
-          }}
         />
         
         {/* Loading skeleton */}
@@ -152,7 +151,8 @@ function AreaCard({ area, index }) {
           transition={{ delay: index * 0.1 + 0.3 }}
           className="text-gray-600 text-sm mb-5 line-clamp-2 flex-1 leading-relaxed"
         >
-          {area.description || "Explore premium off-plan developments in this sought-after Dubai community."}
+          {area.description ||
+            "Explore premium off-plan developments in Abu Dhabi's most sought-after communities."}
         </motion.p>
 
         <motion.div
@@ -194,7 +194,7 @@ function AreaCard({ area, index }) {
   );
 }
 
-export default function AreasShowcaseClient() {
+export default function AbuDhabiAreasSection() {
   const [hasEntered, setHasEntered] = useState(false);
   const sectionRef = useRef(null);
 
@@ -220,12 +220,12 @@ export default function AreasShowcaseClient() {
   return (
     <section 
       ref={sectionRef}
-      className="px-4 py-20 md:px-8 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden"
+      className="px-4 py-20 md:px-8 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
       dir="ltr"
     >
       {/* Background Elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-30" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-20" />
+      <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-30" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-sky-100 rounded-full blur-3xl opacity-20" />
       
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
@@ -241,9 +241,9 @@ export default function AreasShowcaseClient() {
             transition={{ delay: 0.2, duration: 0.7 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
           >
-            Best Real Estate Areas in{" "}
+            Top Real Estate Areas in{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00C6FF] to-blue-600">
-              Dubai
+              Abu Dhabi
             </span>
           </motion.h2>
           <motion.p 
@@ -252,7 +252,7 @@ export default function AreasShowcaseClient() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed"
           >
-            Discover Dubai's top property destinations — from luxury beachfronts to urban communities.
+            Discover Abu Dhabi's leading communities — from waterfront islands to cultural and business hubs.
           </motion.p>
         </motion.div>
 
@@ -263,7 +263,7 @@ export default function AreasShowcaseClient() {
           animate={hasEntered ? "visible" : "hidden"}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
         >
-          {AREAS.map((area, index) => (
+          {ABU_DHABI_AREAS.map((area, index) => (
             <AreaCard key={area.slug} area={area} index={index} />
           ))}
         </motion.div>
@@ -289,7 +289,7 @@ export default function AreasShowcaseClient() {
             transition={{ delay: 1.1, duration: 0.6 }}
             className="text-gray-600 mb-8 max-w-2xl mx-auto"
           >
-            Explore our complete collection of premium properties across all Dubai communities
+            Explore our complete collection of premium properties across all Abu Dhabi communities
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -297,7 +297,7 @@ export default function AreasShowcaseClient() {
             transition={{ delay: 1.2, duration: 0.5 }}
           >
             <Link
-              href="/off-plan"
+              href="/off-plan?region=Abu%20Dhabi"
               className="inline-flex items-center text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
               style={{ backgroundColor: '#00C6FF' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
@@ -307,7 +307,7 @@ export default function AreasShowcaseClient() {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               
               <span className="relative z-10 flex items-center">
-                Explore All Properties
+                Explore All Abu Dhabi Properties
                 <svg
                   className="ml-3 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
                   fill="none"

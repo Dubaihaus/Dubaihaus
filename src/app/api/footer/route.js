@@ -1,7 +1,8 @@
 // src/app/api/footer/route.js
-import { listDevelopers, listDistricts, searchProperties } from "@/lib/reellyApi";
+import { listDevelopers, listDistricts } from "@/lib/reellyApi";
+import { ABU_DHABI_AREAS } from "@/lib/Areas";
 
-/** Areas already shown in cards – exclude from footer */
+/** Areas already shown in cards – exclude from footer (Dubai) */
 const EXCLUDED_AREAS = new Set([
   "Downtown Dubai",
   "Dubai Hills Estate",
@@ -11,6 +12,11 @@ const EXCLUDED_AREAS = new Set([
   "Jumeirah Village Circle (JVC)",
   "Business Bay",
 ]);
+
+/** Abu Dhabi areas already shown in Abu Dhabi area section – exclude from footer */
+const EXCLUDED_ABU_DHABI_AREAS = new Set(
+  (ABU_DHABI_AREAS || []).map((a) => a.title?.trim())
+);
 
 /** Deduplicate + cap results by name */
 function dedupeTop(items = [], pick = (x) => x?.name, limit = 12) {
@@ -57,10 +63,10 @@ export async function GET() {
       12
     );
 
-    /* ---------------- Areas (Dubai districts; exclude card ones) ---------------- */
-    const districts = await listDistricts("Dubai").catch(() => []);
+    /* ---------------- Dubai Areas (districts; exclude card ones) ---------------- */
+    const districtsDubai = await listDistricts("Dubai").catch(() => []);
     const areas = dedupeTop(
-      (districts || [])
+      (districtsDubai || [])
         .filter((d) => !EXCLUDED_AREAS.has(String(d?.name || "")))
         .map((d) => {
           const name = (d?.name || "").trim();
@@ -75,45 +81,29 @@ export async function GET() {
       12
     );
 
-    /* ---------------- Property Types (derived from projects) ---------------- */
-    const sample = await searchProperties({
-      page: 1,
-      pageSize: 60,
-      pricedOnly: true,
-      region: "Dubai",
-    }).catch(() => null);
-
-    const typesSet = new Set(
-      (sample?.results || [])
-        .flatMap((p) => p?.propertyTypes || [])
-        .filter(Boolean)
-        .map((s) => s.trim())
+    /* ---------------- Abu Dhabi Areas (new footer column) ---------------- */
+    const districtsAbuDhabi = await listDistricts("Abu Dhabi").catch(() => []);
+    const abuDhabiAreas = dedupeTop(
+      (districtsAbuDhabi || [])
+        .filter((d) => !EXCLUDED_ABU_DHABI_AREAS.has(String(d?.name || "")))
+        .map((d) => {
+          const name = (d?.name || "").trim();
+          const id = d?.id;
+          // Prefer district id; ensure region=Abu Dhabi in query
+          const href = id
+            ? qsHref("/off-plan", {
+                districts: String(id),
+                region: "Abu Dhabi",
+              })
+            : qsHref("/off-plan", {
+                search_query: name || "Abu Dhabi",
+                region: "Abu Dhabi",
+              });
+          return { name, href };
+        }),
+      (a) => a?.name,
+      12
     );
-
-    const PRIORITY = [
-      "Apartment",
-      "Villa",
-      "Townhouse",
-      "Penthouse",
-      "Studio",
-      "Loft",
-      "Duplex",
-      "Residential Complex",
-      "Apartment Building",
-    ];
-
-    const propertyTypes = Array.from(typesSet)
-      .sort(
-        (a, b) =>
-          (PRIORITY.indexOf(a) === -1 ? 999 : PRIORITY.indexOf(a)) -
-          (PRIORITY.indexOf(b) === -1 ? 999 : PRIORITY.indexOf(b))
-      )
-      .slice(0, 6)
-      .map((name) => {
-        // Build links that work with either unit_types OR unit_type
-        const href = qsHref("/off-plan", { unit_types: name, unit_type: name });
-        return { name, href };
-      });
 
     /* ---------------- Useful Links (internal routes) ---------------- */
     const usefulLinks = [
@@ -127,24 +117,38 @@ export async function GET() {
 
     // Set proper caching headers for CDN
     const headers = {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400', // 1 hour fresh, 1 day stale
+      "Content-Type": "application/json",
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400", // 1 hour fresh, 1 day stale
     };
 
-    return new Response(JSON.stringify({ developers, areas, propertyTypes, usefulLinks }), {
-      headers,
-    });
+    // propertyTypes kept as empty array for backward compatibility
+    return new Response(
+      JSON.stringify({
+        developers,
+        areas,
+        abuDhabiAreas,
+        propertyTypes: [],
+        usefulLinks,
+      }),
+      { headers }
+    );
   } catch (e) {
     console.error("Footer API error:", e);
     // Always return a valid JSON shape (null-safe client)
     return new Response(
-      JSON.stringify({ developers: [], areas: [], propertyTypes: [], usefulLinks: [] }),
-      { 
+      JSON.stringify({
+        developers: [],
+        areas: [],
+        abuDhabiAreas: [],
+        propertyTypes: [],
+        usefulLinks: [],
+      }),
+      {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, s-maxage=300', // 5 minutes on error
-        }
+          "Content-Type": "application/json",
+          "Cache-Control": "public, s-maxage=300", // 5 minutes on error
+        },
       }
     );
   }
