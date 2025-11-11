@@ -1,7 +1,8 @@
 import './globals.css';
-import {headers} from 'next/headers';
-import {NextIntlClientProvider} from 'next-intl';
+import { headers } from 'next/headers';
+import { NextIntlClientProvider } from 'next-intl';
 import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
 import { Providers } from './providers';
 
 async function getMessages(locale) {
@@ -13,18 +14,20 @@ async function getMessages(locale) {
 }
 
 export default async function RootLayout({ children }) {
-  const headerStore =  await headers();
-  const locale = headerStore.get('x-locale') || 'en'; // set by middleware
+  const headerStore = await headers();
+  const locale = headerStore.get('x-locale') || 'en';
   const messages = await getMessages(locale);
 
   return (
     <html lang={locale}>
       <body>
-        
-        {/* Provide locale and messages to the app */}
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Navbar />
-         <Providers>{children}</Providers>
+          {/* React Query provider MUST wrap anything that uses useQuery */}
+          <Providers>
+            <Navbar />
+            {children}
+            <Footer />   {/* now inside QueryClientProvider */}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

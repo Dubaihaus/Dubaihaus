@@ -47,19 +47,65 @@ function uniqJoin(arr) {
   return [...new Set(arr.filter(Boolean).map(s => String(s).trim()))].join(', ');
 }
 
-/** Property Types (explicit → unit_blocks → inference → URL filter) */
-function inferPropertyTypes(p, selectedFromUrl = []) {
-  const explicit = p?.property_type ? [p.property_type] : [];
-  const fromBlocks = (p?.unit_blocks || []).map(b => b?.unit_type).filter(Boolean);
-  const inferred = (!explicit.length && (p?.typical_units || []).length) ? ['Apartment'] : [];
-  const merged = [...explicit, ...fromBlocks, ...inferred, ...selectedFromUrl];
-  const pretty = merged.map(s => {
-    const t = String(s).toLowerCase();
-    if (t.includes('apartment')) return 'Apartments';
-    if (t.includes('villa')) return 'Villas';
-    if (t.includes('studio')) return 'Studios';
-    return s;
+/**
+ * Property Types
+ * Priority:
+ *   1) normalized property.propertyTypes / property.propertyType
+ *   2) raw parkings[].unit_type
+ *   3) raw buildings[].name/description
+ *   4) unit_types from URL
+ */
+function inferPropertyTypes(property, raw, selectedFromUrl = []) {
+  const types = [];
+
+  // 1) from normalizer (preferred)
+  if (Array.isArray(property?.propertyTypes) && property.propertyTypes.length) {
+    types.push(...property.propertyTypes);
+  } else if (property?.propertyType) {
+    types.push(property.propertyType);
+  }
+
+  // 2) from detail: parkings.unit_type
+  if (Array.isArray(raw?.parkings)) {
+    for (const p of raw.parkings) {
+      if (!p?.unit_type) continue;
+      types.push(p.unit_type);
+    }
+  }
+
+  // 3) from detail: buildings name / description (e.g. "5 bedroom villas", "mansions")
+  if (Array.isArray(raw?.buildings)) {
+    for (const b of raw.buildings) {
+      const text = `${b?.name || ''} ${b?.description || ''}`.toLowerCase();
+      if (text.includes('apartment')) types.push('apartment');
+      if (text.includes('villa')) types.push('villa');
+      if (text.includes('mansion')) types.push('mansion');
+      if (text.includes('townhouse') || text.includes('town house')) types.push('townhouse');
+      if (text.includes('penthouse')) types.push('penthouse');
+      if (text.includes('loft')) types.push('loft');
+      if (text.includes('studio')) types.push('studio');
+    }
+  }
+
+  // 4) from URL filters (?unit_types=Apartments,Villa)
+  if (selectedFromUrl && selectedFromUrl.length) {
+    types.push(...selectedFromUrl);
+  }
+
+  if (!types.length) return null;
+
+  const pretty = types.map((t) => {
+    const s = String(t).toLowerCase();
+    if (s.includes('mansion')) return 'Mansions';
+    if (s.includes('villa')) return 'Villas';
+    if (s.includes('townhouse') || s === 'th') return 'Townhouses';
+    if (s.includes('penthouse')) return 'Penthouses';
+    if (s.includes('studio')) return 'Studios';
+    if (s.includes('apartment')) return 'Apartments';
+    if (s.includes('loft')) return 'Lofts';
+    return t.charAt(0).toUpperCase() + t.slice(1);
   });
+
   return uniqJoin(pretty) || null;
 }
 
@@ -214,6 +260,7 @@ function buildAutoDescription({
 /* ---------------- component ---------------- */
 
 export default function ProjectDetailsHighlights({ property }) {
+  // raw Reelly object from normalizer
   const p = property?.rawData ?? property ?? {};
   const sp = useSearchParams();
   const selectedFromUrl = (sp.get('unit_types') || sp.get('unit_type') || '')
@@ -223,7 +270,7 @@ export default function ProjectDetailsHighlights({ property }) {
 
   const projectTitle = titleFromProperty(property);
   const location = formatLocation(p?.location);
-  const propertyTypes = inferPropertyTypes(p, selectedFromUrl);
+  const propertyTypes = inferPropertyTypes(property, p, selectedFromUrl);
   const startingPrice = formatAED(p?.min_price);
   const handover = inferHandover(p);
   const paymentPlan = inferPaymentPlan(p);
@@ -261,11 +308,9 @@ export default function ProjectDetailsHighlights({ property }) {
 
   return (
     <section className="bg-[#f6f8fb] py-10 md:py-12">
-      {/* Increased container width from max-w-6xl to max-w-7xl */}
       <div className="mx-auto max-w-7xl px-4 md:px-8">
-        {/* Increased gap from gap-10 lg:gap-14 xl:gap-16 to gap-12 lg:gap-20 xl:gap-24 */}
         <div className="grid grid-cols-1 lg:[grid-template-columns:minmax(0,1fr)_460px] gap-12 lg:gap-20 xl:gap-24">
-          {/* LEFT - Increased width with more breathing room */}
+          {/* LEFT */}
           <div className="lg:pr-8">
             <p className="text-sm font-semibold text-slate-600 mb-3">About the Project</p>
             <h2 className="text-[32px] leading-[1.15] md:text-5xl md:leading-[1.15] font-extrabold tracking-tight text-slate-900 mb-6">
@@ -293,7 +338,7 @@ export default function ProjectDetailsHighlights({ property }) {
             )}
           </div>
 
-          {/* RIGHT - Slightly wider sidebar */}
+          {/* RIGHT */}
           <aside className="lg:sticky lg:top-24">
             <div className="max-w-[460px] w-full ml-auto rounded-2xl bg-slate-50 border border-slate-200 shadow-[0_8px_24px_rgba(17,24,39,0.06)] p-6 md:p-7">
               <h3 className="text-lg md:text-xl font-semibold text-slate-800 mb-3.5">Project Details</h3>

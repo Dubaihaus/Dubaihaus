@@ -167,12 +167,15 @@ export default function Footer() {
         {/* Bottom Links & Social Icons */}
         <div className="flex flex-wrap items-center justify-between border-t border-white/20 pt-6 relative z-10">
           <div className="flex gap-6 text-sm mb-4 sm:mb-0">
-            <Link href="/legal/user-agreement" className="hover:underline">
-              User Agreement
-            </Link>
-            <Link href="/legal/privacy-policy" className="hover:underline">
-              Privacy Policy
-            </Link>
+            <Link href="/legal?tab=terms" className="hover:underline">
+    Terms & Conditions
+  </Link>
+  <Link href="/legal?tab=privacy" className="hover:underline">
+    Privacy Policy
+  </Link>
+  <Link href="/legal?lang=de" className="hover:underline">
+    German Version
+  </Link>
           </div>
 
           {/* Socials */}

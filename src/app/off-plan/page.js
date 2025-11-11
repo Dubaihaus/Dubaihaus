@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useRouter, useSearchParams } from "next/navigation"; 
 // import MapSection from "@/components/map/MapSection";
 
+
 export default function OffPlanPage({ limit, latest = false }) {
     const router = useRouter();
     const searchParams = useSearchParams();

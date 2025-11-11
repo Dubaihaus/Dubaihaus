@@ -152,3 +152,122 @@
     @apply bg-background text-foreground;
   }
 }
+/* ===========================
+   Legal documents styling
+   =========================== */
+
+.legal-article {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+/* Overall spacing for sections */
+.legal-content section {
+  margin-bottom: 1.75rem;
+}
+
+/* Main title inside the HTML (if you keep <header><h1>...) */
+.legal-content header {
+  margin-bottom: 2rem;
+}
+
+.legal-content header h1 {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f172a; /* slate-900 */
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .legal-content header h1 {
+    font-size: 2rem;
+  }
+}
+
+.legal-content header p {
+  font-size: 0.9rem;
+  color: #64748b; /* slate-500/600 */
+}
+
+/* Headings inside sections */
+.legal-content h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #0f172a;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+}
+
+@media (min-width: 640px) {
+  .legal-content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+.legal-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827; /* slate-900-ish */
+}
+
+/* Paragraphs & list text */
+.legal-content p,
+.legal-content li {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #475569; /* slate-600 */
+}
+
+/* Lists */
+.legal-content ul,
+.legal-content ol {
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.legal-content ul {
+  list-style-type: disc;
+}
+
+.legal-content ol {
+  list-style-type: decimal;
+}
+
+/* Links */
+.legal-content a {
+  color: #2563eb; /* blue-600 */
+  text-decoration: none;
+  border-bottom: 1px solid #bfdbfe; /* blue-200 */
+  font-weight: 500;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.legal-content a:hover {
+  color: #1d4ed8; /* blue-700 */
+  border-bottom-color: #2563eb;
+}
+
+/* Horizontal rules */
+.legal-content hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
+
+/* Themed heading colours */
+.legal-theme-privacy .legal-content h2 {
+  color: #1d4ed8;           /* blue-700 */
+  border-bottom-color: #bfdbfe;
+}
+
+.legal-theme-terms .legal-content h2 {
+  color: #047857;           /* emerald-700 */
+  border-bottom-color: #a7f3d0;
+}

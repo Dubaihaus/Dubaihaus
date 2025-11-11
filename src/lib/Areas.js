@@ -5,10 +5,9 @@ export const DUBAI_AREAS = [
     title: "Downtown Dubai",
     image: "/dashboard/downtown.webp",
     filters: { 
-      area: "Downtown Dubai",
-        sector: "Downtown Dubai",
-      region: "Dubai" ,
-      id:"201"// Additional filter for better results
+      // 👇 use the district ID and region only
+      districts: "201",  // this should match area.id from useAreas("Dubai")
+      region: "Dubai",
     },
   },
   {

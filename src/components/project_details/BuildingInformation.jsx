@@ -15,17 +15,25 @@ function formatLocation(loc) {
   return parts.length ? parts.join(', ') : 'N/A';
 }
 
+/** Format AED price nicely (with K / M / B suffix) */
 function formatAED(n) {
-  return n != null ? `AED ${Number(n).toLocaleString()}` : 'Price on request';
+  if (n == null || n === '') return 'Price on request';
+  const num = Number(n);
+  if (!Number.isFinite(num)) return 'Price on request';
+
+  if (num >= 1_000_000_000) {
+    const billions = num / 1_000_000_000;
+    return `AED ${billions % 1 === 0 ? billions : billions.toFixed(1)}B`;
+  } else if (num >= 1_000_000) {
+    const millions = num / 1_000_000;
+    return `AED ${millions % 1 === 0 ? millions : millions.toFixed(1)}M`;
+  } else if (num >= 1_000) {
+    const thousands = num / 1_000;
+    return `AED ${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}K`;
+  }
+  return `AED ${num.toLocaleString()}`;
 }
 
-function inferPropertyType(p) {
-  const t =
-    p?.unit_blocks?.[0]?.unit_type ||
-    p?.property_type ||
-    (Array.isArray(p?.typical_units) && p.typical_units.length ? 'Apartment' : null);
-  return t || 'N/A';
-}
 
 function formatFurnishing(furnishing) {
   if (!furnishing) return 'N/A';
@@ -45,7 +53,6 @@ function takeLastDistinct(urlArrays, n = 3) {
   const out = [];
   for (const arr of urlArrays) {
     if (!Array.isArray(arr)) continue;
-    // iterate from the end to get the most recent/last images
     for (let i = arr.length - 1; i >= 0 && out.length < n; i--) {
       const u = pickUrl(arr[i]);
       if (u && !seen.has(u)) {
@@ -76,9 +83,8 @@ export default function CombinedPropertyDetails({ property }) {
     ? p.project_map_points.slice(0, 6)
     : [];
 
-  // LEFT CARD: Property & Building Information (no icons, simplified)
+  // LEFT CARD: Property & Building Information
   const leftCardInfo = [
-    // { label: 'Property Type', value: inferPropertyType(p), category: 'type' },
     { label: 'Building Name', value: p.name || property?.title || 'N/A', category: 'building' },
     { label: 'Developer', value: p.developer?.name || p.developer_name || p.developer || 'N/A', category: 'developer' },
     { label: 'Furnishing', value: formatFurnishing(p.furnishing), category: 'features' },
@@ -90,13 +96,11 @@ export default function CombinedPropertyDetails({ property }) {
     { label: 'Location', value: formatLocation(p.location), category: 'location' },
   ].filter((item) => item.value !== 'N/A');
 
-  // RIGHT CARD: Location & Economic Appeal (no icons)
+  // RIGHT CARD: Location & Economic Appeal
   const rightCardInfo = [
     { label: 'Starting Price', value: formatAED(p.min_price), highlight: true },
-    { label: 'Property Type', value: inferPropertyType(p) },
-    { label: 'Prime Location', value: formatLocation(p.location) },
-    // { label: 'Developer', value: p.developer?.name || p.developer_name || p.developer || 'N/A' },
-    // { label: 'Handover', value: p.completion_date || p.handover || 'TBA' },
+    // { label: 'Property Type', value: inferPropertyType(p) },
+    // { label: 'Prime Location', value: formatLocation(p.location) },
   ].filter((item) => item.value !== 'N/A');
 
   return (
@@ -107,7 +111,7 @@ export default function CombinedPropertyDetails({ property }) {
           Property Details & Location
         </h2>
         <p className="text-slate-600 max-w-2xl mx-auto">
-          Comprehensive recap &  overview of building specifications, amenities, and strategic location advantages
+          Comprehensive recap & overview of building specifications, amenities, and strategic location advantages
         </p>
       </div>
 
@@ -179,7 +183,11 @@ export default function CombinedPropertyDetails({ property }) {
                   }`}
                 >
                   <div className="text-slate-700 font-semibold">{item.label}</div>
-                  <div className={`text-right ${item.highlight ? 'text-emerald-700 font-bold text-lg' : 'text-slate-900 font-medium'}`}>
+                  <div
+                    className={`text-right ${
+                      item.highlight ? 'text-emerald-700 font-bold text-lg' : 'text-slate-900 font-medium'
+                    }`}
+                  >
                     {item.value}
                   </div>
                 </div>

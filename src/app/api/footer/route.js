@@ -15,7 +15,7 @@ const EXCLUDED_AREAS = new Set([
 
 /** Abu Dhabi areas already shown in Abu Dhabi area section – exclude from footer */
 const EXCLUDED_ABU_DHABI_AREAS = new Set(
-  (ABU_DHABI_AREAS || []).map((a) => a.title?.trim())
+  // (ABU_DHABI_AREAS || []).map((a) => a.title?.trim())
 );
 
 /** Deduplicate + cap results by name */
