@@ -107,12 +107,12 @@ export async function GET() {
 
     /* ---------------- Useful Links (internal routes) ---------------- */
     const usefulLinks = [
-      { name: "Dubai 360° Virtual Tours", href: "/virtual-tours" },
-      { name: "Dubai Real Estate Videos", href: "/videos" },
+      { name: "Contact Us", href: "/contact" },
+      { name: "Areas in UAE", href: "/areas" },
       { name: "Dubai Real Estate Blog", href: "/blog" },
       { name: "Dubai Real Estate FAQ", href: "/faq" },
-      { name: "Buy Property with Crypto", href: "/services/buy-with-crypto" },
-      { name: "Get Mortgage in Dubai", href: "/services/mortgage" },
+      { name: "Developers", href: "/developers" },
+      { name: "Map", href: "/map" },
     ].map((u) => ({ name: u.name, href: u.href || "/" }));
 
     // Set proper caching headers for CDN

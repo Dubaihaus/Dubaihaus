@@ -10,19 +10,17 @@ function formatAED(n) {
   if (n == null || n === '') return null;
   const num = Number(n);
   if (!Number.isFinite(num)) return null;
-  
-  // Format price with K, M, B suffixes
-  if (num >= 1000000000) {
-    const billions = num / 1000000000;
+
+  if (num >= 1_000_000_000) {
+    const billions = num / 1_000_000_000;
     return `AED ${billions % 1 === 0 ? billions : billions.toFixed(1)}B`;
-  } else if (num >= 1000000) {
-    const millions = num / 1000000;
+  } else if (num >= 1_000_000) {
+    const millions = num / 1_000_000;
     return `AED ${millions % 1 === 0 ? millions : millions.toFixed(1)}M`;
-  } else if (num >= 1000) {
-    const thousands = num / 1000;
+  } else if (num >= 1_000) {
+    const thousands = num / 1_000;
     return `AED ${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}K`;
   }
-  
   return `AED ${num.toLocaleString()}`;
 }
 
@@ -47,25 +45,33 @@ function uniqJoin(arr) {
   return [...new Set(arr.filter(Boolean).map(s => String(s).trim()))].join(', ');
 }
 
+/** Extract only "##### Project general facts" section from a markdown-ish blob */
+function extractProjectGeneralFacts(md) {
+  if (!md || typeof md !== 'string') return null;
+  // Match the section header and grab everything until the next "##### ..." or end.
+  // Case-insensitive, dotall to span newlines. Handles content placed on same line
+  // as the header as in the provided example.
+  const re = /#####\s*Project\s+general\s+facts\b(.*?)(?=#####|\s*$)/is;
+  const m = md.match(re);
+  if (!m) return null;
+
+  // Clean up leading/trailing whitespace and stray hashes if any snuck in.
+  const cleaned = m[1].trim().replace(/^#+\s*/g, '');
+  return cleaned || null;
+}
+
 /**
- * Property Types
- * Priority:
- *   1) normalized property.propertyTypes / property.propertyType
- *   2) raw parkings[].unit_type
- *   3) raw buildings[].name/description
- *   4) unit_types from URL
+ * Property Types (unchanged)
  */
 function inferPropertyTypes(property, raw, selectedFromUrl = []) {
   const types = [];
 
-  // 1) from normalizer (preferred)
   if (Array.isArray(property?.propertyTypes) && property.propertyTypes.length) {
     types.push(...property.propertyTypes);
   } else if (property?.propertyType) {
     types.push(property.propertyType);
   }
 
-  // 2) from detail: parkings.unit_type
   if (Array.isArray(raw?.parkings)) {
     for (const p of raw.parkings) {
       if (!p?.unit_type) continue;
@@ -73,7 +79,6 @@ function inferPropertyTypes(property, raw, selectedFromUrl = []) {
     }
   }
 
-  // 3) from detail: buildings name / description (e.g. "5 bedroom villas", "mansions")
   if (Array.isArray(raw?.buildings)) {
     for (const b of raw.buildings) {
       const text = `${b?.name || ''} ${b?.description || ''}`.toLowerCase();
@@ -87,7 +92,6 @@ function inferPropertyTypes(property, raw, selectedFromUrl = []) {
     }
   }
 
-  // 4) from URL filters (?unit_types=Apartments,Villa)
   if (selectedFromUrl && selectedFromUrl.length) {
     types.push(...selectedFromUrl);
   }
@@ -260,7 +264,6 @@ function buildAutoDescription({
 /* ---------------- component ---------------- */
 
 export default function ProjectDetailsHighlights({ property }) {
-  // raw Reelly object from normalizer
   const p = property?.rawData ?? property ?? {};
   const sp = useSearchParams();
   const selectedFromUrl = (sp.get('unit_types') || sp.get('unit_type') || '')
@@ -281,7 +284,7 @@ export default function ProjectDetailsHighlights({ property }) {
 
   const poi = useMemo(() => nearbyPoints(p), [p]);
 
-  const overviewText =
+  const overviewTextRaw =
     p?.description ||
     p?.overview ||
     p?.about ||
@@ -294,6 +297,9 @@ export default function ProjectDetailsHighlights({ property }) {
       handover,
       startingPrice,
     });
+
+  // 🔎 Keep ONLY "##### Project general facts" if present; otherwise keep fallback.
+  const overviewText = extractProjectGeneralFacts(overviewTextRaw) || overviewTextRaw;
 
   const details = [
     ['Starting Price', startingPrice],
@@ -311,9 +317,9 @@ export default function ProjectDetailsHighlights({ property }) {
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="grid grid-cols-1 lg:[grid-template-columns:minmax(0,1fr)_460px] gap-12 lg:gap-20 xl:gap-24">
           {/* LEFT */}
-          <div className="lg:pr-8">
+          <div className="lg:pr-9">
             <p className="text-sm font-semibold text-slate-600 mb-3">About the Project</p>
-            <h2 className="text-[32px] leading-[1.15] md:text-5xl md:leading-[1.15] font-extrabold tracking-tight text-slate-900 mb-6">
+            <h2 className="text-[30px] leading-[1.15] md:text-5xl md:leading-[1.15] font-extrabold tracking-tight text-slate-900 mb-6">
               Overview of {projectTitle}
             </h2>
 
@@ -329,7 +335,7 @@ export default function ProjectDetailsHighlights({ property }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 md:gap-x-12">
                   {poi.map((line, idx) => (
                     <div key={idx} className="flex items-start gap-2 text-[15px] text-slate-800">
-                      <span className="mt-[9px] h-[6px] w-[6px] rounded-full bg-emerald-500 shrink-0" />
+                      <span className="mt-[9px] h-[6px] w-[6px] rounded-full shrink-0 bg-emerald-500" />
                       <span className="leading-6">{line}</span>
                     </div>
                   ))}
@@ -339,7 +345,8 @@ export default function ProjectDetailsHighlights({ property }) {
           </div>
 
           {/* RIGHT */}
-          <aside className="lg:sticky lg:top-24">
+         <aside className="mt-0 lg:mt-32 lg:sticky lg:top-24">
+
             <div className="max-w-[460px] w-full ml-auto rounded-2xl bg-slate-50 border border-slate-200 shadow-[0_8px_24px_rgba(17,24,39,0.06)] p-6 md:p-7">
               <h3 className="text-lg md:text-xl font-semibold text-slate-800 mb-3.5">Project Details</h3>
               <dl className="divide-y divide-slate-200">

@@ -14,7 +14,7 @@ const containerVariants = {
 
 export default function ContactSection() {
   return (
-    <section
+    <section  id="contact-section"
       className="
         relative w-full 
         bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]

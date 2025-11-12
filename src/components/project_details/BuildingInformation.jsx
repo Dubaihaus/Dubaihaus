@@ -34,7 +34,6 @@ function formatAED(n) {
   return `AED ${num.toLocaleString()}`;
 }
 
-
 function formatFurnishing(furnishing) {
   if (!furnishing) return 'N/A';
   return String(furnishing).toUpperCase() === 'YES' ? 'Furnished' : String(furnishing);
@@ -63,6 +62,21 @@ function takeLastDistinct(urlArrays, n = 3) {
     if (out.length >= n) break;
   }
   return out.slice(0, n);
+}
+
+/** Escape for RegExp constructor */
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Extract "##### <heading> ... (until next ##### or end)" from markdown-ish text */
+function extractMdSection(md, heading) {
+  if (!md || typeof md !== 'string') return null;
+  const re = new RegExp(`#####\\s*${escapeRegExp(heading)}\\b(.*?)(?=#####|\\s*$)`, 'is');
+  const m = md.match(re);
+  if (!m) return null;
+  const cleaned = m[1].trim().replace(/^#+\s*/g, '');
+  return cleaned || null;
 }
 
 export default function CombinedPropertyDetails({ property }) {
@@ -96,12 +110,22 @@ export default function CombinedPropertyDetails({ property }) {
     { label: 'Location', value: formatLocation(p.location), category: 'location' },
   ].filter((item) => item.value !== 'N/A');
 
-  // RIGHT CARD: Location & Economic Appeal
+  // RIGHT CARD: Starting Price (always)
   const rightCardInfo = [
     { label: 'Starting Price', value: formatAED(p.min_price), highlight: true },
-    // { label: 'Property Type', value: inferPropertyType(p) },
-    // { label: 'Prime Location', value: formatLocation(p.location) },
   ].filter((item) => item.value !== 'N/A');
+
+  // ---------- NEW: Prefer "Location description and benefits" from overview ----------
+  const overviewSource =
+    p?.description ||
+    p?.overview ||
+    p?.about ||
+    property?.description ||
+    '';
+
+  const locationDescription =
+    extractMdSection(overviewSource, 'Location description and benefits') || null;
+  // -----------------------------------------------------------------------------------
 
   return (
     <section className="px-5 py-12 md:px-10 md:py-16 lg:px-14 bg-white/80 backdrop-blur-[1px] rounded-2xl shadow-[0_10px_30px_rgba(17,24,39,0.06)]">
@@ -195,49 +219,63 @@ export default function CombinedPropertyDetails({ property }) {
             </div>
           </div>
 
-          {/* Points of Interest Card */}
-          {pointsOfInterest.length > 0 && (
+          {/* CONDITIONAL: Location Description (from overview) OR Nearby Locations */}
+          {locationDescription ? (
             <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
-              <div className="mb-6">
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900">Nearby Locations</h3>
-                <p className="text-slate-600 text-sm mt-1">Key destinations &amp; accessibility</p>
+              <div className="mb-4">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900">
+                  Location Description &amp; Benefits
+                </h3>
+             
               </div>
-
-              <div className="space-y-3">
-                {pointsOfInterest.map((poi, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100 hover:border-slate-300 transition-all duration-300 hover:shadow-sm"
-                  >
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm">
-                        {poi.map_point_name || poi.name || poi.title}
-                      </h4>
-                      <p className="text-slate-500 text-xs">
-                        {poi.distance ? `${poi.distance} km away` : 'Nearby'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {poi.time || poi.minutes || poi.time_min ? (
-                        <span className="bg-slate-900/90 text-white px-3 py-1 rounded-full text-sm font-medium">
-                          {poi.time || poi.minutes || poi.time_min} min
-                        </span>
-                      ) : (
-                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm">
-                          Nearby
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 text-center">
-                <p className="text-slate-500 text-sm">
-                  {pointsOfInterest.length} key locations within easy reach
-                </p>
-              </div>
+              <p className="text-slate-700 leading-7 md:leading-8 text-justify">
+                {locationDescription}
+              </p>
             </div>
+          ) : (
+            pointsOfInterest.length > 0 && (
+              <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+                <div className="mb-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900">Nearby Locations</h3>
+                  <p className="text-slate-600 text-sm mt-1">Key destinations &amp; accessibility</p>
+                </div>
+
+                <div className="space-y-3">
+                  {pointsOfInterest.map((poi, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100 hover:border-slate-300 transition-all duration-300 hover:shadow-sm"
+                    >
+                      <div>
+                        <h4 className="font-semibold text-slate-900 text-sm">
+                          {poi.map_point_name || poi.name || poi.title}
+                        </h4>
+                        <p className="text-slate-500 text-xs">
+                          {poi.distance ? `${poi.distance} km away` : 'Nearby'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {poi.time || poi.minutes || poi.time_min ? (
+                          <span className="bg-slate-900/90 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            {poi.time || poi.minutes || poi.time_min} min
+                          </span>
+                        ) : (
+                          <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm">
+                            Nearby
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-slate-500 text-sm">
+                    {pointsOfInterest.length} key locations within easy reach
+                  </p>
+                </div>
+              </div>
+            )
           )}
         </div>
       </div>

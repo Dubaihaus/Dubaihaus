@@ -40,12 +40,15 @@ export const metadata = {
 
 
 import ContactSection from "@/components/ContactSection";
+import AboutUsSection from "@/components/AboutUsSection";
 
 export default function ContactPage() {
   return (
     <main className="min-h-screen bg-[#F5F7FB]">
       <div className="pt-4 pb-10">
         <ContactSection />
+        <AboutUsSection />
+
       </div>
     </main>
   );

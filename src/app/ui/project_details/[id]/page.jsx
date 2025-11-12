@@ -14,7 +14,7 @@ import BuildingInformation from '@/components/project_details/BuildingInformatio
 import PaymentPlanSection from '@/components/project_details/PaymentPlanSection';
 // import PointsOfInterestSection from '@/components/project_details/PointsOfIntrest';
 import AmenitiesSection from '@/components/project_details/AmenitiesSection';
-import Footer from '@/components/footer';
+// import Footer from '@/components/footer';
 import ProjectFAQ from '@/components/project_details/ProjectFAQ';
 
 export const dynamic = 'force-dynamic'; // or: export const revalidate = 0;
@@ -40,7 +40,7 @@ export default async function ProjectDetailsPage({ params }) {
       {/* <PropertyInformation property={property} /> */}
       <BuildingInformation property={property} />
       <ProjectFAQ property={property} />
-      <Footer />
+     
     </main>
   );
 }

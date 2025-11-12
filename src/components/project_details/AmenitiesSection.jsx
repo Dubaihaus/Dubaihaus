@@ -39,9 +39,30 @@ function parseImageUrl(imageUrlJson) {
   return null;
 }
 
+/** Escape text for safe use inside a RegExp constructor */
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Extract a markdown-like section that starts with "##### <heading>"
+ * and ends at the next "##### ..." or the end of the string.
+ */
+function extractMdSection(md, heading) {
+  if (!md || typeof md !== 'string') return null;
+  const pattern = new RegExp(
+    `#####\\s*${escapeRegExp(heading)}\\b(.*?)(?=#####|\\s*$)`,
+    'is' // case-insensitive, dotall
+  );
+  const m = md.match(pattern);
+  if (!m) return null;
+  const cleaned = m[1].trim().replace(/^#+\s*/g, '');
+  return cleaned || null;
+}
+
 export default function AmenitiesSection({ property }) {
   // Use project_amenities from Reelly API
-  const rawAmenities =  Array.isArray(property?.amenities) ? property.amenities : [];
+  const rawAmenities = Array.isArray(property?.amenities) ? property.amenities : [];
 
   // Build a unified amenity list with image (if any)
   const amenities = useMemo(() => {
@@ -62,13 +83,13 @@ export default function AmenitiesSection({ property }) {
 
   // Carousel images: prefer amenity-provided images; if none, fall back to project gallery
   const galleryFallback = Array.isArray(property?.media?.photos)
-  ? property.media.photos
-   : [
-       ...(property?.rawData?.architecture || []).map(x => x?.url).filter(Boolean),
-       ...(property?.rawData?.interior || []).map(x => x?.url).filter(Boolean),
-       ...(property?.rawData?.lobby || []).map(x => x?.url).filter(Boolean),
-       property?.rawData?.cover_image?.url
-     ].filter(Boolean);
+    ? property.media.photos
+    : [
+        ...(property?.rawData?.architecture || []).map(x => x?.url).filter(Boolean),
+        ...(property?.rawData?.interior || []).map(x => x?.url).filter(Boolean),
+        ...(property?.rawData?.lobby || []).map(x => x?.url).filter(Boolean),
+        property?.rawData?.cover_image?.url
+      ].filter(Boolean);
 
   const carouselImages = amenities.map((a) => a.img).filter(Boolean);
   const images = carouselImages.length > 0 ? carouselImages : galleryFallback;
@@ -78,7 +99,27 @@ export default function AmenitiesSection({ property }) {
 
   const next = () => setIdx((i) => (i + 1) % images.length);
   const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
-  
+
+  // -------- NEW: show only the "Finishing and materials" section from API overview/description
+  const overviewSource =
+    property?.rawData?.description ||
+    property?.rawData?.overview ||
+    property?.rawData?.about ||
+    property?.description ||
+    '';
+
+  const finishingAndMaterials =
+    extractMdSection(overviewSource, 'Finishing and materials') ||
+    null; // if missing, we'll fall back below
+
+  // Fallback text (only if the section isn't available)
+  const fallbackText =
+    typeof property?.description === 'string' && property.description.trim()
+      ? property.description
+      : 'Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities.';
+
+  const paragraphText = finishingAndMaterials || fallbackText;
+
   return (
     <section className="bg-gray-50 py-12" dir="ltr">
       {/* Increased container width from max-w-6xl to max-w-7xl */}
@@ -148,9 +189,7 @@ export default function AmenitiesSection({ property }) {
             </h2>
 
             <p className="text-gray-600 mt-3">
-              {property?.description
-                ? property.description
-                : "Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities."}
+              {paragraphText}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
