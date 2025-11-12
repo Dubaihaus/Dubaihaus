@@ -57,11 +57,11 @@ export default function ContactSection() {
               transition={{ duration: 0.6, delay: 0.05 }}
               className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
             >
-              Let&apos;s plan your{" "}
+              Let&apos;s plan your  next  property move{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]">
-                next property move
+              
               </span>
-              .
+              
             </motion.h1>
 
             <motion.p

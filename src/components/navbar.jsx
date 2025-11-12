@@ -36,6 +36,7 @@ export default function Navbar() {
     { key: 'navbar.map', href: '/map', type: 'normal' }, // adjust /map route if different
     { key: 'navbar.faq', href: '/faq', type: 'normal' },
     { key: 'navbar.blog', href: '#', type: 'blog' },
+    { key: 'navbar.contact', href: '/contact', type: 'normal' }
   ];
 
   const handleLangSelect = (lang) => {
