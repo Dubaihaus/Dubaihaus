@@ -1,15 +1,52 @@
 // app/legal/page.jsx
-'use client';
+// 'use client';
+export const metadata = {
+  title: "Privacy Policy & Terms | DubaiHaus Legal",
+  description:
+    "Read the DubaiHaus Privacy Policy and Terms & Conditions. Learn how we handle your data, cookies and legal responsibilities when browsing Dubai and Abu Dhabi real estate listings.",
+  keywords: [
+    "legal steps to buy property Dubai",
+    "legal steps to buy property Abu Dhabi",
+    "DubaiHaus privacy policy",
+    "DubaiHaus terms and conditions",
+    "real estate legal disclaimer Dubai",
+    "GDPR PDPL DubaiHaus",
+  ],
+  alternates: {
+    canonical: "https://dubaihaus.com/legal",
+    // ⚠ Only add languages when you actually have separate URLs, e.g. /legal/en and /legal/de
+    // languages: {
+    //   en: "https://dubaihaus.com/legal/en",
+    //   de: "https://dubaihaus.com/legal/de",
+    // },
+  },
+  openGraph: {
+    title: "Privacy Policy & Terms | DubaiHaus Legal",
+    description:
+      "Review DubaiHaus’ Privacy Policy and Terms & Conditions for using our Dubai and Abu Dhabi real estate listing platform.",
+    url: "https://dubaihaus.com/legal",
+    siteName: "DubaiHaus",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy & Terms | DubaiHaus Legal",
+    description:
+      "Legal documentation for DubaiHaus, including privacy, cookies and terms of use for UAE property buyers.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 
 import { useState, useMemo } from 'react';
 import Head from 'next/head';
 import PrivacyPolicy from '@/components/legal/PrivacyPolicy';
 import Terms from '@/components/legal/Terms';
 
-const KEYWORDS = [
-  'DubaiHaus', 'real estate', 'off-plan', 'privacy policy', 'terms and conditions',
-  'UAE PDPL', 'GDPR', 'property listings', 'real estate disclaimer'
-];
+
 
 export default function LegalPage() {
   const [lang, setLang] = useState('en');
