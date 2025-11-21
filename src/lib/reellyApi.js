@@ -131,6 +131,10 @@ export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
   _developersCache = { at: now, data: rows };
   return rows;
 }
+export async function getDeveloperById(id) {
+  const developers = await listDevelopers({ limit: 200, offset: 0 });
+  return developers.find((d) => String(d.id) === String(id)) || null;
+}
 
 // ---------- Core: search projects (single page) ----------
 export async function searchProperties({

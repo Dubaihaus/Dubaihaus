@@ -11,12 +11,12 @@ const BATCH_DELAY = 60;
 function MapLoading({ height }) {
   return (
     <div
-      className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex items-center justify-center"
+      className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex items-center justify-center"
       style={{ height: `${height}px` }}
     >
       <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-gray-600 text-sm">Loading map…</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto mb-2"></div>
+        <p className="text-slate-600 text-sm">Loading map…</p>
       </div>
     </div>
   );
@@ -24,7 +24,7 @@ function MapLoading({ height }) {
 
 export default function MapSection({
   projects,
-  title = 'Find your properties on the map',
+  title = 'Explore properties on the map',
   initialView,
   className = '',
   height = 480,
@@ -36,26 +36,28 @@ export default function MapSection({
   });
 
   // Memoize projects to prevent unnecessary re-renders
-  const rawProjects = useMemo(() => 
-    projects || mapData?.results || [], 
+  const rawProjects = useMemo(
+    () => projects || mapData?.results || [],
     [projects, mapData?.results]
   );
 
   // Memoize filtered projects
-  const projectsWithCoords = useMemo(() => 
-    rawProjects.filter(p => 
-      p?.lat != null && 
-      p?.lng != null && 
-      Number.isFinite(p.lat) && 
-      Number.isFinite(p.lng)
-    ),
+  const projectsWithCoords = useMemo(
+    () =>
+      rawProjects.filter(
+        (p) =>
+          p?.lat != null &&
+          p?.lng != null &&
+          Number.isFinite(p.lat) &&
+          Number.isFinite(p.lng)
+      ),
     [rawProjects]
   );
 
   // State
   const [visibleMarkers, setVisibleMarkers] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  
+
   // Refs for batching
   const batchRef = useRef({ timer: null, currentIndex: 0, cancelled: false });
 
@@ -87,7 +89,7 @@ export default function MapSection({
       const end = Math.min(start + BATCH_SIZE, projectsWithCoords.length);
       const batch = projectsWithCoords.slice(start, end);
 
-      setVisibleMarkers(prev => [...prev, ...batch]);
+      setVisibleMarkers((prev) => [...prev, ...batch]);
       batchRef.current.currentIndex = end;
 
       if (end < projectsWithCoords.length) {
@@ -114,7 +116,9 @@ export default function MapSection({
     return (
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
+            {title}
+          </h2>
           <MapLoading height={height} />
         </div>
       </section>
@@ -125,14 +129,20 @@ export default function MapSection({
     return (
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
+            {title}
+          </h2>
           <div
-            className="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-500 flex items-center justify-center"
+            className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 flex items-center justify-center bg-white/80"
             style={{ height: `${height}px` }}
           >
             <div className="text-center">
-              <p className="text-red-500 font-semibold">Failed to load map data.</p>
-              <p className="text-xs mt-2">Please try refreshing the page.</p>
+              <p className="text-red-500 font-semibold">
+                Failed to load map data.
+              </p>
+              <p className="text-xs mt-2">
+                Please try refreshing the page in a moment.
+              </p>
             </div>
           </div>
         </div>
@@ -144,13 +154,17 @@ export default function MapSection({
     return (
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
+            {title}
+          </h2>
           <div
-            className="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-500 flex items-center justify-center"
+            className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 flex items-center justify-center bg-white/80"
             style={{ height: `${height}px` }}
           >
             <div className="text-center">
-              <p className="text-red-500 font-semibold">No properties with valid coordinates.</p>
+              <p className="text-red-500 font-semibold">
+                No properties with valid coordinates.
+              </p>
               <p className="text-xs mt-2">
                 Found {rawProjects.length} projects but none have location data.
               </p>
@@ -164,9 +178,11 @@ export default function MapSection({
   return (
     <section className={`w-full ${className}`}>
       <div className={`mx-auto ${maxWidthClass}`}>
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
+          {title}
+        </h2>
         <div
-          className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative"
+          className="rounded-2xl overflow-hidden border border-slate-200 shadow-[0_18px_60px_rgba(15,23,42,0.08)] bg-white"
           style={{ height: `${height}px` }}
         >
           <PropertiesMap

@@ -1,3 +1,5 @@
+// src/components/PropertyCard.js
+'use client';
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
