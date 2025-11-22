@@ -13,13 +13,47 @@ const EXCLUDED_AREAS = new Set([
   "Business Bay",
 ]);
 
-/** Abu Dhabi areas already shown in Abu Dhabi area section – exclude from footer */
+/** Abu Dhabi areas already shown somewhere else – if you want to exclude them, fill this set */
 const EXCLUDED_ABU_DHABI_AREAS = new Set(
   // (ABU_DHABI_AREAS || []).map((a) => a.title?.trim())
 );
 
+// ✅ Max items in footer columns
+const MAX_FOOTER_ITEMS = 8;
+
+// ✅ Featured developers (will always be shown first if possible)
+const FEATURED_DEVELOPER_NAMES = [
+  "Emaar",
+  "Damac",
+  "Sobha",
+  "Nakheel",
+  "Ellington",
+  "Binghatti",
+  "Aldar",
+  "Meraas",
+];
+
+// ✅ Featured Abu Dhabi areas (will be shown first)
+const FEATURED_ABU_DHABI_AREA_NAMES = [
+  "Ghantoot",
+  "Hudayriyat Island",
+  "Ramhan Island",
+  "Fahid Island",
+  "Jubail Island",
+  "Al Reem Island",
+  "Yas Island",
+  "Saadiyat Island",
+];
+
+// (Optional) you can fill this later if you want specific Dubai areas
+const FEATURED_DUBAI_AREA_NAMES = [
+  // "Dubai Marina",
+  // "Downtown Dubai",
+  // ...
+];
+
 /** Deduplicate + cap results by name */
-function dedupeTop(items = [], pick = (x) => x?.name, limit = 12) {
+function dedupeTop(items = [], pick = (x) => x?.name, limit = MAX_FOOTER_ITEMS) {
   const seen = new Set();
   const out = [];
   for (const it of items) {
@@ -45,51 +79,118 @@ function qsHref(base, paramsObj) {
   return s ? `${base}?${s}` : base;
 }
 
+/** Helper: merge featured names + API data, keep max limit and order */
+function mergeFeaturedWithApi({
+  featuredNames = [],
+  apiItems = [],
+  buildHrefFromName,
+  limit = MAX_FOOTER_ITEMS,
+}) {
+  const out = [];
+  const seen = new Set();
+
+  const addItem = (name, href) => {
+    const trimmed = (name || "").trim();
+    if (!trimmed) return;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ name: trimmed, href });
+  };
+
+  // 1) Add featured first
+  for (const name of featuredNames) {
+    if (out.length >= limit) break;
+    const href = buildHrefFromName(name);
+    addItem(name, href);
+  }
+
+  // 2) Fill remaining slots from API items
+  for (const it of apiItems) {
+    if (out.length >= limit) break;
+    const name = (it?.name || "").trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    const href = it.href || buildHrefFromName(name);
+    addItem(name, href);
+  }
+
+  // Safety slice
+  return out.slice(0, limit);
+}
+
 export async function GET() {
   try {
     /* ---------------- Developers (link by developer id) ---------------- */
     const devRaw = await listDevelopers({ limit: 200, offset: 0 }).catch(() => []);
-    const developers = dedupeTop(
+
+    const developersFromApi =
       (devRaw || []).map((d) => {
         const name = (d?.name || "").trim();
         const id = d?.id;
-        // Prefer developer ID; fallback to name search if ID missing
         const href = id
           ? qsHref("/off-plan", { developer: String(id) })
           : qsHref("/off-plan", { search_query: name || "developer" });
         return { name, href };
-      }),
-      (d) => d?.name,
-      12
-    );
+      }) || [];
+
+    const developers = mergeFeaturedWithApi({
+      featuredNames: FEATURED_DEVELOPER_NAMES,
+      apiItems: developersFromApi,
+      buildHrefFromName: (name) => {
+        const lower = name.toLowerCase();
+        const match = (devRaw || []).find(
+          (d) => String(d?.name || "").trim().toLowerCase() === lower
+        );
+        if (match?.id) {
+          return qsHref("/off-plan", { developer: String(match.id) });
+        }
+        return qsHref("/off-plan", { search_query: name || "developer" });
+      },
+      limit: MAX_FOOTER_ITEMS,
+    });
 
     /* ---------------- Dubai Areas (districts; exclude card ones) ---------------- */
     const districtsDubai = await listDistricts("Dubai").catch(() => []);
-    const areas = dedupeTop(
+
+    const dubaiAreasFromApi =
       (districtsDubai || [])
         .filter((d) => !EXCLUDED_AREAS.has(String(d?.name || "")))
         .map((d) => {
           const name = (d?.name || "").trim();
           const id = d?.id;
-          // Prefer district id; fallback to name search
           const href = id
             ? qsHref("/off-plan", { districts: String(id) })
             : qsHref("/off-plan", { search_query: name || "Dubai" });
           return { name, href };
-        }),
-      (a) => a?.name,
-      12
-    );
+        }) || [];
 
-    /* ---------------- Abu Dhabi Areas (new footer column) ---------------- */
+    const areas = mergeFeaturedWithApi({
+      featuredNames: FEATURED_DUBAI_AREA_NAMES,
+      apiItems: dubaiAreasFromApi,
+      buildHrefFromName: (name) => {
+        const lower = name.toLowerCase();
+        const match = (districtsDubai || []).find(
+          (d) => String(d?.name || "").trim().toLowerCase() === lower
+        );
+        if (match?.id) {
+          return qsHref("/off-plan", { districts: String(match.id) });
+        }
+        return qsHref("/off-plan", { search_query: name || "Dubai" });
+      },
+      limit: MAX_FOOTER_ITEMS,
+    });
+
+    /* ---------------- Abu Dhabi Areas (footer column) ---------------- */
     const districtsAbuDhabi = await listDistricts("Abu Dhabi").catch(() => []);
-    const abuDhabiAreas = dedupeTop(
+
+    const abuDhabiAreasFromApi =
       (districtsAbuDhabi || [])
         .filter((d) => !EXCLUDED_ABU_DHABI_AREAS.has(String(d?.name || "")))
         .map((d) => {
           const name = (d?.name || "").trim();
           const id = d?.id;
-          // Prefer district id; ensure region=Abu Dhabi in query
           const href = id
             ? qsHref("/off-plan", {
                 districts: String(id),
@@ -100,10 +201,29 @@ export async function GET() {
                 region: "Abu Dhabi",
               });
           return { name, href };
-        }),
-      (a) => a?.name,
-      12
-    );
+        }) || [];
+
+    const abuDhabiAreas = mergeFeaturedWithApi({
+      featuredNames: FEATURED_ABU_DHABI_AREA_NAMES,
+      apiItems: abuDhabiAreasFromApi,
+      buildHrefFromName: (name) => {
+        const lower = name.toLowerCase();
+        const match = (districtsAbuDhabi || []).find(
+          (d) => String(d?.name || "").trim().toLowerCase() === lower
+        );
+        if (match?.id) {
+          return qsHref("/off-plan", {
+            districts: String(match.id),
+            region: "Abu Dhabi",
+          });
+        }
+        return qsHref("/off-plan", {
+          search_query: name || "Abu Dhabi",
+          region: "Abu Dhabi",
+        });
+      },
+      limit: MAX_FOOTER_ITEMS,
+    });
 
     /* ---------------- Useful Links (internal routes) ---------------- */
     const usefulLinks = [
@@ -115,13 +235,11 @@ export async function GET() {
       { name: "Map", href: "/map" },
     ].map((u) => ({ name: u.name, href: u.href || "/" }));
 
-    // Set proper caching headers for CDN
     const headers = {
       "Content-Type": "application/json",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400", // 1 hour fresh, 1 day stale
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
     };
 
-    // propertyTypes kept as empty array for backward compatibility
     return new Response(
       JSON.stringify({
         developers,
@@ -134,7 +252,6 @@ export async function GET() {
     );
   } catch (e) {
     console.error("Footer API error:", e);
-    // Always return a valid JSON shape (null-safe client)
     return new Response(
       JSON.stringify({
         developers: [],
@@ -147,7 +264,7 @@ export async function GET() {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          "Cache-Control": "public, s-maxage=300", // 5 minutes on error
+          "Cache-Control": "public, s-maxage=300",
         },
       }
     );

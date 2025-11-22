@@ -106,11 +106,11 @@ export const ABU_DHABI_AREAS = [
     },
   },
   {
-    slug: "al-ghadeer",
-    title: "Al Ghadeer",
+    slug: "jubail-island",
+    title: "Jubail Island",
     image: "/dashboard/abu-dhabi/al-ghadeer.jpg",
     filters: {
-      area: "Al Ghadeer",
+      area: "Jubail Island",
       region: "Abu Dhabi",
     },
   },

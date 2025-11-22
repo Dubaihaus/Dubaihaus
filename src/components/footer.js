@@ -6,9 +6,8 @@ import Link from 'next/link';
 import {
   FaFacebookF,
   FaInstagram,
-  FaPhoneAlt,
   FaWhatsapp,
-  FaYoutube
+  FaYoutube,
 } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
 import { SiX } from 'react-icons/si';
@@ -22,7 +21,12 @@ function SafeInternalLink({ href, children, className }) {
   const isExternal = /^https?:\/\//i.test(href);
   if (isExternal) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
         {children}
       </a>
     );
@@ -43,13 +47,15 @@ const SkeletonList = () => (
 );
 
 export default function Footer() {
-  const { data, isLoading, error } = useFooterData();
+  const { data, isLoading } = useFooterData();
+
+  const MAX_ITEMS = 8;
 
   // Always keep arrays safe, even if API doesn't return a key yet
-  const developers   = data?.developers    ?? [];
-  const areas        = data?.areas         ?? [];
+  const developers = data?.developers ?? [];
+  const areas = data?.areas ?? [];
   const abuDhabiAreas = data?.abuDhabiAreas ?? [];
-  const usefulLinks  = data?.usefulLinks   ?? [];
+  const usefulLinks = data?.usefulLinks ?? [];
 
   return (
     <footer className="relative bg-brand-sky text-white overflow-hidden">
@@ -69,9 +75,12 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {developers.map((d, idx) => (
+                {developers.slice(0, MAX_ITEMS).map((d, idx) => (
                   <li key={`${d?.name || 'dev'}-${idx}`}>
-                    <SafeInternalLink href={d?.href} className="hover:underline">
+                    <SafeInternalLink
+                      href={d?.href}
+                      className="hover:underline"
+                    >
                       {d?.name || 'Developer'}
                     </SafeInternalLink>
                   </li>
@@ -87,9 +96,12 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {areas.map((a, idx) => (
+                {areas.slice(0, MAX_ITEMS).map((a, idx) => (
                   <li key={`${a?.name || 'area'}-${idx}`}>
-                    <SafeInternalLink href={a?.href} className="hover:underline">
+                    <SafeInternalLink
+                      href={a?.href}
+                      className="hover:underline"
+                    >
                       {a?.name || 'Area'}
                     </SafeInternalLink>
                   </li>
@@ -98,16 +110,19 @@ export default function Footer() {
             )}
           </div>
 
-          {/* Properties in Abu Dhabi (replaces Property Types) */}
+          {/* Properties in Abu Dhabi */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Properties in Abu Dhabi</h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {abuDhabiAreas.map((t, idx) => (
+                {abuDhabiAreas.slice(0, MAX_ITEMS).map((t, idx) => (
                   <li key={`${t?.name || 'abu-dhabi-area'}-${idx}`}>
-                    <SafeInternalLink href={t?.href} className="hover:underline">
+                    <SafeInternalLink
+                      href={t?.href}
+                      className="hover:underline"
+                    >
                       {t?.name || 'Area'}
                     </SafeInternalLink>
                   </li>
@@ -125,7 +140,10 @@ export default function Footer() {
               <ul className="space-y-1 text-sm">
                 {usefulLinks.map((u, idx) => (
                   <li key={`${u?.name || 'link'}-${idx}`}>
-                    <SafeInternalLink href={u?.href} className="hover:underline">
+                    <SafeInternalLink
+                      href={u?.href}
+                      className="hover:underline"
+                    >
                       {u?.name || 'Link'}
                     </SafeInternalLink>
                   </li>
@@ -139,7 +157,10 @@ export default function Footer() {
         <div className="flex flex-wrap gap-4 text-sm font-medium">
           {[
             { label: 'Properties in Dubai', href: '/off-plan?region=Dubai' },
-            { label: 'Properties in Ras Al Khaimah', href: '/off-plan?region=Ras Al Khaimah' },
+            {
+              label: 'Properties in Ras Al Khaimah',
+              href: '/off-plan?region=Ras Al Khaimah',
+            },
             { label: 'Properties in Sharjah', href: '/off-plan?region=Sharjah' },
             { label: 'Properties in Ajman', href: '/off-plan?region=Ajman' },
           ].map((item) => (
@@ -160,7 +181,8 @@ export default function Footer() {
             <div className="w-6 h-6 bg-cyan-600" />
           </div>
           <p className="text-sm font-medium">
-            Join over 9500 members and get updates of new off-plan launches & latest real estate news
+            Join over 9500 members and get updates of new off-plan launches &
+            latest real estate news
           </p>
         </div>
 
@@ -168,14 +190,14 @@ export default function Footer() {
         <div className="flex flex-wrap items-center justify-between border-t border-white/20 pt-6 relative z-10">
           <div className="flex gap-6 text-sm mb-4 sm:mb-0">
             <Link href="/legal?tab=terms" className="hover:underline">
-    Terms & Conditions
-  </Link>
-  <Link href="/legal?tab=privacy" className="hover:underline">
-    Privacy Policy
-  </Link>
-  <Link href="/legal?lang=de" className="hover:underline">
-    German Version
-  </Link>
+              Terms &amp; Conditions
+            </Link>
+            <Link href="/legal?tab=privacy" className="hover:underline">
+              Privacy Policy
+            </Link>
+            <Link href="/legal?lang=de" className="hover:underline">
+              German Version
+            </Link>
           </div>
 
           {/* Socials */}
@@ -243,16 +265,8 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Floating Contact Buttons */}
+      {/* Floating WhatsApp Button (Call removed) */}
       <div className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-50 flex flex-col gap-3 pb-[env(safe-area-inset-bottom)]">
-        <a
-          href="tel:+971505231194"
-          aria-label="Call Us"
-          className="h-12 w-12 grid place-items-center rounded-full bg-brand-dark shadow-lg hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-white/60"
-        >
-          <FaPhoneAlt className="text-white text-xl" />
-        </a>
-
         <a
           href="https://wa.me/971505231194"
           target="_blank"
