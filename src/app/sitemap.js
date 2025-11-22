@@ -4,14 +4,11 @@
 import { listDevelopers, searchAllProjects } from "@/lib/reellyApi";
 import { BLOG_POSTS } from "@/data/blogPosts";
 
-export const dynamic = "force-static";          // Generate on server, cache result
-export const revalidate = 60 * 60 * 24;         // Re-generate every 24 hours
+export const dynamic = "force-static";   // metadata route config
+export const revalidate = 86400;         // 24 hours (must be a literal)
 
 const BASE_URL = "https://dubaihaus.com";
 
-/**
- * Helper to build static route entries
- */
 function makeStatic(path, priority = 0.7, freq = "weekly") {
   return {
     url: `${BASE_URL}${path}`,
@@ -24,9 +21,7 @@ function makeStatic(path, priority = 0.7, freq = "weekly") {
 export default async function sitemap() {
   const now = new Date();
 
-  /* ─────────────────────────────
-   * 1) STATIC PAGES (actual routes)
-   * ──────────────────────────── */
+  /* 1) Static pages */
   const staticPages = [
     makeStatic("/", 1.0, "daily"),
     makeStatic("/off-plan", 0.9, "daily"),
@@ -38,9 +33,7 @@ export default async function sitemap() {
     makeStatic("/contact", 0.5, "yearly"),
   ];
 
-  /* ─────────────────────────────
-   * 2) BLOG POSTS  /blog/[slug]
-   * ──────────────────────────── */
+  /* 2) Blog posts /blog/[slug] */
   let blogPages = [];
   try {
     blogPages = (BLOG_POSTS || [])
@@ -55,13 +48,10 @@ export default async function sitemap() {
     console.error("Sitemap: Blog posts error", e);
   }
 
-  /* ─────────────────────────────
-   * 3) DEVELOPER PAGES  /developers/[id]
-   * ──────────────────────────── */
+  /* 3) Developer profiles /developers/[id] */
   let developerPages = [];
   try {
     const devs = await listDevelopers({ limit: 300, offset: 0 });
-
     developerPages = (devs || []).map((d) => ({
       url: `${BASE_URL}/developers/${d.id}`,
       lastModified: now,
@@ -72,15 +62,12 @@ export default async function sitemap() {
     console.error("Sitemap: Developer error", e);
   }
 
-  /* ─────────────────────────────
-   * 4) OFF-PLAN PROJECT DETAIL PAGES  /off-plan/[id]
-   *    Use searchAllProjects to cover many projects
-   * ──────────────────────────── */
+  /* 4) Off-plan detail pages /off-plan/[id] */
   let offplanPages = [];
   try {
     const allProjects = await searchAllProjects({
-      pageSize: 200,      // per page
-      maxPages: 5,        // up to 1000 projects
+      pageSize: 200,
+      maxPages: 5,       // up to 1000 projects
       pricedOnly: true,
     });
 
@@ -95,7 +82,7 @@ export default async function sitemap() {
         acc.push({
           url: `${BASE_URL}/off-plan/${id}`,
           lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
-          priority: 0.9, // very important pages for conversions
+          priority: 0.9,
           changeFrequency: "weekly",
         });
         return acc;
@@ -104,9 +91,7 @@ export default async function sitemap() {
     console.error("Sitemap: Off-plan error", e);
   }
 
-  /* ─────────────────────────────
-   * 5) Merge + Deduplicate by URL
-   * ──────────────────────────── */
+  /* 5) Merge + dedupe by URL */
   const allEntries = [
     ...staticPages,
     ...blogPages,
