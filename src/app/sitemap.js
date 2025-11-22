@@ -1,23 +1,23 @@
 // src/app/sitemap.js
-// Next.js App Router sitemap generator for DubaiHaus
+// SEO-Optimized Sitemap for DubaiHaus (Next.js App Router)
 
-import { listDevelopers, searchProperties } from "@/lib/reellyApi";
+import { listDevelopers, searchAllProjects } from "@/lib/reellyApi";
 import { BLOG_POSTS } from "@/data/blogPosts";
 
-export const dynamic = "force-static";     // generate at build time / revalidate
-export const revalidate = 60 * 60 * 24;    // 24 hours
+export const dynamic = "force-static";          // Generate on server, cache result
+export const revalidate = 60 * 60 * 24;         // Re-generate every 24 hours
 
 const BASE_URL = "https://dubaihaus.com";
 
 /**
- * Small helper to build a static route entry with SEO-friendly defaults
+ * Helper to build static route entries
  */
-function makeStaticRoute(path, { priority = 0.7, changeFrequency = "weekly" } = {}) {
+function makeStatic(path, priority = 0.7, freq = "weekly") {
   return {
     url: `${BASE_URL}${path}`,
     lastModified: new Date(),
     priority,
-    changeFrequency,
+    changeFrequency: freq,
   };
 }
 
@@ -25,97 +25,104 @@ export default async function sitemap() {
   const now = new Date();
 
   /* ─────────────────────────────
-   * 1) STATIC PAGES
+   * 1) STATIC PAGES (actual routes)
    * ──────────────────────────── */
-  const staticRoutes = [
-    makeStaticRoute("", { priority: 1.0, changeFrequency: "daily" }),            // /
-    makeStaticRoute("/off-plan", { priority: 0.9, changeFrequency: "daily" }),
-    makeStaticRoute("/areas", { priority: 0.8, changeFrequency: "weekly" }),
-    makeStaticRoute("/developers", { priority: 0.8, changeFrequency: "weekly" }),
-    makeStaticRoute("/map", { priority: 0.8, changeFrequency: "weekly" }),
-    makeStaticRoute("/blog", { priority: 0.7, changeFrequency: "weekly" }),
-    makeStaticRoute("/faq", { priority: 0.6, changeFrequency: "monthly" }),
-    makeStaticRoute("/contact", { priority: 0.6, changeFrequency: "yearly" }),
+  const staticPages = [
+    makeStatic("/", 1.0, "daily"),
+    makeStatic("/off-plan", 0.9, "daily"),
+    makeStatic("/areas", 0.8, "weekly"),
+    makeStatic("/developers", 0.8, "weekly"),
+    makeStatic("/map", 0.8, "weekly"),
+    makeStatic("/blog", 0.7, "weekly"),
+    makeStatic("/faq", 0.6, "monthly"),
+    makeStatic("/contact", 0.5, "yearly"),
   ];
 
   /* ─────────────────────────────
    * 2) BLOG POSTS  /blog/[slug]
    * ──────────────────────────── */
-  let blogEntries = [];
+  let blogPages = [];
   try {
-    blogEntries = (BLOG_POSTS || [])
+    blogPages = (BLOG_POSTS || [])
       .filter(Boolean)
-      .map((post) => {
-        const lastMod = post.updatedAt || post.updated_at || post.date || now;
-        return {
-          url: `${BASE_URL}/blog/${post.slug}`,
-          lastModified: new Date(lastMod),
-          changeFrequency: "monthly",
-          priority: 0.7,
-        };
-      });
+      .map((post) => ({
+        url: `${BASE_URL}/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt || post.date || now),
+        priority: 0.7,
+        changeFrequency: "monthly",
+      }));
   } catch (e) {
-    console.error("SITEMAP: blog posts error", e);
+    console.error("Sitemap: Blog posts error", e);
   }
 
   /* ─────────────────────────────
-   * 3) DEVELOPERS  /developers/[id]
+   * 3) DEVELOPER PAGES  /developers/[id]
    * ──────────────────────────── */
-  let developerEntries = [];
+  let developerPages = [];
   try {
-    const devs = await listDevelopers({ limit: 200, offset: 0 });
-    developerEntries = (devs || []).map((d) => ({
+    const devs = await listDevelopers({ limit: 300, offset: 0 });
+
+    developerPages = (devs || []).map((d) => ({
       url: `${BASE_URL}/developers/${d.id}`,
       lastModified: now,
-      changeFrequency: "weekly",
       priority: 0.8,
+      changeFrequency: "weekly",
     }));
   } catch (e) {
-    console.error("SITEMAP: developers error", e);
+    console.error("Sitemap: Developer error", e);
   }
 
   /* ─────────────────────────────
-   * 4) OFF-PLAN PROJECT DETAILS  /off-plan/[id]
-   *    (1st batch for SEO coverage)
+   * 4) OFF-PLAN PROJECT DETAIL PAGES  /off-plan/[id]
+   *    Use searchAllProjects to cover many projects
    * ──────────────────────────── */
-  let propertyEntries = [];
+  let offplanPages = [];
   try {
-    const props = await searchProperties({
-      page: 1,
-      pageSize: 200,       // adjust if you want more/less
+    const allProjects = await searchAllProjects({
+      pageSize: 200,      // per page
+      maxPages: 5,        // up to 1000 projects
       pricedOnly: true,
-      includeAllData: false,
     });
 
     const seen = new Set();
-    const list = props?.results || [];
+    offplanPages = (allProjects?.results || [])
+      .filter((p) => p && p.id)
+      .reduce((acc, p) => {
+        const id = String(p.id);
+        if (seen.has(id)) return acc;
+        seen.add(id);
 
-    propertyEntries = list.reduce((acc, p) => {
-      const id = p.id || p.slug;
-      if (!id) return acc;
-      const key = String(id);
-      if (seen.has(key)) return acc;
-      seen.add(key);
-
-      acc.push({
-        url: `${BASE_URL}/off-plan/${key}`,
-        lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
-        changeFrequency: "weekly",
-        priority: 0.85,
-      });
-      return acc;
-    }, []);
+        acc.push({
+          url: `${BASE_URL}/off-plan/${id}`,
+          lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
+          priority: 0.9, // very important pages for conversions
+          changeFrequency: "weekly",
+        });
+        return acc;
+      }, []);
   } catch (e) {
-    console.error("SITEMAP: off-plan properties error", e);
+    console.error("Sitemap: Off-plan error", e);
   }
 
   /* ─────────────────────────────
-   * FINAL MERGE
+   * 5) Merge + Deduplicate by URL
    * ──────────────────────────── */
-  return [
-    ...staticRoutes,
-    ...blogEntries,
-    ...developerEntries,
-    ...propertyEntries,
+  const allEntries = [
+    ...staticPages,
+    ...blogPages,
+    ...developerPages,
+    ...offplanPages,
   ];
+
+  const seenUrls = new Set();
+  const uniqueEntries = [];
+
+  for (const entry of allEntries) {
+    if (!entry?.url) continue;
+    if (seenUrls.has(entry.url)) continue;
+    seenUrls.add(entry.url);
+    uniqueEntries.push(entry);
+  }
+
+  return uniqueEntries;
 }
