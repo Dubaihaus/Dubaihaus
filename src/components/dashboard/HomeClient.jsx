@@ -30,7 +30,7 @@ export default function HomeClient() {
       <DashboardHeader />
 
       {/* Embed the same off-plan UI, but limited + latest */}
-      <OffPlanClient limit={6} latest={true} />
+      <OffPlanClient limit={9} latest={true} />
 
       <OffPlanPropertyTypesSection />
 

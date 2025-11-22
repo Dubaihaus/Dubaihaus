@@ -57,22 +57,22 @@ const OffPlanPropertyTypesSection = () => {
         {/* Icons */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-6">
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaBuilding className="text-blue-600 text-xl" />
+            <FaBuilding className="text-brand-sky -600 text-xl" />
             <span>{t('icons.brandNew')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaHandsHelping className="text-blue-600 text-xl" />
+            <FaHandsHelping className="text-brand-sky -600 text-xl" />
             <span>{t('icons.support')}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaStar className="text-blue-600 text-xl" />
+            <FaStar className="text-brand-sky -600 text-xl" />
             <span>{t('icons.priority')}</span>
           </div>
         </div>
 
         {/* CTA */}
         <div className="mt-2 lg:mt-0">
-          <button className="bg-brand-dark hover:bg-brand-dark/90 text-white text-sm font-semibold px-6 py-2 rounded-xl transition">
+          <button className="bg-brand-sky hover:bg-brand-dark/90 text-white text-sm font-semibold px-6 py-2 rounded-xl transition">
             {t('cta')}
           </button>
         </div>
@@ -102,7 +102,7 @@ const OffPlanPropertyTypesSection = () => {
               {/* overlay gradient for text readability */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
               {/* badge in brand-sky */}
-              <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-blue-600 text-white
+              <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-brand-sky text-white
                                font-semibold text-xs px-3 py-1 shadow">
                 {item.label}
               </span>
@@ -115,7 +115,7 @@ const OffPlanPropertyTypesSection = () => {
             </div>
 
             {/* bottom accent bar in brand gradient */}
-            <div className="h-1 w-full bg-gradient-to-r from-brand-sky to-brand-dark" />
+            <div className="h-1 w-full bg-gradient-to-r from-brand-sky to-brand-sky" />
           </div>
         ))}
       </div>
