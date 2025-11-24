@@ -73,7 +73,7 @@ export default function OffPlanClient({ limit, latest = false }) {
       {/* Title & Currencies */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">New Off-Plan Properties for Sale in Dubai</h1>
+          <h1 className="text-2xl font-bold text-gray-800">New Off-Plan Properties for Sale in Dubai & Abu Dhabi</h1>
           <p className="text-sm text-gray-600 max-w-xl mt-1">
             Off-plan properties are developments which are still in planning or construction.
             Buying in the UAE provides early-phase pricing and flexible payment plans.

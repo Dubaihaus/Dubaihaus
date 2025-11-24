@@ -15,7 +15,7 @@ const FEATURED_ORDER = [
 
 const DISTRICT_IMAGES = {
   'Palm Jebel Ali': '/dashboard/palm.jpg',
-  'DIFC': '/dashboard/difc.jpg',
+  DIFC: '/dashboard/difc.jpg',
   'Dubai Creek': '/dashboard/creek.jpg',
   'Dubai Creek Harbour': '/dashboard/creek.jpg',
   'Dubai Hills Estate': '/dashboard/hills.jpg',
@@ -24,6 +24,7 @@ const DISTRICT_IMAGES = {
   'Jumeirah Village Circle': '/dashboard/jvc.jpg',
   'Business Bay': '/dashboard/business-bay.jpg',
 };
+
 const FALLBACK_IMG = '/project_detail_images/building.jpg';
 
 function ImgWithFallback({ src, alt, sizes, className }) {
@@ -51,23 +52,27 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
   const wrapRef = useRef(null);
   const timer = useRef(null);
 
-  const openNow = () => { if (timer.current) clearTimeout(timer.current); setOpen(true); };
-  const closeSoon = () => { timer.current = setTimeout(() => setOpen(false), 120); };
+  const openNow = () => {
+    if (timer.current) clearTimeout(timer.current);
+    setOpen(true);
+  };
+  const closeSoon = () => {
+    timer.current = setTimeout(() => setOpen(false), 120);
+  };
 
   // Fetch UAE (Dubai) districts when menu first opens
   useEffect(() => {
     if (!open || districts.length) return;
     setLoadingDistricts(true);
     fetch('/api/districts?name=Dubai', { cache: 'no-store' })
-      .then(r => {
+      .then((r) => {
         if (!r.ok) throw new Error('Failed to fetch districts');
         return r.json();
       })
-      .then(j => {
-        console.log('📋 Districts loaded:', j?.length || 0);
+      .then((j) => {
         setDistricts(Array.isArray(j) ? j : []);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching districts:', error);
         setDistricts([]);
       })
@@ -77,8 +82,10 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
   // Close on ESC / outside click
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
-    const onClick = (e) => { 
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); 
+    const onClick = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+      }
     };
     window.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onClick);
@@ -90,31 +97,32 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
 
   // Build prioritized list (featured first), then fill. Show only 5.
   const cards = useMemo(() => {
-    const all = (districts || []).map(d => ({
+    const all = (districts || []).map((d) => ({
       id: d.id,
       name: d.name || '',
     }));
 
     const used = new Set();
-    const featured = FEATURED_ORDER.map(name => {
-      const found = all.find(d => 
-        d.name.toLowerCase().includes(name.toLowerCase()) ||
-        name.toLowerCase().includes(d.name.toLowerCase())
+    const featured = FEATURED_ORDER.map((name) => {
+      const found = all.find(
+        (d) =>
+          d.name.toLowerCase().includes(name.toLowerCase()) ||
+          name.toLowerCase().includes(d.name.toLowerCase())
       );
-      if (found) { 
-        used.add(found.id); 
-        return found; 
+      if (found) {
+        used.add(found.id);
+        return found;
       }
       return { id: `placeholder-${name}`, name, placeholder: true };
     }).filter(Boolean);
 
-    const rest = all.filter(d => !used.has(d.id));
+    const rest = all.filter((d) => !used.has(d.id));
     return [...featured, ...rest].slice(0, 5);
   }, [districts]);
 
   // Fetch a sample project cover for each real district in our 5 cards
   useEffect(() => {
-    const realCards = cards.filter(c => !c.placeholder && c.id);
+    const realCards = cards.filter((c) => !c.placeholder && c.id);
     if (!realCards.length) return;
 
     let cancelled = false;
@@ -122,14 +130,10 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
 
     (async () => {
       try {
-        console.log('🖼️ Fetching cover images for districts:', realCards.map(c => c.name));
-        
         const entries = await Promise.all(
           realCards.map(async (card) => {
             try {
-              // Try multiple strategies to get properties
               const strategies = [
-                // Strategy 1: Use district ID
                 async () => {
                   const qs = new URLSearchParams({
                     page: '1',
@@ -137,11 +141,12 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
                     pricedOnly: 'false',
                     districts: card.id,
                   });
-                  const res = await fetch(`/api/off-plan?${qs.toString()}`, { cache: 'no-store' });
+                  const res = await fetch(`/api/off-plan?${qs.toString()}`, {
+                    cache: 'no-store',
+                  });
                   if (!res.ok) throw new Error('API error');
-                  return await res.json();
+                  return res.json();
                 },
-                // Strategy 2: Use area name search
                 async () => {
                   const qs = new URLSearchParams({
                     page: '1',
@@ -149,11 +154,12 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
                     pricedOnly: 'false',
                     area: card.name,
                   });
-                  const res = await fetch(`/api/off-plan?${qs.toString()}`, { cache: 'no-store' });
+                  const res = await fetch(`/api/off-plan?${qs.toString()}`, {
+                    cache: 'no-store',
+                  });
                   if (!res.ok) throw new Error('API error');
-                  return await res.json();
+                  return res.json();
                 },
-                // Strategy 3: Use search query
                 async () => {
                   const qs = new URLSearchParams({
                     page: '1',
@@ -161,10 +167,12 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
                     pricedOnly: 'false',
                     search_query: card.name,
                   });
-                  const res = await fetch(`/api/off-plan?${qs.toString()}`, { cache: 'no-store' });
+                  const res = await fetch(`/api/off-plan?${qs.toString()}`, {
+                    cache: 'no-store',
+                  });
                   if (!res.ok) throw new Error('API error');
-                  return await res.json();
-                }
+                  return res.json();
+                },
               ];
 
               for (const strategy of strategies) {
@@ -178,17 +186,16 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
                       first?.rawData?.cover_image?.url ||
                       null;
                     if (url) {
-                      console.log(`✅ Found image for ${card.name} via ${strategy.name}`);
                       return [card.id, url];
                     }
                   }
-                } catch (error) {
-                  // Continue to next strategy
+                } catch {
+                  // try next strategy
                 }
               }
               return [card.id, null];
             } catch (error) {
-              console.error(`❌ Error fetching image for ${card.name}:`, error);
+              console.error(`Error fetching image for ${card.name}:`, error);
               return [card.id, null];
             }
           })
@@ -196,8 +203,7 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
 
         if (!cancelled) {
           const map = Object.fromEntries(entries);
-          console.log('🖼️ Image results:', map);
-          setImgByDistrict(prev => ({ ...prev, ...map }));
+          setImgByDistrict((prev) => ({ ...prev, ...map }));
         }
       } catch (error) {
         console.error('Error in image fetching batch:', error);
@@ -206,7 +212,9 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [cards]);
 
   return (
@@ -221,13 +229,13 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
         className="text-sm hover:text-blue-600 transition py-2"
         aria-haspopup="true"
         aria-expanded={open}
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
       >
         {label}
       </button>
 
       {open && (
-        <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[980px] max-w-[95vw] rounded-xl border bg-white shadow-2xl p-4 z-50">
+        <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[980px] max-w-[95vw] rounded-2xl border bg-white shadow-2xl p-5 z-50">
           <div className="flex items-center justify-between px-1 pb-3">
             <div className="text-sm font-semibold text-slate-800">
               Popular Areas (UAE)
@@ -237,7 +245,6 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
             )}
           </div>
 
-          {/* All Areas + 5 cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
             {/* All Areas → /areas */}
             <Link
@@ -253,7 +260,13 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
                   className="object-cover"
                 />
                 <span className="absolute top-2 right-2 grid place-items-center h-8 w-8 rounded-full bg-sky-600 text-white text-xs shadow">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <circle cx="11" cy="11" r="7" />
                     <line x1="16.65" y1="16.65" x2="21" y2="21" />
                   </svg>
@@ -267,8 +280,7 @@ export default function AreasMegaMenu({ label = 'Areas' }) {
             {/* Area cards (5 max) */}
             {cards.map((d) => {
               const href = `/off-plan?area=${encodeURIComponent(d.name)}`;
-              
-              // Pick dynamic cover (preferred), else configured static, else fallback
+
               const dynamic = !d.placeholder && imgByDistrict[d.id];
               const staticImg = DISTRICT_IMAGES[d.name];
               const src = dynamic || staticImg || null;
