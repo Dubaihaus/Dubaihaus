@@ -176,7 +176,7 @@ export default function Footer() {
         </div>
 
         {/* Newsletter */}
-        <div className="flex items-center gap-4 flex-wrap">
+        {/* <div className="flex items-center gap-4 flex-wrap">
           <div className="bg-white p-3 rounded shadow-md">
             <div className="w-6 h-6 bg-cyan-600" />
           </div>
@@ -184,7 +184,7 @@ export default function Footer() {
             Join over 9500 members and get updates of new off-plan launches &
             latest real estate news
           </p>
-        </div>
+        </div> */}
 
         {/* Bottom Links & Social Icons */}
         <div className="flex flex-wrap items-center justify-between border-t border-white/20 pt-6 relative z-10">
@@ -195,9 +195,9 @@ export default function Footer() {
             <Link href="/legal?tab=privacy" className="hover:underline">
               Privacy Policy
             </Link>
-            <Link href="/legal?lang=de" className="hover:underline">
+            {/* <Link href="/legal?lang=de" className="hover:underline">
               German Version
-            </Link>
+            </Link> */}
           </div>
 
           {/* Socials */}

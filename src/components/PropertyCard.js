@@ -1,38 +1,45 @@
 // src/components/PropertyCard.js
 'use client';
+
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useCallback, useState } from "react";
 import { motion } from "framer-motion";
-import { getHandoverLabel } from '../lib/FormatHandover';
+import { getHandoverLabel } from "../lib/FormatHandover";
+
+/* ---------------- helpers ---------------- */
 
 function fmtLocation(locOrString) {
   // If object: safely build without numeric country ids
-  if (locOrString && typeof locOrString === 'object') {
+  if (locOrString && typeof locOrString === "object") {
     const { sector, district, city, region, country } = locOrString;
-    const countryStr = typeof country === 'string' && !/^\d+$/.test(country) ? country : null;
+    const countryStr =
+      typeof country === "string" && !/^\d+$/.test(country) ? country : null;
     const parts = [sector, district, city, region, countryStr].filter(Boolean);
-    return parts.join(', ') || 'Unknown location';
+    return parts.join(", ") || "Unknown location";
   }
 
   // If string: drop standalone numeric tokens like ", 219"
-  const s = String(locOrString || '').trim();
-  if (!s) return 'Unknown location';
-  return s
-    .split(',')
-    .map(p => p.trim())
-    .filter(p => p && !/^\d+$/.test(p))   // remove numeric-only segments
-    .join(', ') || 'Unknown location';
+  const s = String(locOrString || "").trim();
+  if (!s) return "Unknown location";
+  return (
+    s
+      .split(",")
+      .map((p) => p.trim())
+      .filter((p) => p && !/^\d+$/.test(p)) // remove numeric-only segments
+      .join(", ") || "Unknown location"
+  );
 }
 
 function TypeBadges({ types, brRange }) {
   const list = Array.isArray(types) && types.length ? types : null;
   if (!list && !brRange) return null;
-  
+
   return (
     <div className="flex flex-wrap items-center gap-2 mt-2">
+      {/* we pass [] so types themselves are not rendered here */}
       {list?.map((t, index) => (
         <motion.span
           key={t}
@@ -45,7 +52,7 @@ function TypeBadges({ types, brRange }) {
         </motion.span>
       ))}
       {brRange && (
-        <motion.span 
+        <motion.span
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
@@ -58,7 +65,66 @@ function TypeBadges({ types, brRange }) {
   );
 }
 
-export default function PropertyCard({ property, currency, selectedUnitType, index = 0 }) {
+// same “usable steps” helper as in PaymentPlanSection
+function hasUsableSteps(plan) {
+  return plan && Array.isArray(plan.steps) && plan.steps.length > 0;
+}
+
+/**
+ * Build a short payment-plan label for the blue badge.
+ * 1) Try to infer "80/20" from steps.
+ * 2) Else use plan.name or property.paymentPlan.
+ */
+function getCardPaymentPlanLabel(property) {
+  const plans = Array.isArray(property?.paymentPlans)
+    ? property.paymentPlans.filter(hasUsableSteps)
+    : [];
+
+  // 1) If we have a plan with steps, try 80/20 style
+  if (plans.length) {
+    const plan = plans[0];
+    const steps = Array.isArray(plan.steps) ? plan.steps : [];
+
+    const sorted = [...steps]
+      .filter((s) => typeof s?.percentage === "number")
+      .sort((a, b) => b.percentage - a.percentage);
+
+    let ratio = "";
+
+    if (sorted.length >= 2) {
+      const a = Math.round(sorted[0].percentage);
+      const b = Math.round(sorted[1].percentage);
+      const total = steps.reduce(
+        (t, s) => t + (Number(s.percentage) || 0),
+        0
+      );
+
+      // Only show ratio if the top two account for most of the total
+      if (total > 0 && a + b >= total * 0.9) {
+        ratio = `${a}/${b}`;
+      }
+    }
+
+    const base = ratio || plan.name || "Payment plan";
+    return `${base} Payment plan`.replace(/Payment plan Payment plan/i, "Payment plan");
+  }
+
+  // 2) Fallback: use simple string they might have normalized
+  if (typeof property?.paymentPlan === "string" && property.paymentPlan.trim()) {
+    return property.paymentPlan.trim();
+  }
+
+  return null;
+}
+
+/* ---------------- component ---------------- */
+
+export default function PropertyCard({
+  property,
+  currency,
+  selectedUnitType,
+  index = 0,
+}) {
   const router = useRouter();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -70,8 +136,8 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
     property?.rawData?.cover_image?.url ||
     "/project_detail_images/building.jpg";
 
-  const status = property.status || property.sale_status || "For Sale";
-  const rawPrice = property.price ?? property.minPrice ?? property.min_price ?? null;
+  const rawPrice =
+    property.price ?? property.minPrice ?? property.min_price ?? null;
 
   // currency conversion first, then round to nearest integer
   let converted = rawPrice;
@@ -81,19 +147,45 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
   // remove any decimals — ensure integer
   const price = converted != null ? Math.round(Number(converted)) : null;
 
-  const shownCurrency = currency || property.priceCurrency || property.price_currency || "AED";
-  const locationLabel = fmtLocation(property.locationObj || property.rawData?.location || property.location);
+  const shownCurrency =
+    currency ||
+    property.priceCurrency ||
+    property.price_currency ||
+    "AED";
+
+  const locationLabel = fmtLocation(
+    property.locationObj || property.rawData?.location || property.location
+  );
   const developer = property.developer || "N/A";
   const handover = getHandoverLabel(property);
 
-  // Multi-type support from normalizer
-  const types = property.propertyTypes || (property.propertyType ? [property.propertyType] : []);
+  // --- Property types & payment plan meta ---
+
+  // Property types array from API / normalizer
+  const types =
+    Array.isArray(property.propertyTypes) && property.propertyTypes.length
+      ? property.propertyTypes
+      : property.propertyType
+      ? [property.propertyType]
+      : [];
+
+  // Comma-separated label for red badge
+  const propertyTypesLabel =
+    types && types.length ? types.join(", ") : "Property";
+
+  // Only bedroom summary in chips now
   const brRange = property.bedroomsRange || null;
-  const categoryBadge = types[0] || "Property";
+
+  // Left red badge: property types
+  const leftBadgeLabel = propertyTypesLabel;
+
+  // Right blue badge: payment plan or "Coming soon"
+  const paymentPlanLabel = getCardPaymentPlanLabel(property);
+  const rightBadgeLabel = paymentPlanLabel || "Coming soon";
 
   const queryParams = {};
   if (selectedUnitType) queryParams.unit_type = selectedUnitType;
-  
+
   // Build an href STRING for router.prefetch (Link can still use object)
   const href = useMemo(() => {
     const pathname = `/ui/project_details/${property.id}`;
@@ -109,14 +201,14 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        duration: 0.6, 
+      transition={{
+        duration: 0.6,
         delay: index * 0.1,
-        ease: [0.25, 0.1, 0.25, 1]
+        ease: [0.25, 0.1, 0.25, 1],
       }}
-      whileHover={{ 
+      whileHover={{
         y: -8,
-        transition: { duration: 0.3, ease: "easeOut" }
+        transition: { duration: 0.3, ease: "easeOut" },
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -125,7 +217,7 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
     >
       {/* Shine effect overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10 pointer-events-none" />
-      
+
       <Link
         href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}
         prefetch
@@ -137,43 +229,45 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
         {/* Image Container */}
         <div className="relative overflow-hidden">
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200">
-            <motion.img 
-              src={coverPhoto} 
+            <motion.img
+              src={coverPhoto}
               alt={property.title || property.name}
               className={`w-full h-64 object-cover transition-all duration-700 ${
-                isHovered ? 'scale-110' : 'scale-100'
-              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                isHovered ? "scale-110" : "scale-100"
+              } ${imageLoaded ? "opacity-100" : "opacity-0"}`}
               onLoad={() => setImageLoaded(true)}
               initial={false}
               animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             />
-            
+
             {/* Loading skeleton */}
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse" />
             )}
-            
+
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            {/* Status badges */}
-            <motion.span 
+
+            {/* Badges */}
+            {/* Left: property types */}
+            <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 + 0.2 }}
               className="absolute top-4 left-4 bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
             >
-              {categoryBadge}
+              {leftBadgeLabel}
             </motion.span>
-            
-            <motion.span 
+
+            {/* Right: payment plan or Coming soon */}
+            <motion.span
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 + 0.3 }}
-              className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
+              className="absolute top-14 left-4 bg-brand-dark text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
             >
-              {status}
+              {rightBadgeLabel}
             </motion.span>
           </div>
         </div>
@@ -181,18 +275,18 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
         {/* Content */}
         <div className="p-6 flex flex-col flex-1 relative z-0">
           {/* Price */}
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 + 0.1 }}
             className="font-bold text-xl mb-3"
-            style={{ color: '#00C6FF' }}
+            style={{ color: "#00C6FF" }}
           >
             from {shownCurrency} {price?.toLocaleString() ?? "—"}
           </motion.p>
 
           {/* Title */}
-          <motion.h3 
+          <motion.h3
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 + 0.2 }}
@@ -202,7 +296,7 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
           </motion.h3>
 
           {/* Location */}
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: index * 0.1 + 0.3 }}
@@ -212,11 +306,11 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
             <span className="line-clamp-1">{locationLabel}</span>
           </motion.p>
 
-          {/* Type badges */}
-          <TypeBadges types={types} brRange={brRange} />
+          {/* Type badges – bedrooms only */}
+          <TypeBadges types={[]} brRange={brRange} />
 
           {/* Developer & Handover */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: index * 0.1 + 0.4 }}
@@ -242,18 +336,18 @@ export default function PropertyCard({ property, currency, selectedUnitType, ind
             <Button
               className="w-full text-white rounded-xl font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group/btn"
               style={{
-                backgroundColor: '#00C6FF',
+                backgroundColor: "#00C6FF",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#003C7A';
+                e.currentTarget.style.backgroundColor = "#003C7A";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#00C6FF';
+                e.currentTarget.style.backgroundColor = "#00C6FF";
               }}
             >
               {/* Button shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
-              
+
               <motion.span
                 animate={isHovered ? { x: 2 } : { x: 0 }}
                 transition={{ duration: 0.2 }}

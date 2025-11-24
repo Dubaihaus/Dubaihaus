@@ -1,5 +1,5 @@
 // src/app/api/off-plan/latest/route.js
-import { searchProperties } from "@/lib/reellyApi";
+import { searchProperties, getPropertyById} from "@/lib/reellyApi";
 import { cookies } from "next/headers";
 
 export async function GET(request) {
@@ -27,7 +27,33 @@ export async function GET(request) {
   console.log("🆕 /api/off-plan/latest filters:", { ...filters, locale });
 
   const data = await searchProperties(filters);
+ // ✅ Enrich with paymentPlan + propertyTypes from detail API
+  if (data?.results?.length) {
+    try {
+      const enrichedResults = await Promise.all(
+        data.results.map(async (item) => {
+          try {
+            const detail = await getPropertyById(item.id);
 
+            return {
+              ...item,
+              propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
+                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
+            };
+          } catch (err) {
+            console.error("Failed to enrich latest project", item.id, err);
+            return item;
+          }
+        })
+      );
+      data = { ...data, results: enrichedResults };
+    } catch (err) {
+      console.error("Bulk enrichment for latest failed:", err);
+    }
+  }
+
+ 
   const responseHeaders = {
     "Content-Type": "application/json",
     "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",

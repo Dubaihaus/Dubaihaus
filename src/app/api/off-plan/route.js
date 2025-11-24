@@ -1,5 +1,5 @@
 // src/app/api/off-plan/route.js
-import { searchProperties, listRegions, listDistricts, searchAllProjects } from "@/lib/reellyApi";
+import { searchProperties, listRegions, listDistricts, searchAllProjects ,  getPropertyById} from "@/lib/reellyApi";
 import { cookies } from "next/headers";
 
 // Helper function to search across all location fields
@@ -175,6 +175,36 @@ export async function GET(request) {
       }
     }
   }
+
+
+ if (!forMap && data?.results?.length) {
+    try {
+      const enrichedResults = await Promise.all(
+        data.results.map(async (item) => {
+          try {
+            const detail = await getPropertyById(item.id);
+
+            return {
+              ...item,
+              // prefer detail meta, fall back to existing values if any
+              propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
+                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
+            };
+          } catch (err) {
+            console.error("Failed to enrich project", item.id, err);
+            return item;
+          }
+        })
+      );
+
+      data = { ...data, results: enrichedResults };
+    } catch (err) {
+      console.error("Bulk enrichment failed:", err);
+    }
+  }
+
+  
 
   const responseHeaders = {
     "Content-Type": "application/json",
