@@ -1,6 +1,7 @@
 // src/components/ContactSection.jsx
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -13,8 +14,69 @@ const containerVariants = {
 };
 
 export default function ContactSection() {
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState(null); // "ok" | "error" | null
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setStatus(null);
+
+  const form = e.currentTarget;  // ⬅ SAVE REFERENCE
+  const formData = new FormData(form);
+    const payload = {
+      purpose: formData.get("purpose"),
+      budget: formData.get("budget"),
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      areas: formData.get("areas"),
+      message: formData.get("message"),
+      projectTitle: "General Contact Form",
+      consentMarketing: false,
+    };
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      // Debug log (you can remove later)
+      console.log("CONTACT /api/contact status:", res.status);
+
+      if (res.ok) {
+        // best-effort JSON read (in case we change response later)
+        try {
+          await res.json();
+        } catch {
+          /* ignore JSON parse error */
+        }
+
+        setStatus("ok");
+      form.reset(); // ⬅ RESET FORM ON SUCCESS
+      } else {
+        let data = null;
+        try {
+          data = await res.json();
+        } catch {
+          /* ignore */
+        }
+        console.error("CONTACT /api/contact error:", res.status, data);
+        setStatus("error");
+      }
+    } catch (err) {
+      console.error("CONTACT fetch failed:", err);
+      setStatus("error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <section  id="contact-section"
+    <section
+      id="contact-section"
       className="
         relative w-full 
         bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]
@@ -57,11 +119,8 @@ export default function ContactSection() {
               transition={{ duration: 0.6, delay: 0.05 }}
               className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
             >
-              Let&apos;s plan your  next  property move{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]">
-              
-              </span>
-              
+              Let&apos;s plan your next property move{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]"></span>
             </motion.h1>
 
             <motion.p
@@ -97,6 +156,7 @@ export default function ContactSection() {
 
           {/* form card */}
           <motion.form
+            onSubmit={handleSubmit}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.35 }}
@@ -267,18 +327,25 @@ export default function ContactSection() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-1">
               <button
                 type="submit"
+                disabled={submitting}
                 className="
                   relative inline-flex items-center justify-center gap-2 
                   overflow-hidden rounded-full px-7 py-3.5 text-sm font-semibold text-white
                   shadow-[0_18px_40px_rgba(0,76,153,0.35)]
                   transition-transform duration-200
                   hover:scale-[1.02] active:scale-[0.98]
+                  disabled:opacity-60 disabled:cursor-not-allowed
+                  group
                 "
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]" />
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-                <span className="relative z-10">Send enquiry</span>
-                <span className="relative z-10 text-lg leading-none">↗</span>
+                <span className="relative z-10">
+                  {submitting ? "Sending..." : "Send enquiry"}
+                </span>
+                {!submitting && (
+                  <span className="relative z-10 text-lg leading-none">↗</span>
+                )}
               </button>
 
               <p className="text-[11px] text-slate-500 max-w-xs">
@@ -286,6 +353,18 @@ export default function ContactSection() {
                 property opportunities. We respect your privacy.
               </p>
             </div>
+
+            {/* status messages */}
+            {status === "ok" && (
+              <p className="text-sm text-emerald-600">
+                ✅ Message sent! We&apos;ll get back to you soon.
+              </p>
+            )}
+            {status === "error" && (
+              <p className="text-sm text-red-600">
+                ❌ Something went wrong. Please try again.
+              </p>
+            )}
           </motion.form>
         </div>
 
@@ -327,9 +406,9 @@ export default function ContactSection() {
                     📞
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">Call / WhatsApp</p>
+                    <p className="font-semibold text-slate-900">WhatsApp</p>
                     <p className="text-[13px] text-slate-600">
-                      +971 XX XXX XXXX
+                      +971 50 523 1194
                     </p>
                     <p className="mt-1 text-[11px] text-slate-500">
                       Mon–Sat, 10:00 – 19:00 (GST)

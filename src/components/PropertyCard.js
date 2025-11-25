@@ -255,7 +255,7 @@ export default function PropertyCard({
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 + 0.2 }}
-              className="absolute top-4 left-4 bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
+              className="absolute top-4 left-4 bg-white text-black text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
             >
               {leftBadgeLabel}
             </motion.span>
@@ -265,7 +265,7 @@ export default function PropertyCard({
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 + 0.3 }}
-              className="absolute top-14 left-4 bg-brand-dark text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
+              className="absolute top-14 left-4 bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-xl shadow-lg"
             >
               {rightBadgeLabel}
             </motion.span>

@@ -158,7 +158,7 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                 </Field>
 
                 {/* Message */}
-                <Field label="Your Message (Optional)">
+                <Field label="Your Message ">
                   <textarea
                     name="message"
                     value={form.message}
@@ -181,11 +181,11 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                     />
                     <span className="text-[13px] md:text-sm text-gray-700 group-hover:text-gray-900">
                       I agree to the{' '}
-                      <a href="/privacy" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
+                      <a href="/legal?tab=privacy" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
                         Privacy Policy
                       </a>{' '}
                       and{' '}
-                      <a href="/terms" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
+                      <a href="/legal?tab=terms" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
                         Terms of Service
                       </a>
                     </span>
