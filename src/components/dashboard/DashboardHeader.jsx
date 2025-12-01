@@ -1,46 +1,49 @@
+// src/components/dashboard/DashboardHeader.jsx
 'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQueries } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 
 // ====== CONFIG ======
 const AREAS_CONFIG = [
-  { 
-    title: 'Jumeirah Village Circle (JVC)', 
+  {
+    title: 'Jumeirah Village Circle (JVC)',
     filters: { districts: '269' },
-    gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60', 
-    fallbackImg: '/dashboard/palm1.jpg' 
+    gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
+    fallbackImg: '/dashboard/palm1.jpg',
   },
-  { 
-    title: 'Business Bay', 
+  {
+    title: 'Business Bay',
     filters: { districts: '187' },
-    gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60', 
-    fallbackImg: '/dashboard/BusinessBay.webp' 
+    gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
+    fallbackImg: '/dashboard/BusinessBay.webp',
   },
-  { 
-    title: 'Dubai Hills Estate', 
+  {
+    title: 'Dubai Hills Estate',
     filters: { districts: ['204', '210'] },
-    gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60', 
-    fallbackImg: '/dashboard/Marina.jpg' 
+    gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
+    fallbackImg: '/dashboard/Marina.jpg',
   },
-  { 
-    title: 'Downtown Dubai', 
+  {
+    title: 'Downtown Dubai',
     filters: { districts: '201' },
-    gradient: 'bg-gradient-to-r from-slate-900/60 to-sky-900/60',   
-    fallbackImg: '/dashboard/downtown.webp' 
+    gradient: 'bg-gradient-to-r from-slate-900/60 to-sky-900/60',
+    fallbackImg: '/dashboard/downtown.webp',
   },
-  { 
-    title: 'Dubai Marina', 
+  {
+    title: 'Dubai Marina',
     filters: { districts: '217' },
-    gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',  
-    fallbackImg: '/dashboard/Marina.jpg' 
+    gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',
+    fallbackImg: '/dashboard/Marina.jpg',
   },
-  { 
-    title: 'Palm Jumeirah', 
+  {
+    title: 'Palm Jumeirah',
     filters: { districts: '308' },
-    gradient: 'bg-gradient-to-r from-fuchsia-900/60 to-rose-900/60', 
-    fallbackImg: '/dashboard/palm.jpg' 
+    gradient: 'bg-gradient-to-r from-fuchsia-900/60 to-rose-900/60',
+    fallbackImg: '/dashboard/palm.jpg',
   },
 ];
 
@@ -73,7 +76,10 @@ async function fetchAreaSlideData(areaConfig) {
   // Strategy 1: district
   if (areaConfig.filters.districts) {
     try {
-      const params = new URLSearchParams({ ...baseParams, districts: areaConfig.filters.districts });
+      const params = new URLSearchParams({
+        ...baseParams,
+        districts: areaConfig.filters.districts,
+      });
       const res = await fetch(`/api/off-plan?${params}`);
       if (res.ok) {
         const data = await res.json();
@@ -96,7 +102,10 @@ async function fetchAreaSlideData(areaConfig) {
   // Strategy 3: search query
   try {
     const searchQuery = areaConfig.title.split('(')[0].trim();
-    const params = new URLSearchParams({ ...baseParams, search_query: searchQuery });
+    const params = new URLSearchParams({
+      ...baseParams,
+      search_query: searchQuery,
+    });
     const res = await fetch(`/api/off-plan?${params}`);
     if (res.ok) {
       const data = await res.json();
@@ -153,24 +162,45 @@ export default function DashboardHeader() {
   const slideQueries = useAreaSlides();
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const t = useTranslations('dashboard.hero');
 
   const slides = slideQueries.map((query, index) => {
     const areaConfig = AREAS_CONFIG[index];
     const project = query.data;
-    
+
     const projectImage = extractImageUrl(project);
     const finalImage = projectImage || areaConfig.fallbackImg || PLACEHOLDER;
 
-    const allHref = `/off-plan?${new URLSearchParams(areaConfig.filters).toString()}`;
+    const allHref = `/off-plan?${new URLSearchParams(
+      areaConfig.filters
+    ).toString()}`;
     const projectId = project?.id || project?.rawData?.id;
     const detailHref = projectId ? `/ui/project_details/${projectId}` : allHref;
 
-    const description = project
-      ? `${project.name || 'Featured property'} in ${areaConfig.title}. ${project.bedrooms ? `${project.bedrooms}-bed` : 'Luxury'} apartments with modern amenities.`
-      : `Explore premium off-plan developments in ${areaConfig.title}.`;
+    const areaTitle = areaConfig.title;
+    const projectName =
+      project?.name || t('fallbackProjectName', { defaultValue: 'Featured property' });
+
+    let description;
+    if (project) {
+      if (project.bedrooms) {
+        description = t('descriptionWithBedrooms', {
+          projectName,
+          areaTitle,
+          bedrooms: project.bedrooms,
+        });
+      } else {
+        description = t('descriptionNoBedrooms', {
+          projectName,
+          areaTitle,
+        });
+      }
+    } else {
+      description = t('descriptionFallback', { areaTitle });
+    }
 
     return {
-      areaTitle: areaConfig.title,
+      areaTitle,
       description,
       bg: finalImage,
       gradient: areaConfig.gradient,
@@ -183,7 +213,7 @@ export default function DashboardHeader() {
     };
   });
 
-  const loading = slideQueries.some(query => query.isLoading);
+  const loading = slideQueries.some((query) => query.isLoading);
 
   // Auto-rotate slides
   useEffect(() => {
@@ -198,14 +228,17 @@ export default function DashboardHeader() {
     return () => clearInterval(id);
   }, [slides.length, loading]);
 
-  const goTo = useCallback((idx) => {
-    if (idx === current || isAnimating) return;
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrent(idx);
-      setIsAnimating(false);
-    }, 500);
-  }, [current, isAnimating]);
+  const goTo = useCallback(
+    (idx) => {
+      if (idx === current || isAnimating) return;
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrent(idx);
+        setIsAnimating(false);
+      }, 500);
+    },
+    [current, isAnimating]
+  );
 
   const active = slides[current] || null;
 
@@ -213,11 +246,7 @@ export default function DashboardHeader() {
   if (loading && slides.length === 0) {
     return (
       <section
-        className="
-          relative
-          h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px]
-          bg-gray-200 overflow-hidden
-        "
+        className="relative h-[440px] sm:h-[520px] md:h-[600px] lg:h-[680px] bg-gray-200 overflow-hidden"
         dir="ltr"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-gray-400/60 to-gray-600/60" />
@@ -227,8 +256,11 @@ export default function DashboardHeader() {
             <div className="h-5 sm:h-6 bg-gray-300 rounded mb-2 w-full animate-pulse" />
             <div className="h-5 sm:h-6 bg-gray-300 rounded mb-6 w-2/3 animate-pulse" />
             <div className="flex gap-3 sm:gap-4 mb-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-8 bg-gray-300 rounded-full w-24 animate-pulse" />
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-8 bg-gray-300 rounded-full w-24 animate-pulse"
+                />
               ))}
             </div>
             <div className="flex gap-3 sm:gap-4">
@@ -244,10 +276,7 @@ export default function DashboardHeader() {
   // ====== HERO ======
   return (
     <section
-      className="
-        relative overflow-hidden
-        h-[480px] sm:h-[560px] md:h-[640px] lg:h-[700px]
-      "
+      className="relative overflow-hidden h-[480px] sm:h-[560px] md:h-[640px] lg:h-[700px]"
       dir="ltr"
     >
       {/* Background slideshow */}
@@ -258,7 +287,10 @@ export default function DashboardHeader() {
             className={`absolute inset-0 transition-all duration-1000 ${
               idx === current ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
-            style={{ transition: 'opacity 1s ease-in-out, transform 6s ease-in-out' }}
+            style={{
+              transition:
+                'opacity 1s ease-in-out, transform 6s ease-in-out',
+            }}
           >
             <BackgroundImage
               src={slide.bg}
@@ -286,66 +318,77 @@ export default function DashboardHeader() {
             {active.hasProject ? (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-green-200 text-xs sm:text-sm font-medium">Properties Available</span>
+                <span className="text-green-200 text-xs sm:text-sm font-medium">
+                  {t('statusPropertiesAvailable')}
+                </span>
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
                 <div className="w-2 h-2 bg-yellow-400 rounded-full" />
-                <span className="text-yellow-200 text-xs sm:text-sm font-medium">Explore Area</span>
+                <span className="text-yellow-200 text-xs sm:text-sm font-medium">
+                  {t('statusExploreArea')}
+                </span>
               </div>
             )}
 
             {/* Chips */}
             <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
-              {['Luxury Apartments', 'Green Spaces', 'Premium Amenities'].map((txt) => (
-                <span
-                  key={txt}
-                  className="bg-white/20 backdrop-blur-lg px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm text-white border border-white/30 shadow-lg"
-                >
-                  {txt}
-                </span>
-              ))}
+              {[t('chipLuxury'), t('chipGreen'), t('chipAmenities')].map(
+                (txt) => (
+                  <span
+                    key={txt}
+                    className="bg-white/20 backdrop-blur-lg px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm text-white border border-white/30 shadow-lg"
+                  >
+                    {txt}
+                  </span>
+                )
+              )}
             </div>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href={active.hrefDetail}
-                className="
-                  bg-red-600 hover:bg-red-700 text-white font-semibold
-                  px-6 py-3 sm:px-8 sm:py-4 rounded-lg
-                  transition-all duration-300 text-center shadow-lg hover:shadow-xl
-                  transform hover:-translate-y-0.5 sm:hover:-translate-y-1
-                  flex items-center justify-center gap-2
-                "
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:hover:-translate-y-1 flex items-center justify-center gap-2"
                 prefetch
               >
-                <span>{active.hasProject ? 'Discover Properties' : 'Explore Area'}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <span>
+                  {active.hasProject
+                    ? t('primaryCtaWithProject')
+                    : t('primaryCtaNoProject')}
+                </span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
               <Link
                 href={active.hrefAll}
-                className="
-                  border-2 border-white text-white hover:bg-white/20 font-semibold
-                  px-6 py-3 sm:px-8 sm:py-4 rounded-lg
-                  transition-all duration-300 text-center backdrop-blur-sm
-                  shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:hover:-translate-y-1
-                "
+                className="border-2 border-white text-white hover:bg-white/20 font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all duration-300 text-center backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:hover:-translate-y-1"
                 prefetch
               >
-                View All in {active.areaTitle.split(' ')[0]}
+                {t('secondaryCtaPrefix', {
+                  areaShort: active.areaTitle.split(' ')[0],
+                })}
               </Link>
             </div>
           </div>
         ) : (
           <div className="max-w-3xl mb-8">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight uppercase mb-3 sm:mb-4 text-white">
-              Dubai Off-Plan Properties
+              {t('defaultTitle')}
             </h1>
             <p className="text-base sm:text-lg md:text-xl mb-5 sm:mb-6 text-white/90 leading-relaxed">
-              Discover premium off-plan developments across Dubai's most sought-after locations.
+              {t('defaultDescription')}
             </p>
           </div>
         )}
@@ -358,9 +401,11 @@ export default function DashboardHeader() {
                 key={idx}
                 onClick={() => goTo(idx)}
                 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                  idx === current ? 'bg-white scale-110 sm:scale-125 shadow-lg' : 'bg-white/50 hover:bg-white/70 hover:scale-105'
+                  idx === current
+                    ? 'bg-white scale-110 sm:scale-125 shadow-lg'
+                    : 'bg-white/50 hover:bg-white/70 hover:scale-105'
                 }`}
-                aria-label={`Go to ${slide.areaTitle}`}
+                aria-label={t('dotAriaLabel', { areaTitle: slide.areaTitle })}
               />
             ))}
           </div>
@@ -370,31 +415,43 @@ export default function DashboardHeader() {
         {slides.length > 1 && (
           <>
             <button
-              onClick={() => goTo((current - 1 + slides.length) % slides.length)}
-              className="
-                hidden md:inline-flex
-                absolute left-1 md:left-1top-1/2 -translate-y-1/2
-                bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full p-3 md:p-4
-                transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20
-              "
-              aria-label="Previous slide"
+              onClick={() =>
+                goTo((current - 1 + slides.length) % slides.length)
+              }
+              className="hidden md:inline-flex absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full p-3 md:p-4 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20"
+              aria-label={t('ariaPreviousSlide')}
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-5 h-5 md:w-6 md:h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <button
               onClick={() => goTo((current + 1) % slides.length)}
-              className="
-                hidden md:inline-flex
-                absolute right-2 md:right-4 top-1/2 -translate-y-1/2
-                bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full p-3 md:p-4
-                transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20
-              "
-              aria-label="Next slide"
+              className="hidden md:inline-flex absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-lg rounded-full p-3 md:p-4 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20"
+              aria-label={t('ariaNextSlide')}
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-5 h-5 md:w-6 md:h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </>
@@ -407,7 +464,7 @@ export default function DashboardHeader() {
           className="h-full bg-white transition-all duration-5000 ease-linear shadow-lg"
           style={{
             width: isAnimating ? '100%' : '0%',
-            transition: isAnimating ? 'width 5s linear' : 'none'
+            transition: isAnimating ? 'width 5s linear' : 'none',
           }}
           key={current}
         />

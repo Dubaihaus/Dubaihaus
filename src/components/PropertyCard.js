@@ -1,35 +1,36 @@
 // src/components/PropertyCard.js
 'use client';
 
-import { MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useCallback, useState } from "react";
-import { motion } from "framer-motion";
-import { getHandoverLabel } from "../lib/FormatHandover";
+import { MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useMemo, useCallback, useState } from 'react';
+import { motion } from 'framer-motion';
+import { getHandoverLabel } from '../lib/FormatHandover';
+import { useTranslations } from 'next-intl';
 
 /* ---------------- helpers ---------------- */
 
-function fmtLocation(locOrString) {
+function fmtLocation(locOrString, unknownLabel = 'Unknown location') {
   // If object: safely build without numeric country ids
-  if (locOrString && typeof locOrString === "object") {
+  if (locOrString && typeof locOrString === 'object') {
     const { sector, district, city, region, country } = locOrString;
     const countryStr =
-      typeof country === "string" && !/^\d+$/.test(country) ? country : null;
+      typeof country === 'string' && !/^\d+$/.test(country) ? country : null;
     const parts = [sector, district, city, region, countryStr].filter(Boolean);
-    return parts.join(", ") || "Unknown location";
+    return parts.join(', ') || unknownLabel;
   }
 
   // If string: drop standalone numeric tokens like ", 219"
-  const s = String(locOrString || "").trim();
-  if (!s) return "Unknown location";
+  const s = String(locOrString || '').trim();
+  if (!s) return unknownLabel;
   return (
     s
-      .split(",")
+      .split(',')
       .map((p) => p.trim())
       .filter((p) => p && !/^\d+$/.test(p)) // remove numeric-only segments
-      .join(", ") || "Unknown location"
+      .join(', ') || unknownLabel
   );
 }
 
@@ -73,23 +74,21 @@ function hasUsableSteps(plan) {
 /**
  * Build a short payment-plan label for the blue badge.
  * 1) Try to infer "80/20" from steps.
- * 2) Else use plan.name or property.paymentPlan.
+ * 2) Else use plan.name or fallback paymentPlanLabel.
  */
-function getCardPaymentPlanLabel(property) {
+function getCardPaymentPlanLabel(property, paymentPlanLabel = 'Payment plan') {
   const plans = Array.isArray(property?.paymentPlans)
     ? property.paymentPlans.filter(hasUsableSteps)
     : [];
 
-  // 1) If we have a plan with steps, try 80/20 style
+  // 1) If we have a plan with steps, try ratio + label
   if (plans.length) {
     const plan = plans[0];
     const steps = Array.isArray(plan.steps) ? plan.steps : [];
 
     const sorted = [...steps]
-      .filter((s) => typeof s?.percentage === "number")
+      .filter((s) => typeof s?.percentage === 'number')
       .sort((a, b) => b.percentage - a.percentage);
-
-    let ratio = "";
 
     if (sorted.length >= 2) {
       const a = Math.round(sorted[0].percentage);
@@ -101,16 +100,19 @@ function getCardPaymentPlanLabel(property) {
 
       // Only show ratio if the top two account for most of the total
       if (total > 0 && a + b >= total * 0.9) {
-        ratio = `${a}/${b}`;
+        return `${a}/${b} ${paymentPlanLabel}`;
       }
     }
 
-    const base = ratio || plan.name || "Payment plan";
-    return `${base} Payment plan`.replace(/Payment plan Payment plan/i, "Payment plan");
+    if (plan.name) {
+      return `${plan.name} ${paymentPlanLabel}`;
+    }
+
+    return paymentPlanLabel;
   }
 
   // 2) Fallback: use simple string they might have normalized
-  if (typeof property?.paymentPlan === "string" && property.paymentPlan.trim()) {
+  if (typeof property?.paymentPlan === 'string' && property.paymentPlan.trim()) {
     return property.paymentPlan.trim();
   }
 
@@ -126,6 +128,7 @@ export default function PropertyCard({
   index = 0,
 }) {
   const router = useRouter();
+  const t = useTranslations('offPlan.card');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -134,29 +137,27 @@ export default function PropertyCard({
     property?.media?.photos?.[0] ||
     property?.cover_image?.url ||
     property?.rawData?.cover_image?.url ||
-    "/project_detail_images/building.jpg";
+    '/project_detail_images/building.jpg';
 
   const rawPrice =
     property.price ?? property.minPrice ?? property.min_price ?? null;
 
   // currency conversion first, then round to nearest integer
   let converted = rawPrice;
-  if (currency === "EUR" && rawPrice != null) converted = rawPrice * 0.25;
-  else if (currency === "USD" && rawPrice != null) converted = rawPrice * 0.27;
+  if (currency === 'EUR' && rawPrice != null) converted = rawPrice * 0.25;
+  else if (currency === 'USD' && rawPrice != null) converted = rawPrice * 0.27;
 
   // remove any decimals — ensure integer
   const price = converted != null ? Math.round(Number(converted)) : null;
 
   const shownCurrency =
-    currency ||
-    property.priceCurrency ||
-    property.price_currency ||
-    "AED";
+    currency || property.priceCurrency || property.price_currency || 'AED';
 
   const locationLabel = fmtLocation(
-    property.locationObj || property.rawData?.location || property.location
+    property.locationObj || property.rawData?.location || property.location,
+    t('location.unknown')
   );
-  const developer = property.developer || "N/A";
+  const developer = property.developer || 'N/A';
   const handover = getHandoverLabel(property);
 
   // --- Property types & payment plan meta ---
@@ -171,7 +172,7 @@ export default function PropertyCard({
 
   // Comma-separated label for red badge
   const propertyTypesLabel =
-    types && types.length ? types.join(", ") : "Property";
+    types && types.length ? types.join(', ') : t('badges.propertyFallback');
 
   // Only bedroom summary in chips now
   const brRange = property.bedroomsRange || null;
@@ -180,8 +181,11 @@ export default function PropertyCard({
   const leftBadgeLabel = propertyTypesLabel;
 
   // Right blue badge: payment plan or "Coming soon"
-  const paymentPlanLabel = getCardPaymentPlanLabel(property);
-  const rightBadgeLabel = paymentPlanLabel || "Coming soon";
+  const paymentPlanLabel = getCardPaymentPlanLabel(
+    property,
+    t('badges.paymentPlan')
+  );
+  const rightBadgeLabel = paymentPlanLabel || t('badges.comingSoon');
 
   const queryParams = {};
   if (selectedUnitType) queryParams.unit_type = selectedUnitType;
@@ -208,7 +212,7 @@ export default function PropertyCard({
       }}
       whileHover={{
         y: -8,
-        transition: { duration: 0.3, ease: "easeOut" },
+        transition: { duration: 0.3, ease: 'easeOut' },
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -219,7 +223,10 @@ export default function PropertyCard({
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10 pointer-events-none" />
 
       <Link
-        href={{ pathname: `/ui/project_details/${property.id}`, query: queryParams }}
+        href={{
+          pathname: `/ui/project_details/${property.id}`,
+          query: queryParams,
+        }}
         prefetch
         onMouseEnter={prefetchDetail}
         onFocus={prefetchDetail}
@@ -233,12 +240,12 @@ export default function PropertyCard({
               src={coverPhoto}
               alt={property.title || property.name}
               className={`w-full h-64 object-cover transition-all duration-700 ${
-                isHovered ? "scale-110" : "scale-100"
-              } ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                isHovered ? 'scale-110' : 'scale-100'
+              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               initial={false}
               animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             />
 
             {/* Loading skeleton */}
@@ -280,9 +287,10 @@ export default function PropertyCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 + 0.1 }}
             className="font-bold text-xl mb-3"
-            style={{ color: "#00C6FF" }}
+            style={{ color: '#00C6FF' }}
           >
-            from {shownCurrency} {price?.toLocaleString() ?? "—"}
+            {t('from')} {shownCurrency}{' '}
+            {price?.toLocaleString() ?? '—'}
           </motion.p>
 
           {/* Title */}
@@ -317,11 +325,15 @@ export default function PropertyCard({
             className="text-sm text-gray-600 space-y-2 mb-6 mt-4"
           >
             <p className="flex justify-between">
-              <span className="font-medium">Developer:</span>
+              <span className="font-medium">
+                {t('labels.developer')}
+              </span>
               <span className="text-gray-800">{developer}</span>
             </p>
             <p className="flex justify-between">
-              <span className="font-medium">Handover:</span>
+              <span className="font-medium">
+                {t('labels.handover')}
+              </span>
               <span className="text-gray-800">{handover}</span>
             </p>
           </motion.div>
@@ -336,13 +348,13 @@ export default function PropertyCard({
             <Button
               className="w-full text-white rounded-xl font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group/btn"
               style={{
-                backgroundColor: "#00C6FF",
+                backgroundColor: '#00C6FF',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#003C7A";
+                e.currentTarget.style.backgroundColor = '#003C7A';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#00C6FF";
+                e.currentTarget.style.backgroundColor = '#00C6FF';
               }}
             >
               {/* Button shine effect */}
@@ -353,7 +365,7 @@ export default function PropertyCard({
                 transition={{ duration: 0.2 }}
                 className="relative z-10 flex items-center justify-center"
               >
-                Discover more
+                {t('button.discoverMore')}
                 <svg
                   className="ml-2 w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300"
                   fill="none"

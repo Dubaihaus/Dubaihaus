@@ -1,4 +1,4 @@
-
+// src/components/dashboard/HomeClient.jsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -9,9 +9,11 @@ import Footer from "@/components/footer";
 import AreasShowcaseClient from "@/components/dashboard/PropertiesPerArea";
 import MapSection from "@/components/map/MapSection";
 import AbuDhabiAreasSection from "@/components/dashboard/AbuDhabiAreas";
+import { useTranslations } from "next-intl";
 
 export default function HomeClient() {
   const [mapProjects, setMapProjects] = useState([]);
+  const tHome = useTranslations("home");
 
   useEffect(() => {
     (async () => {
@@ -36,7 +38,7 @@ export default function HomeClient() {
 
       <MapSection
         projects={mapProjects}
-        title="Find latest properties on the map"
+        title={tHome("mapSection.title")}
         height={520}
         initialView={{ longitude: 55.27, latitude: 25.2, zoom: 10 }}
         maxWidthClass="max-w-6xl"
@@ -45,7 +47,8 @@ export default function HomeClient() {
 
       <AbuDhabiAreasSection />
       <AreasShowcaseClient />
-  
+
+      <Footer />
     </>
   );
 }

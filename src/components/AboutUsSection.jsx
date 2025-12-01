@@ -1,6 +1,8 @@
+// src/components/AboutUsSection.jsx
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   ShieldCheck,
   Users2,
@@ -8,11 +10,10 @@ import {
   BadgeCheck,
   Target,
   Sparkles,
-  Shield,
+  Building,
   Award,
   TrendingUp,
   Heart,
-  Building,
 } from "lucide-react";
 
 const fadeUp = {
@@ -24,14 +25,16 @@ const fadeUp = {
   }),
 };
 
-const stats = [
-  { number: "500+", label: "Happy Clients", icon: Users2 },
-  { number: "4.9/5", label: "Client Rating", icon: Award },
-  { number: "AED 2B+", label: "Property Value", icon: TrendingUp },
-  { number: "2024", label: "Established", icon: Building },
+const STAT_CONFIG = [
+  { number: "500+", labelKey: "about.stats.happyClients", icon: Users2 },
+  { number: "4.9/5", labelKey: "about.stats.clientRating", icon: Award },
+  { number: "AED 2B+", labelKey: "about.stats.propertyValue", icon: TrendingUp },
+  { number: "2024", labelKey: "about.stats.established", icon: Building },
 ];
 
 export default function AboutUsSection() {
+  const t = useTranslations();
+
   return (
     <section
       className="
@@ -56,21 +59,19 @@ export default function AboutUsSection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-sky)]" />
-            About DubaiHaus
+            {t("about.badge")}
           </div>
 
           <h2 className="mt-4 text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 leading-tight">
-            Building{" "}
+            {t("about.headlinePrefix")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]">
-              Trust & Transparency
+              {t("about.headlineHighlight")}
             </span>{" "}
-            in Every Property
+            {t("about.headlineSuffix")}
           </h2>
 
           <p className="mt-5 text-slate-600 text-lg sm:text-xl leading-relaxed">
-            Since 2024, DubaiHaus has been redefining how people buy, sell, and
-            invest in real estate across Dubai and Abu Dhabi — with verified data,
-            genuine advice, and expert guidance from people who care.
+            {t("about.intro")}
           </p>
         </motion.div>
 
@@ -82,9 +83,9 @@ export default function AboutUsSection() {
           variants={fadeUp}
           className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
         >
-          {stats.map((stat, i) => (
+          {STAT_CONFIG.map((stat, i) => (
             <motion.div
-              key={stat.label}
+              key={stat.labelKey}
               custom={i}
               variants={fadeUp}
               className="
@@ -97,8 +98,12 @@ export default function AboutUsSection() {
               <div className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-brand-sky)] to-[var(--color-brand-dark)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                 <stat.icon size={16} className="text-white" />
               </div>
-              <p className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">{stat.number}</p>
-              <p className="text-sm text-slate-600 font-medium">{stat.label}</p>
+              <p className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">
+                {stat.number}
+              </p>
+              <p className="text-sm text-slate-600 font-medium">
+                {t(stat.labelKey)}
+              </p>
             </motion.div>
           ))}
         </motion.div>
@@ -114,22 +119,22 @@ export default function AboutUsSection() {
           {[
             {
               icon: <ShieldCheck className="h-5 w-5" />,
-              title: "Verified & Authentic",
-              body: "Every project we recommend undergoes rigorous verification. No fake listings, no hidden agendas — only developer-approved data.",
+              titleKey: "about.values.verified.title",
+              bodyKey: "about.values.verified.body",
             },
             {
               icon: <Heart className="h-5 w-5" />,
-              title: "Client-First Approach",
-              body: "Your goals come first. We listen carefully and design property options that truly match your lifestyle and investment goals.",
+              titleKey: "about.values.clientFirst.title",
+              bodyKey: "about.values.clientFirst.body",
             },
             {
               icon: <Globe2 className="h-5 w-5" />,
-              title: "Global Buyer Support",
-              body: "Remote consultations, digital paperwork, and guidance for clients from GCC, Europe, and around the world.",
+              titleKey: "about.values.globalSupport.title",
+              bodyKey: "about.values.globalSupport.body",
             },
           ].map((card, i) => (
             <motion.div
-              key={card.title}
+              key={card.titleKey}
               custom={i}
               variants={fadeUp}
               className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.10)] backdrop-blur-xl"
@@ -140,8 +145,12 @@ export default function AboutUsSection() {
                 <div className="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-brand-sky)] to-[var(--color-brand-dark)] text-white w-10 h-10 shadow-md">
                   {card.icon}
                 </div>
-                <h3 className="mt-3 text-lg font-semibold text-slate-900">{card.title}</h3>
-                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{card.body}</p>
+                <h3 className="mt-3 text-lg font-semibold text-slate-900">
+                  {t(card.titleKey)}
+                </h3>
+                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">
+                  {t(card.bodyKey)}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -160,80 +169,95 @@ export default function AboutUsSection() {
         >
           <div className="grid md:grid-cols-3 gap-6 items-start">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Our Plan</p>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">What We’re Building</h3>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                {t("about.plan.badge")}
+              </p>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                {t("about.plan.title")}
+              </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                A faster, more transparent discovery experience: verified project data, live availability,
-                expert concierge recommendations, and one-tap booking support.
+                {t("about.plan.body")}
               </p>
             </div>
 
             <ul className="space-y-3">
               {[
-                { icon: <BadgeCheck className="h-4 w-4" />, text: "Developer-verified data & brochures" },
-                { icon: <Target className="h-4 w-4" />, text: "Tailored shortlists by budget & area" },
-                { icon: <Sparkles className="h-4 w-4" />, text: "Transparent payment plans & handovers" },
+                {
+                  icon: <BadgeCheck className="h-4 w-4" />,
+                  textKey: "about.plan.list.verifiedData",
+                },
+                {
+                  icon: <Target className="h-4 w-4" />,
+                  textKey: "about.plan.list.tailoredShortlists",
+                },
+                {
+                  icon: <Sparkles className="h-4 w-4" />,
+                  textKey: "about.plan.list.transparentPlans",
+                },
               ].map((li, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[var(--color-brand-sky)] shadow-sm">
                     {li.icon}
                   </span>
-                  <span className="text-sm text-slate-700">{li.text}</span>
+                  <span className="text-sm text-slate-700">
+                    {t(li.textKey)}
+                  </span>
                 </li>
               ))}
             </ul>
 
             <div className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Authenticity</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                {t("about.authenticity.badge")}
+              </p>
               <p className="mt-1.5 text-sm text-slate-700 leading-relaxed">
-                We work directly with authorized developers and agencies.
-                All information and pricing are verified before being published.
+                {t("about.authenticity.body")}
               </p>
             </div>
           </div>
         </motion.div>
 
         {/* CTA */}
-       <motion.div
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true, amount: 0.35 }}
-  variants={fadeUp}
-  className="relative mt-16 rounded-3xl bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)] p-10 text-center overflow-hidden"
->
-  <div className="absolute inset-0 opacity-10">
-    <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-white" />
-    <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-white" />
-  </div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.35 }}
+          variants={fadeUp}
+          className="relative mt-16 rounded-3xl bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)] p-10 text-center overflow-hidden"
+        >
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-white" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-white" />
+          </div>
 
-  <div className="relative z-10 space-y-4">
-    <h3 className="text-2xl md:text-3xl font-bold text-white">
-      Ready to start your property journey?
-    </h3>
-    <p className="text-blue-100 text-sm md:text-base max-w-2xl mx-auto">
-      Book a quick consultation—no obligation, just clear guidance.
-    </p>
-
-    <button
-      type="button"
-      onClick={() => {
-        const el = document.getElementById('contact-section');
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }}
-      className="
-        inline-flex items-center justify-center
-        rounded-2xl bg-white text-[var(--color-brand-dark)]
-        px-8 py-4 font-semibold shadow-2xl
-        hover:scale-105 transition-transform duration-200
-      "
-    >
-      Book a consultation
-    </button>
-  </div>
-     <p className="text-blue-100/80 text-sm mt-6">
-              No obligation — just honest advice from verified property experts.
+          <div className="relative z-10 space-y-4">
+            <h3 className="text-2xl md:text-3xl font-bold text-white">
+              {t("about.cta.title")}
+            </h3>
+            <p className="text-blue-100 text-sm md:text-base max-w-2xl mx-auto">
+              {t("about.cta.body")}
             </p>
-</motion.div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById("contact-section");
+                el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="
+                inline-flex items-center justify-center
+                rounded-2xl bg-white text-[var(--color-brand-dark)]
+                px-8 py-4 font-semibold shadow-2xl
+                hover:scale-105 transition-transform duration-200
+              "
+            >
+              {t("about.cta.button")}
+            </button>
+          </div>
+          <p className="text-blue-100/80 text-sm mt-6">
+            {t("about.cta.note")}
+          </p>
+        </motion.div>
       </div>
     </section>
   );

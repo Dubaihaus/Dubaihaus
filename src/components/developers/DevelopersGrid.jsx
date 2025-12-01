@@ -1,11 +1,13 @@
 // src/components/developers/DevelopersGrid.jsx
-"use client";
+'use client';
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 function DeveloperCard({ developer }) {
-  const initials = String(developer?.name || "NA").slice(0, 2).toUpperCase();
+  const t = useTranslations('developers.grid');
+  const initials = String(developer?.name || 'NA').slice(0, 2).toUpperCase();
 
   return (
     <Link
@@ -38,7 +40,7 @@ function DeveloperCard({ developer }) {
           </h2>
           {developer.website && (
             <p className="mt-0.5 truncate text-xs text-[var(--color-brand-sky)]/90">
-              {developer.website.replace(/^https?:\/\//, "")}
+              {developer.website.replace(/^https?:\/\//, '')}
             </p>
           )}
         </div>
@@ -46,13 +48,13 @@ function DeveloperCard({ developer }) {
 
       <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-700 border border-slate-200">
-          View projects
+          {t('viewProjects')}
           <span className="transition-transform group-hover:translate-x-0.5">
             ↗
           </span>
         </span>
         <span className="text-[11px] text-slate-400">
-          Off-plan & ready projects
+          {t('offplanAndReady')}
         </span>
       </div>
     </Link>
@@ -60,33 +62,33 @@ function DeveloperCard({ developer }) {
 }
 
 export default function DevelopersGrid({ initialDevelopers = [] }) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const t = useTranslations('developers.grid');
+  const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(
     Math.max(1, Math.ceil(initialDevelopers.length / 2)) // show half initially
   );
 
   useEffect(() => {
     function handleSearch(event) {
-      const term = String(event.detail || "").toLowerCase();
+      const term = String(event.detail || '').toLowerCase();
       setSearchTerm(term);
 
       // When searching, show all matching results (no pagination frustration)
       if (term) {
         setVisibleCount(Number.MAX_SAFE_INTEGER);
       } else {
-        setVisibleCount(
-          Math.max(1, Math.ceil(initialDevelopers.length / 2))
-        );
+        setVisibleCount(Math.max(1, Math.ceil(initialDevelopers.length / 2)));
       }
     }
-    window.addEventListener("developers:search", handleSearch);
-    return () => window.removeEventListener("developers:search", handleSearch);
+    window.addEventListener('developers:search', handleSearch);
+    return () =>
+      window.removeEventListener('developers:search', handleSearch);
   }, [initialDevelopers.length]);
 
   const filtered = useMemo(() => {
     if (!searchTerm) return initialDevelopers;
     return initialDevelopers.filter((dev) =>
-      String(dev.name || "").toLowerCase().includes(searchTerm)
+      String(dev.name || '').toLowerCase().includes(searchTerm)
     );
   }, [initialDevelopers, searchTerm]);
 
@@ -97,15 +99,10 @@ export default function DevelopersGrid({ initialDevelopers = [] }) {
     <div className="mt-10">
       <div className="mb-4 flex items-center justify-between text-xs text-slate-500">
         <span>
-          Showing{" "}
-          <span className="font-semibold text-[var(--color-brand-sky)]">
-            {visibleDevelopers.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-semibold">
-            {filtered.length}
-          </span>{" "}
-          {filtered.length === 1 ? "developer" : "developers"}
+          {t('summary', {
+            visible: visibleDevelopers.length,
+            total: filtered.length,
+          })}
         </span>
       </div>
 
@@ -116,7 +113,7 @@ export default function DevelopersGrid({ initialDevelopers = [] }) {
 
         {visibleDevelopers.length === 0 && (
           <div className="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white/80 p-6 text-center text-sm text-slate-500">
-            No developers match your search. Try another name.
+            {t('empty')}
           </div>
         )}
       </div>
@@ -133,7 +130,7 @@ export default function DevelopersGrid({ initialDevelopers = [] }) {
               transition-colors
             "
           >
-            Show all developers
+            {t('showAllButton')}
             <span>↓</span>
           </button>
         </div>

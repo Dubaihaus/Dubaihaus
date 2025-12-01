@@ -3,16 +3,17 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 const REGIONS = [
-  { value: "Dubai", label: "Dubai",  count: 42 },
-  { value: "Abu Dhabi", label: "Abu Dhabi", count: 28 },
-  { value: "Sharjah", label: "Sharjah",   count: 15 },
-  { value: "Ajman", label: "Ajman",  count: 8 },
-  { value: "Ras Al Khaimah", label: "Ras Al Khaimah",  count: 6 },
-  { value: "Fujairah", label: "Fujairah",  count: 4 },
-  { value: "Umm Al Quwain", label: "Umm Al Quwain",  count: 3 },
-  { value: "all", label: "All UAE", count: 106 },
+  { value: "Dubai", labelKey: "regions.Dubai", count: 42 },
+  { value: "Abu Dhabi", labelKey: "regions.AbuDhabi", count: 28 },
+  { value: "Sharjah", labelKey: "regions.Sharjah", count: 15 },
+  { value: "Ajman", labelKey: "regions.Ajman", count: 8 },
+  { value: "Ras Al Khaimah", labelKey: "regions.RasAlKhaimah", count: 6 },
+  { value: "Fujairah", labelKey: "regions.Fujairah", count: 4 },
+  { value: "Umm Al Quwain", labelKey: "regions.UmmAlQuwain", count: 3 },
+  { value: "all", labelKey: "filter.regionAllLabel", count: 106 },
 ];
 
 export default function AreasFilterPanel({
@@ -21,20 +22,28 @@ export default function AreasFilterPanel({
   areaQuery,
   onAreaQueryChange,
 }) {
+  const t = useTranslations("areas");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const searchRef = useRef(null);
 
   // Mock suggestions - in real app, this would come from API
   const areaSuggestions = [
-    "Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Business Bay",
-    "Jumeirah Village", "Dubai Hills", "Yas Island", "Al Reem Island",
-    "Khalifa City", "Al Maryah Island"
+    "Downtown Dubai",
+    "Dubai Marina",
+    "Palm Jumeirah",
+    "Business Bay",
+    "Jumeirah Village",
+    "Dubai Hills",
+    "Yas Island",
+    "Al Reem Island",
+    "Khalifa City",
+    "Al Maryah Island",
   ];
 
   useEffect(() => {
     if (areaQuery.length > 1) {
-      const filtered = areaSuggestions.filter(area =>
+      const filtered = areaSuggestions.filter((area) =>
         area.toLowerCase().includes(areaQuery.toLowerCase())
       );
       setSuggestions(filtered.slice(0, 5));
@@ -62,7 +71,7 @@ export default function AreasFilterPanel({
             {/* Region Select */}
             <div className="lg:col-span-4">
               <label className="block text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                📍 Select Region
+                📍 {t("filter.selectRegionLabel")}
               </label>
               <div className="relative">
                 <select
@@ -72,13 +81,23 @@ export default function AreasFilterPanel({
                 >
                   {REGIONS.map((r) => (
                     <option key={r.value} value={r.value}>
-                      {r.emoji} {r.label} ({r.count})
+                      {t(r.labelKey)} ({r.count})
                     </option>
                   ))}
                 </select>
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -87,20 +106,22 @@ export default function AreasFilterPanel({
             {/* Area Search */}
             <div className="lg:col-span-5 relative">
               <label className="block text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                🔍 Search Areas
+                🔍 {t("filter.searchAreasLabel")}
               </label>
               <div className="relative">
                 <input
                   ref={searchRef}
                   type="text"
-                  placeholder="Try 'Downtown', 'Marina', 'Yas Island'..."
+                  placeholder={t("filter.searchPlaceholder")}
                   value={areaQuery}
                   onChange={(e) => onAreaQueryChange(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                  onBlur={() =>
+                    setTimeout(() => setIsSearchFocused(false), 200)
+                  }
                   className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 pr-24 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all duration-300 hover:border-gray-300"
                 />
-                
+
                 {/* Search button */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -109,7 +130,7 @@ export default function AreasFilterPanel({
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-lg text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-shadow duration-300"
                   style={{ backgroundColor: "#00C6FF" }}
                 >
-                  Find Areas
+                  {t("filter.findAreasButton")}
                 </motion.button>
               </div>
 
@@ -163,12 +184,10 @@ export default function AreasFilterPanel({
                     d="M9 20l-5.447-2.724A2 2 0 013 15.382V5.618a2 2 0 011.106-1.789L9 2m0 18l6-3m-6 3V2m6 15l5.447-2.724A2 2 0 0021 12.382V4.618a2 2 0 00-1.106-1.789L15 2m0 15V2"
                   />
                 </svg>
-                View Map
+                {t("filter.viewMapButton")}
               </motion.button>
             </div>
           </div>
-
-       
         </motion.div>
       </div>
     </section>

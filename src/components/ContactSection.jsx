@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -14,6 +15,7 @@ const containerVariants = {
 };
 
 export default function ContactSection() {
+  const t = useTranslations(); // use full keys, e.g. "contact.badge"
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // "ok" | "error" | null
 
@@ -22,8 +24,9 @@ export default function ContactSection() {
     setSubmitting(true);
     setStatus(null);
 
-  const form = e.currentTarget;  // ⬅ SAVE REFERENCE
-  const formData = new FormData(form);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
     const payload = {
       purpose: formData.get("purpose"),
       budget: formData.get("budget"),
@@ -43,19 +46,16 @@ export default function ContactSection() {
         body: JSON.stringify(payload),
       });
 
-      // Debug log (you can remove later)
       console.log("CONTACT /api/contact status:", res.status);
 
       if (res.ok) {
-        // best-effort JSON read (in case we change response later)
         try {
           await res.json();
         } catch {
           /* ignore JSON parse error */
         }
-
         setStatus("ok");
-      form.reset(); // ⬅ RESET FORM ON SUCCESS
+        form.reset();
       } else {
         let data = null;
         try {
@@ -107,7 +107,9 @@ export default function ContactSection() {
             className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm backdrop-blur-xl"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-sky)]" />
-            <span className="text-slate-700">Let&apos;s talk</span>
+            <span className="text-slate-700">
+              {t("contact.badge")}
+            </span>
           </motion.div>
 
           {/* heading + subtext */}
@@ -119,7 +121,7 @@ export default function ContactSection() {
               transition={{ duration: 0.6, delay: 0.05 }}
               className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
             >
-              Let&apos;s plan your next property move{" "}
+              {t("contact.headline")}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]"></span>
             </motion.h1>
 
@@ -130,10 +132,7 @@ export default function ContactSection() {
               transition={{ duration: 0.6, delay: 0.15 }}
               className="max-w-xl text-base sm:text-lg text-slate-600 leading-relaxed"
             >
-              Whether you&apos;re exploring off-plan projects, looking for a
-              ready apartment, or considering selling, share your plans and our
-              experts will come back with tailored options in Dubai &amp; Abu
-              Dhabi.
+              {t("contact.subheadline")}
             </motion.p>
 
             <motion.div
@@ -145,11 +144,11 @@ export default function ContactSection() {
             >
               <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 shadow-sm backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span>No-obligation consultation</span>
+                <span>{t("contact.chips.noObligation")}</span>
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 shadow-sm backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-sky)]" />
-                <span>Response usually within 24 hours</span>
+                <span>{t("contact.chips.responseTime")}</span>
               </span>
             </motion.div>
           </div>
@@ -173,7 +172,7 @@ export default function ContactSection() {
                   htmlFor="purpose"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  I&apos;m interested in
+                  {t("contact.form.purpose.label")}
                 </label>
                 <select
                   id="purpose"
@@ -185,11 +184,21 @@ export default function ContactSection() {
                   "
                   defaultValue="buy-offplan"
                 >
-                  <option value="buy-offplan">Buying off-plan</option>
-                  <option value="buy-ready">Buying a ready property</option>
-                  <option value="sell">Selling my property</option>
-                  <option value="invest">Investment advice</option>
-                  <option value="other">Just exploring options</option>
+                  <option value="buy-offplan">
+                    {t("contact.form.purpose.options.buyOffplan")}
+                  </option>
+                  <option value="buy-ready">
+                    {t("contact.form.purpose.options.buyReady")}
+                  </option>
+                  <option value="sell">
+                    {t("contact.form.purpose.options.sell")}
+                  </option>
+                  <option value="invest">
+                    {t("contact.form.purpose.options.invest")}
+                  </option>
+                  <option value="other">
+                    {t("contact.form.purpose.options.other")}
+                  </option>
                 </select>
               </div>
 
@@ -198,13 +207,13 @@ export default function ContactSection() {
                   htmlFor="budget"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  Approximate budget (AED)
+                  {t("contact.form.budget.label")}
                 </label>
                 <input
                   id="budget"
                   name="budget"
                   type="text"
-                  placeholder="e.g. 1M – 2M"
+                  placeholder={t("contact.form.budget.placeholder")}
                   className="
                     w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                     text-slate-900 shadow-sm placeholder:text-slate-400
@@ -220,13 +229,13 @@ export default function ContactSection() {
                   htmlFor="name"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  Full name
+                  {t("contact.form.name.label")}
                 </label>
                 <input
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="Your full name"
+                  placeholder={t("contact.form.name.placeholder")}
                   className="
                     w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                     text-slate-900 shadow-sm placeholder:text-slate-400
@@ -241,13 +250,13 @@ export default function ContactSection() {
                   htmlFor="email"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  Email address
+                  {t("contact.form.email.label")}
                 </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("contact.form.email.placeholder")}
                   className="
                     w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                     text-slate-900 shadow-sm placeholder:text-slate-400
@@ -264,13 +273,13 @@ export default function ContactSection() {
                   htmlFor="phone"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  Phone / WhatsApp
+                  {t("contact.form.phone.label")}
                 </label>
                 <input
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+971 ..."
+                  placeholder={t("contact.form.phone.placeholder")}
                   className="
                     w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                     text-slate-900 shadow-sm placeholder:text-slate-400
@@ -278,7 +287,7 @@ export default function ContactSection() {
                   "
                 />
                 <p className="text-[11px] text-slate-500">
-                  Optional, but helps us reach you faster.
+                  {t("contact.form.phoneHint")}
                 </p>
               </div>
 
@@ -287,13 +296,13 @@ export default function ContactSection() {
                   htmlFor="areas"
                   className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
                 >
-                  Areas you&apos;re considering
+                  {t("contact.form.areas.label")}
                 </label>
                 <input
                   id="areas"
                   name="areas"
                   type="text"
-                  placeholder="Downtown, Dubai Marina, Dubai Hills..."
+                  placeholder={t("contact.form.areas.placeholder")}
                   className="
                     w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                     text-slate-900 shadow-sm placeholder:text-slate-400
@@ -308,13 +317,13 @@ export default function ContactSection() {
                 htmlFor="message"
                 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500"
               >
-                Tell us a bit more
+                {t("contact.form.message.label")}
               </label>
               <textarea
                 id="message"
                 name="message"
                 rows={4}
-                placeholder="Share any details about your timeframe, preferences or questions..."
+                placeholder={t("contact.form.message.placeholder")}
                 className="
                   w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
                   text-slate-900 shadow-sm placeholder:text-slate-400
@@ -341,7 +350,9 @@ export default function ContactSection() {
                 <span className="absolute inset-0 bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]" />
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
                 <span className="relative z-10">
-                  {submitting ? "Sending..." : "Send enquiry"}
+                  {submitting
+                    ? t("contact.form.submitSubmitting")
+                    : t("contact.form.submitIdle")}
                 </span>
                 {!submitting && (
                   <span className="relative z-10 text-lg leading-none">↗</span>
@@ -349,20 +360,19 @@ export default function ContactSection() {
               </button>
 
               <p className="text-[11px] text-slate-500 max-w-xs">
-                By sending this form you agree to be contacted by DubaiHaus about
-                property opportunities. We respect your privacy.
+                {t("contact.disclaimer")}
               </p>
             </div>
 
             {/* status messages */}
             {status === "ok" && (
               <p className="text-sm text-emerald-600">
-                ✅ Message sent! We&apos;ll get back to you soon.
+                {t("contact.status.success")}
               </p>
             )}
             {status === "error" && (
               <p className="text-sm text-red-600">
-                ❌ Something went wrong. Please try again.
+                {t("contact.status.error")}
               </p>
             )}
           </motion.form>
@@ -374,10 +384,7 @@ export default function ContactSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
-          className="
-            flex-1 lg:max-w-sm 
-            space-y-6
-          "
+          className="flex-1 lg:max-w-sm space-y-6"
         >
           {/* glass stats card */}
           <div
@@ -393,10 +400,10 @@ export default function ContactSection() {
             <div className="relative z-10 space-y-5">
               <div className="space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Contact details
+                  {t("contact.aside.badge")}
                 </p>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                  Talk to a DubaiHaus specialist
+                  {t("contact.aside.title")}
                 </h2>
               </div>
 
@@ -406,12 +413,14 @@ export default function ContactSection() {
                     📞
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">WhatsApp</p>
+                    <p className="font-semibold text-slate-900">
+                      {t("contact.aside.whatsapp.label")}
+                    </p>
                     <p className="text-[13px] text-slate-600">
-                      +971 50 523 1194
+                      {t("contact.aside.whatsapp.number")}
                     </p>
                     <p className="mt-1 text-[11px] text-slate-500">
-                      Mon–Sat, 10:00 – 19:00 (GST)
+                      {t("contact.aside.whatsapp.hours")}
                     </p>
                   </div>
                 </div>
@@ -421,9 +430,11 @@ export default function ContactSection() {
                     ✉️
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">Email</p>
+                    <p className="font-semibold text-slate-900">
+                      {t("contact.aside.email.label")}
+                    </p>
                     <p className="text-[13px] text-slate-600">
-                      hello@dubaihaus.com
+                      {t("contact.aside.email.value")}
                     </p>
                   </div>
                 </div>
@@ -433,12 +444,14 @@ export default function ContactSection() {
                     📍
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">Based in</p>
+                    <p className="font-semibold text-slate-900">
+                      {t("contact.aside.location.label")}
+                    </p>
                     <p className="text-[13px] text-slate-600">
-                      Dubai &amp; Abu Dhabi, UAE
+                      {t("contact.aside.location.value")}
                     </p>
                     <p className="mt-1 text-[11px] text-slate-500">
-                      Supporting buyers from GCC, Europe &amp; worldwide.
+                      {t("contact.aside.location.hint")}
                     </p>
                   </div>
                 </div>
@@ -451,7 +464,7 @@ export default function ContactSection() {
                     500+
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    Clients assisted
+                    {t("contact.aside.stats.clients")}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -459,7 +472,7 @@ export default function ContactSection() {
                     4.9/5
                   </p>
                   <p className="text-[11px] text-slate-500">
-                    Avg. satisfaction
+                    {t("contact.aside.stats.satisfaction")}
                   </p>
                 </div>
               </div>
@@ -469,11 +482,9 @@ export default function ContactSection() {
           {/* small strip / reassurance */}
           <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/70 px-4 py-3 text-xs sm:text-[13px] text-slate-600 leading-relaxed">
             <span className="font-semibold text-[var(--color-brand-dark)]">
-              Not ready to talk yet?
+              {t("contact.aside.strip.title")}
             </span>{" "}
-            Save this page and reach out whenever you&apos;re ready. We&apos;ll
-            be here with updated projects, verified information and transparent
-            advice.
+            {t("contact.aside.strip.body")}
           </div>
         </motion.aside>
       </motion.div>

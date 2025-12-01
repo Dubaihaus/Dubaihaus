@@ -1,6 +1,9 @@
 // src/app/api/off-plan/latest/route.js
-import { searchProperties, getPropertyById} from "@/lib/reellyApi";
+import { searchProperties, getPropertyById } from "@/lib/reellyApi";
 import { cookies } from "next/headers";
+import { translateProjectsForLocale } from "@/lib/translateReelly";
+
+export const runtime = "nodejs";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -26,8 +29,9 @@ export async function GET(request) {
 
   console.log("🆕 /api/off-plan/latest filters:", { ...filters, locale });
 
-  const data = await searchProperties(filters);
- // ✅ Enrich with paymentPlan + propertyTypes from detail API
+  let data = await searchProperties(filters);
+
+  // ✅ Enrich with paymentPlan + propertyTypes from detail API
   if (data?.results?.length) {
     try {
       const enrichedResults = await Promise.all(
@@ -38,7 +42,7 @@ export async function GET(request) {
             return {
               ...item,
               propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
-                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlans: detail?.paymentPlans || item.paymentPlans || [],
               paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
             };
           } catch (err) {
@@ -53,7 +57,15 @@ export async function GET(request) {
     }
   }
 
- 
+  // 🌍 Locale-aware translation (currently only for German)
+  if (data?.results?.length && locale === "de") {
+    try {
+      data.results = await translateProjectsForLocale(data.results, locale);
+    } catch (err) {
+      console.error("Translation for latest projects failed:", err);
+    }
+  }
+
   const responseHeaders = {
     "Content-Type": "application/json",
     "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",

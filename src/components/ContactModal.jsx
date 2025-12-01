@@ -3,8 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send, Phone, Mail, User, MessageCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function ContactModal({ open, onClose, projectTitle }) {
+  const t = useTranslations('contact.modal');
+
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
@@ -16,12 +19,17 @@ export default function ContactModal({ open, onClose, projectTitle }) {
   const formatPhoneNumber = (value) => {
     const cleaned = value.replace(/\D/g, '');
     if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 6) return `+${cleaned.slice(0,3)} ${cleaned.slice(3)}`;
-    if (cleaned.length <= 9) return `+${cleaned.slice(0,3)} ${cleaned.slice(3,6)} ${cleaned.slice(6)}`;
-    return `+${cleaned.slice(0,3)} ${cleaned.slice(3,6)} ${cleaned.slice(6,9)} ${cleaned.slice(9,12)}`;
+    if (cleaned.length <= 6) return `+${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
+    if (cleaned.length <= 9)
+      return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+    return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(
+      6,
+      9
+    )} ${cleaned.slice(9, 12)}`;
   };
 
-  const handlePhoneChange = (e) => setForm({ ...form, phone: formatPhoneNumber(e.target.value) });
+  const handlePhoneChange = (e) =>
+    setForm({ ...form, phone: formatPhoneNumber(e.target.value) });
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +61,10 @@ export default function ContactModal({ open, onClose, projectTitle }) {
     }
   };
 
-  const handleKeyDown = useCallback((e) => e.key === 'Escape' && onClose?.(), [onClose]);
+  const handleKeyDown = useCallback(
+    (e) => e.key === 'Escape' && onClose?.(),
+    [onClose]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -91,7 +102,7 @@ export default function ContactModal({ open, onClose, projectTitle }) {
               <button
                 onClick={onClose}
                 className="absolute right-3 top-3 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                aria-label="Close"
+                aria-label={t('closeAriaLabel')}
               >
                 <X size={18} />
               </button>
@@ -101,10 +112,12 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                   <MessageCircle size={22} className="text-white" />
                 </div>
                 <h2 className="text-xl md:text-2xl font-bold mb-1">
-                  Let&apos;s Discuss {projectTitle || 'Your Project'}
+                  {projectTitle
+                    ? t('headingWithProject', { projectTitle })
+                    : t('headingGeneric')}
                 </h2>
                 <p className="text-white/80 text-xs md:text-[13px]">
-                  Our expert will contact you within 24 hours
+                  {t('subtitle')}
                 </p>
               </div>
             </div>
@@ -114,32 +127,39 @@ export default function ContactModal({ open, onClose, projectTitle }) {
               <form onSubmit={onSubmit} className="space-y-5">
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Full Name" icon={<User size={16} className="text-gray-400" />}>
+                  <Field
+                    label={t('fields.name')}
+                    icon={<User size={16} className="text-gray-400" />}
+                  >
                     <input
                       name="name"
                       value={form.name}
                       onChange={onChange}
                       required
-                     
                       className="field-input field-input--sm pl-9"
                     />
                   </Field>
 
-                  <Field label="Email Address" icon={<Mail size={16} className="text-gray-400" />}>
+                  <Field
+                    label={t('fields.email')}
+                    icon={<Mail size={16} className="text-gray-400" />}
+                  >
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={onChange}
                       required
-                  
                       className="field-input field-input--sm pl-9"
                     />
                   </Field>
                 </div>
 
                 {/* Phone */}
-                <Field label="Phone Number" icon={<Phone size={16} className="text-gray-400" />}>
+                <Field
+                  label={t('fields.phone')}
+                  icon={<Phone size={16} className="text-gray-400" />}
+                >
                   <div className="relative">
                     <input
                       type="tel"
@@ -150,21 +170,18 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                       placeholder="+971 50 123 4567"
                       className="field-input field-input--sm pl-20 pr-3"
                     />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                  
-                      {/* <span className="text-xs text-gray-500">+971</span> */}
-                    </div>
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5" />
                   </div>
                 </Field>
 
                 {/* Message */}
-                <Field label="Your Message ">
+                <Field label={t('fields.message')}>
                   <textarea
                     name="message"
                     value={form.message}
                     onChange={onChange}
                     rows={4}
-                    placeholder="Tell us about your requirements, timeline, or any specific needs..."
+                    placeholder={t('fields.messagePlaceholder')}
                     className="field-input field-input--sm textarea resize-none"
                   />
                 </Field>
@@ -180,13 +197,19 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                       required
                     />
                     <span className="text-[13px] md:text-sm text-gray-700 group-hover:text-gray-900">
-                      I agree to the{' '}
-                      <a href="/legal?tab=privacy" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
-                        Privacy Policy
+                      {t('consent.requiredPrefix')}
+                      <a
+                        href="/legal?tab=privacy"
+                        className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline"
+                      >
+                        {t('consent.privacyPolicy')}
                       </a>{' '}
-                      and{' '}
-                      <a href="/legal?tab=terms" className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline">
-                        Terms of Service
+                      {t('consent.and')}{' '}
+                      <a
+                        href="/legal?tab=terms"
+                        className="text-[#2DADFF] hover:text-[#1498ff] font-medium underline"
+                      >
+                        {t('consent.termsOfService')}
                       </a>
                     </span>
                   </label>
@@ -199,7 +222,7 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                       onChange={(e) => setConsentMarketing(e.target.checked)}
                     />
                     <span className="text-[13px] md:text-sm text-gray-700 group-hover:text-gray-900">
-                      Send me updates about new projects and exclusive offers
+                      {t('consent.marketing')}
                     </span>
                   </label>
                 </div>
@@ -214,13 +237,27 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                       exit={{ opacity: 0, y: -8 }}
                     >
                       <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        <svg
+                          className="w-3 h-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-green-800 font-medium text-sm">Message sent successfully!</p>
-                        <p className="text-green-600 text-xs">We&apos;ll get back to you soon.</p>
+                        <p className="text-green-800 font-medium text-sm">
+                          {t('status.successTitle')}
+                        </p>
+                        <p className="text-green-600 text-xs">
+                          {t('status.successBody')}
+                        </p>
                       </div>
                     </motion.div>
                   )}
@@ -235,8 +272,12 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                         <X size={12} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-red-800 font-medium text-sm">Unable to send message</p>
-                        <p className="text-red-600 text-xs">Please check all fields and try again.</p>
+                        <p className="text-red-800 font-medium text-sm">
+                          {t('status.errorTitle')}
+                        </p>
+                        <p className="text-red-600 text-xs">
+                          {t('status.errorBody')}
+                        </p>
                       </div>
                     </motion.div>
                   )}
@@ -253,12 +294,12 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                   {submitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Sending...
+                      {t('submit.loading')}
                     </>
                   ) : (
                     <>
                       <Send size={16} />
-                      Get Expert Consultation
+                      {t('submit.default')}
                     </>
                   )}
                 </motion.button>
@@ -266,7 +307,7 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                 {/* Trust line */}
                 <div className="text-center">
                   <p className="text-[11px] text-gray-500">
-                    🔒 Your information is secure and never shared with third parties
+                    🔒 {t('trust')}
                   </p>
                 </div>
               </form>
@@ -282,9 +323,15 @@ export default function ContactModal({ open, onClose, projectTitle }) {
 function Field({ label, children, icon }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-[13px] md:text-sm font-medium text-gray-700">{label}</label>
+      <label className="block text-[13px] md:text-sm font-medium text-gray-700">
+        {label}
+      </label>
       <div className="relative">
-        {icon && <div className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</div>}
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            {icon}
+          </div>
+        )}
         {children}
       </div>
     </div>

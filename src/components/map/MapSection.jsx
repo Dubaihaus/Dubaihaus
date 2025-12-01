@@ -4,11 +4,13 @@
 import { useMapData } from '@/hooks/useMapData';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import PropertiesMap from './PropertiesMap';
+import { useTranslations } from 'next-intl';
 
 const BATCH_SIZE = 80;
 const BATCH_DELAY = 60;
 
 function MapLoading({ height }) {
+  const t = useTranslations('map.section');
   return (
     <div
       className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 flex items-center justify-center"
@@ -16,7 +18,7 @@ function MapLoading({ height }) {
     >
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto mb-2"></div>
-        <p className="text-slate-600 text-sm">Loading map…</p>
+        <p className="text-slate-600 text-sm">{t('loading')}</p>
       </div>
     </div>
   );
@@ -24,12 +26,17 @@ function MapLoading({ height }) {
 
 export default function MapSection({
   projects,
-  title = 'Explore properties on the map',
+  title,
   initialView,
   className = '',
   height = 480,
   maxWidthClass = 'max-w-5xl',
 }) {
+  const tSection = useTranslations('map.section');
+  const tHome = useTranslations('home.mapSection');
+
+  const heading = title || tHome('title');
+
   // Data fetching
   const { data: mapData, isLoading, error } = useMapData({
     enabled: !projects,
@@ -117,7 +124,7 @@ export default function MapSection({
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
           <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
-            {title}
+            {heading}
           </h2>
           <MapLoading height={height} />
         </div>
@@ -130,7 +137,7 @@ export default function MapSection({
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
           <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
-            {title}
+            {heading}
           </h2>
           <div
             className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 flex items-center justify-center bg-white/80"
@@ -138,11 +145,9 @@ export default function MapSection({
           >
             <div className="text-center">
               <p className="text-red-500 font-semibold">
-                Failed to load map data.
+                {tSection('errorTitle')}
               </p>
-              <p className="text-xs mt-2">
-                Please try refreshing the page in a moment.
-              </p>
+              <p className="text-xs mt-2">{tSection('errorBody')}</p>
             </div>
           </div>
         </div>
@@ -155,7 +160,7 @@ export default function MapSection({
       <section className={`w-full ${className}`}>
         <div className={`mx-auto ${maxWidthClass}`}>
           <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
-            {title}
+            {heading}
           </h2>
           <div
             className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-600 flex items-center justify-center bg-white/80"
@@ -163,10 +168,10 @@ export default function MapSection({
           >
             <div className="text-center">
               <p className="text-red-500 font-semibold">
-                No properties with valid coordinates.
+                {tSection('emptyTitle')}
               </p>
               <p className="text-xs mt-2">
-                Found {rawProjects.length} projects but none have location data.
+                {tSection('emptyBody', { count: rawProjects.length })}
               </p>
             </div>
           </div>
@@ -179,7 +184,7 @@ export default function MapSection({
     <section className={`w-full ${className}`}>
       <div className={`mx-auto ${maxWidthClass}`}>
         <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-3">
-          {title}
+          {heading}
         </h2>
         <div
           className="rounded-2xl overflow-hidden border border-slate-200 shadow-[0_18px_60px_rgba(15,23,42,0.08)] bg-white"

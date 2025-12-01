@@ -1,43 +1,50 @@
-'use client';
-import Image from 'next/image';
-import { FaArrowRight, FaBuilding, FaHandsHelping, FaStar } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+// src/components/dashboard/OffPlanPropertyTypesSection.jsx
+"use client";
+
+import Image from "next/image";
+import {
+  FaArrowRight,
+  FaBuilding,
+  FaHandsHelping,
+  FaStar,
+} from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const OffPlanPropertyTypesSection = () => {
   const router = useRouter();
-  const t = useTranslations('offPlan');
+  const t = useTranslations("offPlan");
 
   const propertyTypes = [
     {
-      title: t('propertyTypes.penthouses.title'),
-      label: t('propertyTypes.penthouses.label'),
-      image: '/dashboard/apartments.jpg',
-      filters: { unit_types: 'Penthouse' },
+      title: t("propertyTypes.penthouses.title"),
+      label: t("propertyTypes.penthouses.label"),
+      image: "/dashboard/apartments.jpg",
+      filters: { unit_types: "Penthouse" },
     },
     {
-      title: t('propertyTypes.townhouses.title'),
-      label: t('propertyTypes.townhouses.label'),
-      image: '/dashboard/townhouses.jpg',
-      filters: { unit_types: 'Townhouse' },
+      title: t("propertyTypes.townhouses.title"),
+      label: t("propertyTypes.townhouses.label"),
+      image: "/dashboard/townhouses.jpg",
+      filters: { unit_types: "Townhouse" },
     },
     {
-      title: t('propertyTypes.villas.title'),
-      label: t('propertyTypes.villas.label'),
-      image: '/dashboard/villas.jpg',
-      filters: { unit_types: 'Villa' },
+      title: t("propertyTypes.villas.title"),
+      label: t("propertyTypes.villas.label"),
+      image: "/dashboard/villas.jpg",
+      filters: { unit_types: "Villa" },
     },
     {
-      title: t('propertyTypes.all.title'),
-      label: t('propertyTypes.all.label'),
-      image: '/dashboard/building.jpg',
+      title: t("propertyTypes.all.title"),
+      label: t("propertyTypes.all.label"),
+      image: "/dashboard/building.jpg",
       filters: {},
     },
   ];
 
   const handleCardClick = (filters) => {
     const params = new URLSearchParams(filters).toString();
-    router.push(`/off-plan${params ? `?${params}` : ''}`);
+    router.push(`/off-plan${params ? `?${params}` : ""}`);
   };
 
   return (
@@ -47,33 +54,33 @@ const OffPlanPropertyTypesSection = () => {
         {/* Left */}
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
-            {t('heading')}
+            {t("heading")}
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            {t('description')}
+            {t("description")}
           </p>
         </div>
 
         {/* Icons */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-6">
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaBuilding className="text-brand-sky -600 text-xl" />
-            <span>{t('icons.brandNew')}</span>
+            <FaBuilding className="text-brand-sky text-xl" />
+            <span>{t("icons.brandNew")}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaHandsHelping className="text-brand-sky -600 text-xl" />
-            <span>{t('icons.support')}</span>
+            <FaHandsHelping className="text-brand-sky text-xl" />
+            <span>{t("icons.support")}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-700">
-            <FaStar className="text-brand-sky -600 text-xl" />
-            <span>{t('icons.priority')}</span>
+            <FaStar className="text-brand-sky text-xl" />
+            <span>{t("icons.priority")}</span>
           </div>
         </div>
 
         {/* CTA */}
         <div className="mt-2 lg:mt-0">
           <button className="bg-brand-sky hover:bg-brand-dark/90 text-white text-sm font-semibold px-6 py-2 rounded-xl transition">
-            {t('cta')}
+            {t("cta")}
           </button>
         </div>
       </div>
@@ -102,15 +109,19 @@ const OffPlanPropertyTypesSection = () => {
               {/* overlay gradient for text readability */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
               {/* badge in brand-sky */}
-              <span className="absolute top-3 left-3 inline-flex items-center rounded-full bg-brand-sky text-white
-                               font-semibold text-xs px-3 py-1 shadow">
+              <span
+                className="absolute top-3 left-3 inline-flex items-center rounded-full bg-brand-sky text-white
+                               font-semibold text-xs px-3 py-1 shadow"
+              >
                 {item.label}
               </span>
             </div>
 
             {/* Title row */}
             <div className="flex items-center justify-between px-4 py-3">
-              <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
+              <h3 className="text-sm font-semibold text-slate-900">
+                {item.title}
+              </h3>
               <FaArrowRight className="text-brand-sky text-base transition-transform group-hover:translate-x-0.5" />
             </div>
 

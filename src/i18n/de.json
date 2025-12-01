@@ -9,7 +9,8 @@
     "videos": "Videos",
     "faq": "FAQ",
     "blog": "Blog",
-    "find": "Finden"
+    "find": "Finden",
+    "contact": "Kontakt"
   },
   "hero": {
     "headline": "PALM JEBEL ALI",
@@ -30,23 +31,526 @@
     "join": "Treten Sie über 9500 Mitgliedern bei und erhalten Sie Updates zu neuen Off-Plan-Projekten & neuesten Immobiliennachrichten"
   },
   "offPlan": {
-  "heading": "Neue Off-Plan Immobilien in Dubai",
-  "description": "Off-Plan-Immobilien sind Projekte, die sich noch in der Planungs- oder Bauphase befinden. Der Kauf in Dubai bietet Vorteile wie Frühbucherrabatte und großzügige Zahlungspläne nach Übergabe.",
-  "icons": {
-    "brandNew": "Brandneue Projekte",
-    "support": "Umfassende Unterstützung",
-    "priority": "Prioritätsbuchung"
+    "heading": "Neue Off-Plan Immobilien in Dubai",
+    "description": "Off-Plan-Immobilien sind Projekte, die sich noch in der Planungs- oder Bauphase befinden. Der Kauf in Dubai bietet Vorteile wie Frühbucherrabatte und großzügige Zahlungspläne nach Übergabe.",
+    "icons": {
+      "brandNew": "Brandneue Projekte",
+      "support": "Umfassende Unterstützung",
+      "priority": "Prioritätsbuchung"
+    },
+    "cta": "Finden Sie Ihre Off-Plan Immobilie in Dubai",
+    "propertyTypes": {
+      "penthouses": {
+        "title": "Penthäuser zum Verkauf",
+        "label": "AB AED 240.000"
+      },
+      "townhouses": {
+        "title": "Reihenhäuser zum Verkauf",
+        "label": "AB AED 558.000"
+      },
+      "villas": {
+        "title": "Villen zum Verkauf",
+        "label": "AB AED 1.000.000"
+      },
+      "buildings": {
+        "title": "Gebäude zum Verkauf",
+        "label": "AB AED 47.000.000"
+      },
+      "land": {
+        "title": "Grundstücke zum Verkauf",
+        "label": "ONLINE-VORGENEHMIGUNG"
+      },
+      "all": {
+        "title": "Alle Immobilien zum Verkauf",
+        "label": "AB AED 240.000"
+      }
+    },
+    "client": {
+      "heading": "Neue Off-Plan-Immobilien zum Verkauf in Dubai & Abu Dhabi",
+      "description": "Off-Plan-Immobilien befinden sich noch in der Planungs- oder Bauphase. Der Kauf in den VAE bietet Frühbucherpreise und flexible Zahlungspläne.",
+      "buttons": {
+        "viewMore": "Mehr anzeigen",
+        "loading": "Wird geladen …"
+      },
+      "filters": {
+        "open": "Filter",
+        "title": "Filter",
+        "clear": "Filter zurücksetzen"
+      },
+      "noResults": "Keine Immobilien gefunden. Passen Sie Ihre Filter an."
+    },
+    "card": {
+      "from": "ab",
+      "location": {
+        "unknown": "Unbekannter Standort"
+      },
+      "badges": {
+        "propertyFallback": "Immobilie",
+        "comingSoon": "Demnächst verfügbar",
+        "paymentPlan": "Zahlungsplan"
+      },
+      "labels": {
+        "developer": "Entwickler:",
+        "handover": "Übergabe:"
+      },
+      "button": {
+        "discoverMore": "Mehr entdecken"
+      }
+    }
   },
-  "cta": "Finden Sie Ihre Off-Plan Immobilie in Dubai",
-  "propertyTypes": {
-    "apartments": { "title": "Wohnungen zum Verkauf", "label": "AB AED 240.000" },
-    "townhouses": { "title": "Reihenhäuser zum Verkauf", "label": "AB AED 558.000" },
-    "villas": { "title": "Villen zum Verkauf", "label": "AB AED 1.000.000" },
-    "buildings": { "title": "Gebäude zum Verkauf", "label": "AB AED 47.000.000" },
-    "land": { "title": "Grundstücke zum Verkauf", "label": "ONLINE-VORGENEHMIGUNG" },
-    "all": { "title": "Alle Immobilien zum Verkauf", "label": "AB AED 240.000" }
-  }
-}
+  "contact": {
+    "metadata": {
+      "title": "Kontakt DubaiHaus | Sprechen Sie mit Dubai & Abu Dhabi Immobilienexperten",
+      "description": "Kontaktieren Sie DubaiHaus für Hilfe beim Kauf, Verkauf oder Investition in Immobilien in Dubai und Abu Dhabi. Sprechen Sie mit unseren Experten über Off-Plan-Projekte, Zahlungspläne und Golden Visa-Berechtigung.",
+      "keywords": "Kontakt DubaiHaus, Dubai Immobilien Kontakt, Immobilienexperten Dubai sprechen, Off-Plan Immobilienberatung Dubai, Dubai Immobilienagentur Kontakt, Immobilien kaufen Dubai Hilfe, Dubai Abu Dhabi Immobilienexperten",
+      "og": {
+        "title": "Kontakt DubaiHaus | Dubai & Abu Dhabi Immobilienexperten | DubaiHaus",
+        "description": "Kontaktieren Sie unser Team für maßgeschneiderte Beratung zum Kauf, Verkauf und Investition in Immobilien in Dubai & Abu Dhabi."
+      },
+      "twitter": {
+        "title": "Kontakt DubaiHaus | Dubai & Abu Dhabi Immobilienexperten | DubaiHaus",
+        "description": "Erhalten Sie persönliche Beratung für Immobilieninvestitionen in Dubai und Abu Dhabi."
+      }
+    },
+    "badge": "Lass uns sprechen",
+    "headline": "Lassen Sie uns Ihren nächsten Immobilien­schritt planen",
+    "subheadline": "Ganz gleich, ob Sie Off-Plan-Projekte prüfen, eine bezugsfertige Wohnung suchen oder den Verkauf erwägen – teilen Sie Ihre Pläne und unsere Experten melden sich mit passenden Optionen in Dubai & Abu Dhabi.",
+    "chips": {
+      "noObligation": "Unverbindliche Beratung",
+      "responseTime": "Antwort in der Regel innerhalb von 24 Stunden"
+    },
+    "form": {
+      "purpose": {
+        "label": "Ich interessiere mich für",
+        "options": {
+          "buyOffplan": "Kauf einer Off-Plan-Immobilie",
+          "buyReady": "Kauf einer bezugsfertigen Immobilie",
+          "sell": "Verkauf meiner Immobilie",
+          "invest": "Investmentberatung",
+          "other": "Ich informiere mich nur"
+        }
+      },
+      "budget": {
+        "label": "Ungefähres Budget (AED)",
+        "placeholder": "z. B. 1 Mio. – 2 Mio."
+      },
+      "name": {
+        "label": "Vollständiger Name",
+        "placeholder": "Ihr vollständiger Name"
+      },
+      "email": {
+        "label": "E-Mail-Adresse",
+        "placeholder": "sie@beispiel.com"
+      },
+      "phone": {
+        "label": "Telefon / WhatsApp",
+        "placeholder": "+971 ..."
+      },
+      "phoneHint": "Optional, hilft uns jedoch, Sie schneller zu erreichen.",
+      "areas": {
+        "label": "Bevorzugte Gebiete",
+        "placeholder": "Downtown, Dubai Marina, Dubai Hills..."
+      },
+      "message": {
+        "label": "Erzählen Sie uns mehr",
+        "placeholder": "Teilen Sie Details zu Zeitraum, Präferenzen oder Fragen..."
+      },
+      "submitIdle": "Anfrage senden",
+      "submitSubmitting": "Wird gesendet..."
+    },
+    "disclaimer": "Mit dem Absenden dieses Formulars erklären Sie sich einverstanden, von DubaiHaus zu Immobilienangeboten kontaktiert zu werden. Wir respektieren Ihre Privatsphäre.",
+    "status": {
+      "success": "✅ Nachricht gesendet! Wir melden uns in Kürze bei Ihnen.",
+      "error": "❌ Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    },
+    "aside": {
+      "badge": "Kontaktdaten",
+      "title": "Sprechen Sie mit einem DubaiHaus-Spezialisten",
+      "whatsapp": {
+        "label": "WhatsApp",
+        "number": "+971 50 523 1194",
+        "hours": "Mo–Sa, 10:00 – 19:00 (GST)"
+      },
+      "email": {
+        "label": "E-Mail",
+        "value": "hello@dubaihaus.com"
+      },
+      "location": {
+        "label": "Standorte",
+        "value": "Dubai & Abu Dhabi, VAE",
+        "hint": "Unterstützung für Käufer aus GCC, Europa & weltweit."
+      },
+      "stats": {
+        "clients": "Betreute Kunden",
+        "satisfaction": "Durchschnittliche Zufriedenheit"
+      },
+      "strip": {
+        "title": "Noch nicht bereit zum Gespräch?",
+        "body": "Speichern Sie diese Seite und melden Sie sich, wenn Sie soweit sind. Wir sind mit aktuellen Projekten, geprüften Informationen und transparenter Beratung für Sie da."
+      }
+    },
+    "modal": {
+      "headingWithProject": "Lassen Sie uns {projectTitle} besprechen",
+      "headingGeneric": "Lassen Sie uns Ihr Projekt besprechen",
+      "subtitle": "Unser Experte meldet sich innerhalb von 24 Stunden bei Ihnen",
+      "fields": {
+        "name": "Vollständiger Name",
+        "email": "E-Mail-Adresse",
+        "phone": "Telefonnummer",
+        "message": "Ihre Nachricht",
+        "messagePlaceholder": "Erzählen Sie uns von Ihren Anforderungen, Ihrem Zeitplan oder besonderen Wünschen …"
+      },
+      "consent": {
+  "requiredPrefix": "Ich stimme der ",
+  "privacyPolicy": "Datenschutzerklärung",
+  "termsOfService": "den Nutzungsbedingungen",
+  "and": "und",
+  "marketing": "Senden Sie mir Updates zu neuen Projekten und exklusiven Angeboten"
+},
 
+      "status": {
+        "successTitle": "Nachricht erfolgreich gesendet!",
+        "successBody": "Wir melden uns in Kürze bei Ihnen.",
+        "errorTitle": "Nachricht konnte nicht gesendet werden",
+        "errorBody": "Bitte prüfen Sie alle Felder und versuchen Sie es erneut."
+      },
+      "submit": {
+        "default": "Expertenberatung anfordern",
+        "loading": "Wird gesendet …"
+      },
+      "trust": "Ihre Daten sind sicher und werden niemals an Dritte weitergegeben.",
+      "closeAriaLabel": "Schließen"
+    }
+  },
+  "about": {
+    "badge": "Über DubaiHaus",
+    "headlinePrefix": "Wir schaffen",
+    "headlineHighlight": "Vertrauen & Transparenz",
+    "headlineSuffix": "bei jeder Immobilie",
+    "intro": "Seit 2024 verändert DubaiHaus, wie Menschen Immobilien in Dubai und Abu Dhabi kaufen, verkaufen und investieren – mit geprüften Daten, ehrlicher Beratung und Experten, denen Ihre Ziele wirklich wichtig sind.",
+    "stats": {
+      "happyClients": "Zufriedene Kunden",
+      "clientRating": "Kundenbewertung",
+      "propertyValue": "Immobilienvolumen",
+      "established": "Gründungsjahr"
+    },
+    "values": {
+      "verified": {
+        "title": "Geprüft & authentisch",
+        "body": "Jedes von uns empfohlene Projekt wird sorgfältig geprüft. Keine Fake-Angebote, keine versteckten Absichten – nur vom Entwickler freigegebene Daten."
+      },
+      "clientFirst": {
+        "title": "Kundenorientierter Ansatz",
+        "body": "Ihre Ziele stehen an erster Stelle. Wir hören aufmerksam zu und stellen Optionen zusammen, die wirklich zu Ihrem Lebensstil und Ihren Investmentzielen passen."
+      },
+      "globalSupport": {
+        "title": "Unterstützung für internationale Käufer",
+        "body": "Remote-Beratungen, digitale Unterlagen und Begleitung für Kunden aus den GCC-Staaten, Europa und der ganzen Welt."
+      }
+    },
+    "plan": {
+      "badge": "Unser Plan",
+      "title": "Was wir aufbauen",
+      "body": "Ein schnelleres, transparenteres Discovery-Erlebnis: geprüfte Projektdaten, aktuelle Verfügbarkeiten, Concierge-Empfehlungen und Unterstützung bei der Buchung.",
+      "list": {
+        "verifiedData": "Entwicklergeprüfte Daten & Broschüren",
+        "tailoredShortlists": "Individuelle Shortlists nach Budget & Gebiet",
+        "transparentPlans": "Transparente Zahlungspläne & Übergaben"
+      }
+    },
+    "authenticity": {
+      "badge": "Authentizität",
+      "body": "Wir arbeiten direkt mit autorisierten Entwicklern und Agenturen. Alle Informationen und Preise werden vor der Veröffentlichung geprüft."
+    },
+    "cta": {
+      "title": "Bereit für Ihren Immobilienweg?",
+      "body": "Buchen Sie eine kurze Beratung – unverbindlich und mit klarer Orientierung.",
+      "button": "Beratung buchen",
+      "note": "Keine Verpflichtung – nur ehrliche Beratung von geprüften Immobilienexperten."
+    }
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Häufig gestellte Fragen zu",
+    "highlight": "Immobilien in Dubai",
+    "subtitle": "Klare und kompakte Antworten, damit Sie fundierte Investitionsentscheidungen auf dem Immobilienmarkt in Dubai treffen können.",
+    "buttons": {
+      "seeMore": "Mehr Fragen anzeigen",
+      "showLess": "Weniger Fragen anzeigen"
+    },
+    "stats": {
+      "questionsAnswered": "Beantwortete Fragen",
+      "verifiedInformation": "Geprüfte Informationen",
+      "expertSupport": "Expertenunterstützung",
+      "investorsHelped": "Unterstützte Investoren"
+    },
+    "items": {
+      "q1": {
+        "question": "Wie verkauft man eine Immobilie in Dubai?",
+        "answer": "Der Verkauf einer Immobilie in Dubai ist mit Hilfe eines qualifizierten Maklers kein komplizierter Prozess. Nachdem Sie einen Spezialisten gefunden haben, unterzeichnen Sie ein „FORM A\", um diesen offiziell mit Vermarktung und Vermittlung zu beauftragen."
+      },
+      "q2": {
+        "question": "Wie verkauft man eine Off-Plan-Immobilie in Dubai?",
+        "answer": "Der Verkauf von Off-Plan-Immobilien in Dubai ist rechtlich zulässig, jedoch setzen viele Entwickler bestimmte Bedingungen und Einschränkungen, um diese Transaktionen zu steuern."
+      },
+      "q3": {
+        "question": "Warum in Dubai investieren?",
+        "answer": "Der Investmentmarkt in Dubai bietet höhere Mietrenditen als viele etablierte Immobilienmärkte. Die durchschnittliche Rendite liegt zwischen 5 % und 9 %, während der Preis pro Quadratmeter deutlich niedriger ist als in Städten wie London, Hongkong oder Paris."
+      },
+      "q4": {
+        "question": "Wie beginnt man mit Immobilieninvestments in Dubai?",
+        "answer": "Definieren Sie zunächst Ihr Investitionsziel. Neben der Eigennutzung können Sie die Immobilie vermieten oder weiterverkaufen – beides gute Optionen, wenn Sie laufende Erträge erzielen möchten."
+      },
+      "q5": {
+        "question": "Wie investiert man in Immobilien?",
+        "answer": "In Dubai dürfen Einwohner der VAE Immobilien nur in ausgewiesenen Freehold-Gebieten erwerben. Off-Plan-Projekte sind besonders attraktiv, da die Preise niedriger sind und Entwickler flexible Zahlungspläne anbieten."
+      },
+      "q6": {
+        "question": "Wie investiert man in Dubais Immobilienmarkt?",
+        "answer": "Viele Anleger sichern sich langfristige Einnahmen, indem sie Vermieter werden. Wohnimmobilien können eine Rendite von 5 % bis zu 12 % erzielen – höher als in vielen europäischen Hauptstädten."
+      },
+      "q7": {
+        "question": "Wie investieren Anfänger mit wenig Kapital?",
+        "answer": "Der Immobilienmarkt in Dubai bietet für jedes Budget passende Optionen. Beliebte, erschwingliche Communities sind z. B. Dubai International City, Jumeirah Lake Towers, Jumeirah Village Circle und Dubai Sports City."
+      },
+      "q8": {
+        "question": "Wie kauft man eine Wohnung in Dubai?",
+        "answer": "Bei der Wahl eines Stadtteils sollten Sie Faktoren wie Infrastruktur, öffentliche Verkehrsmittel, Gesundheitsversorgung, Schulen und die gewünschte Lebensqualität berücksichtigen."
+      },
+      "q9": {
+        "question": "Wo kann man in Dubai Immobilien kaufen?",
+        "answer": "Dubai bietet Optionen für jedes Budget. Beliebte und familienfreundliche, gleichzeitig erschwingliche Gegenden sind Jumeirah Lake Towers, Jumeirah Village Circle, Dubai International City und Dubai Sports City."
+      },
+      "q10": {
+        "question": "Was ist eine Off-Plan-Immobilie in Dubai?",
+        "answer": "Eine Off-Plan-Immobilie befindet sich noch im Bau. Der Kaufpreis ist in der Regel niedriger als bei fertigen Einheiten und häufig besteht die Möglichkeit, vor Fertigstellung mit Wertsteigerung zu verkaufen."
+      },
+      "q11": {
+        "question": "Wie kauft man eine Off-Plan-Immobilie in Dubai?",
+        "answer": "Der Immobilienmarkt der VAE ist für alle Käufer offen. Für den Erwerb einer Off-Plan-Immobilie in Dubai benötigen Sie kein Visum oder Emirates ID – ein gültiger Reisepass genügt."
+      },
+      "q12": {
+        "question": "Was bedeutet Immobilieninvestment in Dubai?",
+        "answer": "Immobilieninvestments in Dubai eignen sich ideal für langfristige Einkünfte. Sie können z. B. ein Haus kaufen, renovieren und weiterverkaufen oder ein vermietetes Gebäude erwerben, dessen Mieteinnahmen Kosten und Gewinn abdecken."
+      },
+      "q13": {
+        "question": "Warum in Immobilien in Dubai investieren?",
+        "answer": "Die Immobilienpreise in Dubai sind deutlich niedriger als in vielen Städten Europas, Amerikas oder Asiens, während die Mietrenditen oft attraktiv bleiben."
+      },
+      "q14": {
+        "question": "Dürfen Ausländer Immobilien in Dubai kaufen?",
+        "answer": "Ausländische Staatsbürger können nur in bestimmten Freehold-Gebieten Immobilien erwerben. In diesen Zonen haben sie volle Eigentumsrechte oder langfristige Pachtverträge von bis zu 99 Jahren."
+      },
+      "q15": {
+        "question": "Kann man die Staatsbürgerschaft der VAE erhalten?",
+        "answer": "Im Januar 2021 haben die VAE Änderungen beschlossen, die es bestimmten Gruppen von Ausländern sowie deren Ehepartnern und Kindern ermöglichen, unter bestimmten Voraussetzungen die Emirati-Staatsbürgerschaft zu erhalten."
+      },
+      "q16": {
+        "question": "Sind Immobilien in Dubai erschwinglich?",
+        "answer": "Dubai bietet Immobilien in verschiedenen Preiskategorien – von bezahlbaren Einheiten bis hin zu Ultra-Luxus-Objekten. Der Standort ist einer der wichtigsten preisbestimmenden Faktoren."
+      },
+      "q17": {
+        "question": "Lohnt es sich, in Dubai eine Immobilie zu kaufen?",
+        "answer": "Ja. Ein wesentlicher Vorteil sind die hohen Mietrenditen, die je nach Lage und Immobilientyp im Durchschnitt zwischen 5 % und 9 % liegen."
+      },
+      "q18": {
+        "question": "Wie viel kostet eine Wohnung in Dubai?",
+        "answer": "Der Preis hängt von Lage und Anzahl der Schlafzimmer ab. Günstigere Optionen finden Sie z. B. in Jumeirah Lake Towers, Dubai Investment Park und International City."
+      },
+      "q19": {
+        "question": "Kann man in Dubai ohne Job leben?",
+        "answer": "Arbeitsvisa sind üblich, aber es gibt Alternativen wie Investoren-, Immobilien-, Freelancer- oder Golden-Visas – jeweils mit eigenen finanziellen und rechtlichen Voraussetzungen."
+      },
+      "q20": {
+        "question": "Kann ich dauerhaft in Dubai leben?",
+        "answer": "Das Golden-Visa-System der VAE bietet langfristige Aufenthaltsvisa (5 oder 10 Jahre), die verlängert werden können, sofern alle Bedingungen erfüllt sind."
+      },
+      "q21": {
+        "question": "Wo können Expats in Dubai Immobilien kaufen?",
+        "answer": "Expats und ausländische Käufer dürfen nur in von der Regierung ausgewiesenen Freehold-Gebieten Immobilien erwerben."
+      },
+      "q22": {
+        "question": "Kann man Immobilien in Dubai bar bezahlen?",
+        "answer": "Ja, das ist möglich. Barzahler haben häufig eine stärkere Verhandlungsposition und können bessere Konditionen erzielen."
+      },
+      "q23": {
+        "question": "Wie hoch ist die Mindestinvestition in Dubai?",
+        "answer": "Der Mindestbetrag ändert sich mit der Zeit, aber es gibt Studios und kleinere Einheiten in aufstrebenden Communities, die vergleichsweise niedrige Einstiegspreise für Investoren bieten."
+      }
+    },
+    "meta": {
+      "title": "Immobilien-FAQ für Dubai & Abu Dhabi | Off-Plan, Gebühren & Golden Visa",
+      "description": "Antworten auf häufige Fragen zum Immobilienkauf in Dubai und Abu Dhabi – inklusive Off-Plan-Kauf, Nebenkosten, Zahlungsplänen und Golden-Visa-Voraussetzungen.",
+      "keywords": [
+        "Immobilien in Dubai kaufen",
+        "Immobilien in Abu Dhabi kaufen",
+        "Immobilienkauf VAE",
+        "Dubai Immobilien FAQ",
+        "Abu Dhabi Immobilien FAQ",
+        "Fragen zu Immobilien in Dubai",
+        "Off-Plan FAQ Dubai",
+        "Golden Visa Immobilienanforderungen",
+        "Gebühren beim Immobilienkauf in Dubai"
+      ],
+      "canonical": "https://dubaihaus.com/faq",
+      "ogTitle": "Immobilien-FAQ für Dubai & Abu Dhabi | Off-Plan, Gebühren & Golden Visa | DubaiHaus",
+      "ogDescription": "Klare Erklärungen zu Off-Plan-Käufen, Kosten, rechtlichen Aspekten und Aufenthaltsgenehmigungen durch Immobilieninvestments in Dubai und Abu Dhabi.",
+      "url": "https://dubaihaus.com/faq",
+      "twitterTitle": "Immobilien-FAQ für Dubai & Abu Dhabi | Off-Plan, Gebühren & Golden Visa | DubaiHaus",
+      "twitterDescription": "Häufig gestellte Fragen rund um den Immobilienkauf und Investitionen in Dubai und Abu Dhabi."
+    }
+  },
+  "developers": {
+    "hero": {
+      "badge": "Entwickler",
+      "heading": "Entdecken Sie die führenden Entwickler der VAE",
+      "description": "Entdecken Sie renommierte Namen wie Emaar, Damac, Sobha, Aldar und viele mehr. Filtern Sie nach Namen und springen Sie direkt zu den Off-Plan-Projekten jedes Entwicklers.",
+      "countLabel": "Aktuell werden {total} {total, plural, one {Entwickler} other {Entwickler}} gelistet.",
+      "filterTitle": "Entwickler filtern",
+      "searchLabel": "Nach Namen suchen",
+      "searchPlaceholder": "Emaar, Damac, Aldar...",
+      "tip": "Tipp: Beginnen Sie zu tippen, um das Raster unten sofort zu filtern."
+    },
+    "grid": {
+      "summary": "Es werden {visible} von {total} {total, plural, one {Entwickler} other {Entwicklern}} angezeigt.",
+      "viewProjects": "Projekte ansehen",
+      "offplanAndReady": "Off-Plan- & Bestandsprojekte",
+      "empty": "Keine Entwickler entsprechen Ihrer Suche. Versuchen Sie einen anderen Namen.",
+      "showAllButton": "Alle Entwickler anzeigen"
+    }
+  },
+  "areas": {
+    "hero": {
+      "titleLine1": "Entdecken Sie erstklassige",
+      "titleHighlight": "Standorte in den VAE",
+      "description": "Erkunden Sie exklusive Communities in Dubai, Abu Dhabi und darüber hinaus. Finden Sie Ihre perfekte Investition in den begehrtesten Vierteln."
+    },
+    "stats": {
+      "primeAreasNumber": "100+",
+      "primeAreas": "Erstklassige Gebiete",
+      "developmentsNumber": "500+",
+      "developments": "Entwicklungen",
+      "investmentValueNumber": "AED 2B+",
+      "investmentValue": "Investitionsvolumen"
+    },
+    "filter": {
+      "selectRegionLabel": "Region auswählen",
+      "searchAreasLabel": "Gebiete durchsuchen",
+      "searchPlaceholder": "Probieren Sie 'Downtown', 'Marina', 'Yas Island'...",
+      "findAreasButton": "Gebiete finden",
+      "viewMapButton": "Karte anzeigen",
+      "regionAllLabel": "Gesamte VAE"
+    },
+    "regions": {
+      "Dubai": "Dubai",
+      "AbuDhabi": "Abu Dhabi",
+      "Sharjah": "Sharjah",
+      "Ajman": "Ajman",
+      "RasAlKhaimah": "Ras Al Khaimah",
+      "Fujairah": "Fujairah",
+      "UmmAlQuwain": "Umm Al Quwain"
+    },
+    "results": {
+      "allUaeAreas": "Alle VAE-Gebiete",
+      "regionAreasSuffix": "Gebiete",
+      "areaSingular": "Gebiet",
+      "areaPlural": "Gebiete",
+      "found": "gefunden",
+      "forQueryPrefix": "für",
+      "sortPopularity": "Sortieren nach: Beliebtheit",
+      "sortName": "Sortieren nach: Name A-Z",
+      "sortPropertyCount": "Sortieren nach: Immobilienanzahl"
+    },
+    "states": {
+      "errorTitle": "Gebiete konnten nicht geladen werden",
+      "errorBody": "Wir haben Probleme, die Gebiete zu laden. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Keine Gebiete gefunden",
+      "emptyBody": "Wir konnten keine Gebiete finden, die Ihren Suchkriterien entsprechen.",
+      "clearFilters": "Filter zurücksetzen",
+      "loadMore": "Weitere Gebiete laden"
+    },
+    "card": {
+      "propertiesCountSuffix": "+ Immobilien",
+      "descriptionPrefix": "Entdecken Sie erstklassige Off-Plan-Immobilien in",
+      "descriptionFeaturing": "Mit",
+      "descriptionDevelopmentsSuffix": "exklusiven Entwicklungen.",
+      "descriptionFallback": "Erstklassige Investitionsmöglichkeiten warten auf Sie.",
+      "cta": "Gebiet erkunden",
+      "hot": "Beliebt"
+    },
+    "abuDhabi": {
+      "headingPrefix": "Top-Immobiliengebiete in",
+      "headingHighlight": "Abu Dhabi",
+      "description": "Entdecken Sie Abu Dhabis führende Communities – von Inseln am Wasser bis zu kulturellen und geschäftlichen Zentren.",
+      "fallbackDescription": "Erkunden Sie erstklassige Off-Plan-Entwicklungen in Abu Dhabis begehrtesten Communities.",
+      "failedToLoadShort": "Laden fehlgeschlagen",
+      "errorLoading": "Fehler beim Laden der Immobilien",
+      "ctaSectionTitle": "Finden Sie Ihr bevorzugtes Gebiet nicht?",
+      "ctaSectionBody": "Entdecken Sie unsere vollständige Sammlung erstklassiger Immobilien in allen Abu Dhabi Communities",
+      "ctaSectionButton": "Alle Abu Dhabi Immobilien erkunden"
+    }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Finden Sie die neuesten Immobilien auf der Karte"
+    }
+  },
+ 
+  "dashboard": {
+    "hero": {
+      "fallbackProjectName": "Top-Immobilie",
+      "descriptionWithBedrooms": "{projectName} in {areaTitle}. {bedrooms}-Zimmer-Apartments mit modernen Annehmlichkeiten.",
+      "descriptionNoBedrooms": "{projectName} in {areaTitle}. Luxusapartments mit modernen Annehmlichkeiten.",
+      "descriptionFallback": "Entdecken Sie erstklassige Off-Plan-Entwicklungen in {areaTitle}.",
+      "statusPropertiesAvailable": "Verfügbare Immobilien",
+      "statusExploreArea": "Gebiet erkunden",
+      "chipLuxury": "Luxusapartments",
+      "chipGreen": "Grünflächen",
+      "chipAmenities": "Premium-Ausstattung",
+      "primaryCtaWithProject": "Immobilien entdecken",
+      "primaryCtaNoProject": "Gebiet erkunden",
+      "secondaryCtaPrefix": "Alle in {areaShort} anzeigen",
+      "defaultTitle": "Dubai Off-Plan-Immobilien",
+      "defaultDescription": "Entdecken Sie hochwertige Off-Plan-Projekte in Dubais gefragtesten Lagen.",
+      "dotAriaLabel": "Zu {areaTitle} wechseln",
+      "ariaPreviousSlide": "Vorherige Folie",
+      "ariaNextSlide": "Nächste Folie"
+    },
+    "areasShowcase": {
+      "sectionTitle": "Beste Immobiliengebiete in {city}",
+      "sectionCity": "Dubai",
+      "sectionDescription": "Entdecken Sie Dubais Top-Immobilienstandorte – von luxuriösen Strandlagen bis zu urbanen Communities.",
+      "cardErrorTitle": "Laden fehlgeschlagen",
+      "cardErrorBody": "Fehler beim Laden der Immobilien",
+      "cardErrorCta": "Erneut versuchen",
+      "cardPropertiesCountSuffix": "+ Immobilien",
+      "cardDescriptionFallback": "Entdecken Sie hochwertige Off-Plan-Entwicklungen in dieser gefragten Community in Dubai.",
+      "cardCta": "Gebiet erkunden",
+      "ctaTitle": "Sie finden Ihr Wunschgebiet nicht?",
+      "ctaBody": "Entdecken Sie unsere gesamte Auswahl an Premium-Immobilien in allen Communities Dubais.",
+      "ctaButton": "Alle Immobilien erkunden"
+    }
+  },
+  "map": {
+    "popup": {
+      "fallbackTitle": "Immobilie",
+      "fallbackLocation": "Dubai",
+      "viewDetails": "Details ansehen"
+    },
+    "section": {
+      "defaultTitle": "Immobilien auf der Karte erkunden",
+      "loading": "Karte wird geladen…",
+      "errorTitle": "Kartendaten konnten nicht geladen werden.",
+      "errorBody": "Bitte versuchen Sie es in wenigen Augenblicken erneut.",
+      "emptyTitle": "Keine Immobilien mit gültigen Koordinaten.",
+      "emptyBody": "Es wurden {count} Projekte gefunden, aber keines enthält Standortdaten."
+    },
+    "status": {
+      "markersLoading": "Immobilien werden geladen…",
+      "mapboxMissingTitle": "Mapbox-Token nicht konfiguriert",
+      "mapboxMissingBody": "Überprüfen Sie die Umgebungsvariable NEXT_PUBLIC_MAPBOX_TOKEN"
+    }
+  }
 
 }

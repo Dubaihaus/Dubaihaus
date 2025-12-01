@@ -1,6 +1,15 @@
 // src/app/api/off-plan/route.js
-import { searchProperties, listRegions, listDistricts, searchAllProjects ,  getPropertyById} from "@/lib/reellyApi";
+import {
+  searchProperties,
+  listRegions,
+  listDistricts,
+  searchAllProjects,
+  getPropertyById,
+} from "@/lib/reellyApi";
 import { cookies } from "next/headers";
+import { translateProjectsForLocale } from "@/lib/translateReelly";
+
+export const runtime = "nodejs";
 
 // Helper function to search across all location fields
 async function resolveAreaToFilters(areaName) {
@@ -11,7 +20,9 @@ async function resolveAreaToFilters(areaName) {
   try {
     const districts = await listDistricts(areaName);
     const districtMatch = districts.find((d) =>
-      String(d.name || "").toLowerCase().includes(String(areaName).toLowerCase())
+      String(d.name || "")
+        .toLowerCase()
+        .includes(String(areaName).toLowerCase())
     );
 
     if (districtMatch?.id) {
@@ -21,7 +32,9 @@ async function resolveAreaToFilters(areaName) {
 
     const regions = await listRegions();
     const regionMatch = regions.find((r) =>
-      String(r.name || "").toLowerCase().includes(String(areaName).toLowerCase())
+      String(r.name || "")
+        .toLowerCase()
+        .includes(String(areaName).toLowerCase())
     );
 
     if (regionMatch) {
@@ -79,7 +92,8 @@ export async function GET(request) {
     else if (key === "pricedOnly") filters.pricedOnly = value === "true";
     else if (key === "latest") filters.latest = value === "true";
     else if (key === "forMap" || key === "mode") filters[key] = value;
-    else if (value === "true" || value === "false") filters[key] = value === "true";
+    else if (value === "true" || value === "false")
+      filters[key] = value === "true";
     else filters[key] = value;
   });
 
@@ -176,8 +190,8 @@ export async function GET(request) {
     }
   }
 
-
- if (!forMap && data?.results?.length) {
+  // Enrich with detail data (payment plans, propertyTypes)
+  if (!forMap && data?.results?.length) {
     try {
       const enrichedResults = await Promise.all(
         data.results.map(async (item) => {
@@ -188,7 +202,7 @@ export async function GET(request) {
               ...item,
               // prefer detail meta, fall back to existing values if any
               propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
-                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlans: detail?.paymentPlans || item.paymentPlans || [],
               paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
             };
           } catch (err) {
@@ -204,7 +218,14 @@ export async function GET(request) {
     }
   }
 
-  
+  // 🌍 Locale-aware translation (skip for map mode to save quota)
+  if (!forMap && data?.results?.length && locale === "de") {
+    try {
+      data.results = await translateProjectsForLocale(data.results, locale);
+    } catch (err) {
+      console.error("Translation for off-plan results failed:", err);
+    }
+  }
 
   const responseHeaders = {
     "Content-Type": "application/json",

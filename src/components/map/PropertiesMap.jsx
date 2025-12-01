@@ -2,6 +2,7 @@
 'use client';
 
 import { useMemo, useState, useCallback, lazy, Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 
 // Lazy load map components
 const Map = lazy(() =>
@@ -27,22 +28,24 @@ import MapPopup from './MapPopup';
 const MAPBOX_STYLE = 'mapbox://styles/mapbox/streets-v12';
 
 function MapLoading() {
+  const tSection = useTranslations('map.section');
   return (
     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading map…</p>
+        <p className="text-gray-600">{tSection('loading')}</p>
       </div>
     </div>
   );
 }
 
 function MarkersLoading() {
+  const tStatus = useTranslations('map.status');
   return (
     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg z-10">
       <div className="flex items-center gap-2 text-sm text-gray-700">
         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-        <span>Loading properties…</span>
+        <span>{tStatus('markersLoading')}</span>
       </div>
     </div>
   );
@@ -67,6 +70,7 @@ export default function PropertiesMap({
   markersLoading = false,
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const tStatus = useTranslations('map.status');
   const [activeProject, setActiveProject] = useState(null);
 
   // Convert projects to markers
@@ -121,9 +125,9 @@ export default function PropertiesMap({
     return (
       <div className="w-full h-full rounded-xl border border-gray-200 flex items-center justify-center bg-gray-50">
         <div className="text-red-500 text-center">
-          <div>Mapbox token not configured</div>
+          <div>{tStatus('mapboxMissingTitle')}</div>
           <div className="text-sm text-gray-500 mt-1">
-            Check NEXT_PUBLIC_MAPBOX_TOKEN
+            {tStatus('mapboxMissingBody')}
           </div>
         </div>
       </div>
@@ -174,7 +178,10 @@ export default function PropertiesMap({
                 onClose={handlePopupClose}
                 closeButton={false}
               >
-                <MapPopup project={activeProject} onClose={handlePopupClose} />
+                <MapPopup
+                  project={activeProject}
+                  onClose={handlePopupClose}
+                />
               </Popup>
             </Suspense>
           )}

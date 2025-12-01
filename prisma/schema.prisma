@@ -123,3 +123,15 @@ enum MediaType {
   FLOORPLAN
   FILE
 }
+model Translation {
+  id             Int      @id @default(autoincrement())
+  key            String   @unique               // hash key
+  sourceText     String
+  sourceLang     String   @default("en")
+  targetLang     String
+  translatedText String
+  provider       String   @default("deepl")
+  usageCount     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

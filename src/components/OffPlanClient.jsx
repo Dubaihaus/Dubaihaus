@@ -1,16 +1,24 @@
 // src/components/offplan/OffPlanClient.jsx  (CLIENT)
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import FiltersPanel from "@/components/FiltersPanel";
-import PropertyCard from "@/components/PropertyCard";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from 'react';
+import FiltersPanel from '@/components/FiltersPanel';
+import PropertyCard from '@/components/PropertyCard';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function OffPlanClient({ limit, latest = false }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('offPlan.client');
 
   // Initialize filters from query params (for full page)
   const initialFilters = {};
@@ -18,7 +26,7 @@ export default function OffPlanClient({ limit, latest = false }) {
 
   const [filters, setFilters] = useState(initialFilters);
   const [projects, setProjects] = useState([]);
-  const [currency, setCurrency] = useState("AED");
+  const [currency, setCurrency] = useState('AED');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -26,9 +34,9 @@ export default function OffPlanClient({ limit, latest = false }) {
     setLoading(true);
     try {
       const paramsObj = { ...filters, currency };
-      if (latest) paramsObj.latest = "true";
+      if (latest) paramsObj.latest = 'true';
 
-      Object.keys(paramsObj).forEach(k => {
+      Object.keys(paramsObj).forEach((k) => {
         if (!paramsObj[k]) delete paramsObj[k];
       });
 
@@ -36,14 +44,16 @@ export default function OffPlanClient({ limit, latest = false }) {
       const res = await fetch(`/api/off-plan?${params.toString()}`);
       if (!res.ok) {
         const text = await res.text();
-        console.error("off-plan API error:", res.status, text.slice(0, 300));
+        console.error('off-plan API error:', res.status, text.slice(0, 300));
         setProjects([]);
         return;
       }
       const data = await res.json();
-      setProjects(limit ? (data.results || []).slice(0, limit) : (data.results || []));
+      setProjects(
+        limit ? (data.results || []).slice(0, limit) : data.results || []
+      );
     } catch (e) {
-      console.error("Error fetching projects:", e);
+      console.error('Error fetching projects:', e);
       setProjects([]);
     } finally {
       setLoading(false);
@@ -52,6 +62,7 @@ export default function OffPlanClient({ limit, latest = false }) {
 
   useEffect(() => {
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, currency, latest]);
 
   // Sync URL only on the full page
@@ -65,7 +76,7 @@ export default function OffPlanClient({ limit, latest = false }) {
 
   const handleViewMore = () => {
     setLoading(true);
-    setTimeout(() => router.push("/off-plan"), 300);
+    setTimeout(() => router.push('/off-plan'), 300);
   };
 
   return (
@@ -73,18 +84,19 @@ export default function OffPlanClient({ limit, latest = false }) {
       {/* Title & Currencies */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">New Off-Plan Properties for Sale in Dubai & Abu Dhabi</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {t('heading')}
+          </h1>
           <p className="text-sm text-gray-600 max-w-xl mt-1">
-            Off-plan properties are developments which are still in planning or construction.
-            Buying in the UAE provides early-phase pricing and flexible payment plans.
+            {t('description')}
           </p>
         </div>
 
         <div className="flex gap-2">
-          {["AED", "EUR", "USD"].map((cur) => (
+          {['AED', 'EUR', 'USD'].map((cur) => (
             <Button
               key={cur}
-              variant={currency === cur ? "default" : "outline"}
+              variant={currency === cur ? 'default' : 'outline'}
               onClick={() => setCurrency(cur)}
               className="px-4"
             >
@@ -105,10 +117,10 @@ export default function OffPlanClient({ limit, latest = false }) {
             {loading ? (
               <div className="flex items-center gap-2">
                 <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                Loading...
+                {t('buttons.loading')}
               </div>
             ) : (
-              "View More"
+              t('buttons.viewMore')
             )}
           </Button>
         </div>
@@ -119,11 +131,13 @@ export default function OffPlanClient({ limit, latest = false }) {
         <div className="flex gap-2 mb-6">
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" className="px-4">Filters</Button>
+              <Button variant="outline" className="px-4">
+                {t('filters.open')}
+              </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
+                <SheetTitle>{t('filters.title')}</SheetTitle>
               </SheetHeader>
               <div className="mt-4">
                 <FiltersPanel filters={filters} setFilters={setFilters} />
@@ -132,8 +146,12 @@ export default function OffPlanClient({ limit, latest = false }) {
           </Sheet>
 
           {Object.keys(filters).length > 0 && (
-            <Button variant="outline" onClick={() => setFilters({})} className="px-4">
-              Clear Filters
+            <Button
+              variant="outline"
+              onClick={() => setFilters({})}
+              className="px-4"
+            >
+              {t('filters.clear')}
             </Button>
           )}
         </div>
@@ -150,7 +168,7 @@ export default function OffPlanClient({ limit, latest = false }) {
       {!loading && (
         <div>
           {projects.length === 0 ? (
-            <p className="text-gray-500">No properties found. Try adjusting your filters.</p>
+            <p className="text-gray-500">{t('noResults')}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
               {projects.map((p) => (

@@ -10,7 +10,7 @@
     "faq": "FAQ",
     "blog": "Blog",
     "find": "Find",
-    "contact":"Contact"
+    "contact": "Contact"
   },
   "hero": {
     "headline": "PALM JEBEL ALI",
@@ -31,22 +31,524 @@
     "join": "Join over 9500 members and get updates of new off-plan launches & latest real estate news"
   },
   "offPlan": {
-  "heading": "New Off-Plan Properties in Dubai",
-  "description": "Off-plan properties are those developments which are still in the planning or construction stages. Purchasing an off-plan property in Dubai (the UAE) comes with certain advantages as many real estate developers in the UAE offer special promotions in the early phases, such as generous post-handover payment plans.",
-  "icons": {
-    "brandNew": "Brand New Projects",
-    "support": "Full Support",
-    "priority": "Priority Booking"
+    "heading": "New Off-Plan Properties in Dubai",
+    "description": "Off-plan properties are those developments which are still in the planning or construction stages. Purchasing an off-plan property in Dubai (the UAE) comes with certain advantages as many real estate developers in the UAE offer special promotions in the early phases, such as generous post-handover payment plans.",
+    "icons": {
+      "brandNew": "Brand New Projects",
+      "support": "Full Support",
+      "priority": "Priority Booking"
+    },
+    "cta": "Find Your Off-Plan Property in Dubai",
+    "propertyTypes": {
+      "penthouses": {
+        "title": "Penthouses for Sale",
+        "label": "FROM AED 240,000"
+      },
+      "townhouses": {
+        "title": "Townhouses for Sale",
+        "label": "FROM AED 558,000"
+      },
+      "villas": {
+        "title": "Villas for Sale",
+        "label": "FROM AED 1,000,000"
+      },
+      "buildings": {
+        "title": "Buildings for Sale",
+        "label": "FROM AED 47,000,000"
+      },
+      "land": {
+        "title": "Land Plots for Sale",
+        "label": "ONLINE PRE-APPROVAL"
+      },
+      "all": {
+        "title": "All Properties for Sale",
+        "label": "FROM AED 240,000"
+      }
+    },
+    "client": {
+      "heading": "New off-plan properties for sale in Dubai & Abu Dhabi",
+      "description": "Off-plan properties are developments which are still in planning or construction. Buying in the UAE provides early-phase pricing and flexible payment plans.",
+      "buttons": {
+        "viewMore": "View more",
+        "loading": "Loading..."
+      },
+      "filters": {
+        "open": "Filters",
+        "title": "Filters",
+        "clear": "Clear filters"
+      },
+      "noResults": "No properties found. Try adjusting your filters."
+    },
+    "card": {
+      "from": "from",
+      "location": {
+        "unknown": "Unknown location"
+      },
+      "badges": {
+        "propertyFallback": "Property",
+        "comingSoon": "Coming soon",
+        "paymentPlan": "Payment plan"
+      },
+      "labels": {
+        "developer": "Developer:",
+        "handover": "Handover:"
+      },
+      "button": {
+        "discoverMore": "Discover more"
+      }
+    }
   },
-  "cta": "Find Your Off-Plan Property in Dubai",
-  "propertyTypes": {
-    "penthouses": { "title": "Penthouses for Sale", "label": "FROM AED 240,000" },
-    "townhouses": { "title": "Townhouses for Sale", "label": "FROM AED 558,000" },
-    "villas": { "title": "Villas for Sale", "label": "FROM AED 1,000,000" },
-    "buildings": { "title": "Buildings for Sale", "label": "FROM AED 47,000,000" },
-    "land": { "title": "Land Plots for Sale", "label": "ONLINE PRE-APPROVAL" },
-    "all": { "title": "All Properties for Sale", "label": "FROM AED 240,000" }
-  }
-}
+  "contact": {
+    "metadata": {
+      "title": "Contact DubaiHaus | Speak with Dubai & Abu Dhabi Property Experts",
+      "description": "Get in touch with DubaiHaus for help buying, selling or investing in property in Dubai and Abu Dhabi. Talk to our experts about off-plan projects, payment plans and Golden Visa eligibility.",
+      "keywords": "contact DubaiHaus, Dubai property contact, speak to real estate expert Dubai, off-plan property consultation Dubai, Dubai real estate agency contact, buy property in Dubai help, Dubai Abu Dhabi property experts",
+      "og": {
+        "title": "Contact DubaiHaus | Dubai & Abu Dhabi Property Experts | DubaiHaus",
+        "description": "Reach out to our team for tailored advice on buying, selling and investing in Dubai & Abu Dhabi real estate."
+      },
+      "twitter": {
+        "title": "Contact DubaiHaus | Dubai & Abu Dhabi Property Experts | DubaiHaus",
+        "description": "Get personalised guidance on Dubai and Abu Dhabi property investment."
+      }
+    },
+    "badge": "Let's talk",
+    "headline": "Let's plan your next property move",
+    "subheadline": "Whether you're exploring off-plan projects, looking for a ready apartment, or considering selling, share your plans and our experts will come back with tailored options in Dubai & Abu Dhabi.",
+    "chips": {
+      "noObligation": "No-obligation consultation",
+      "responseTime": "Response usually within 24 hours"
+    },
+    "form": {
+      "purpose": {
+        "label": "I'm interested in",
+        "options": {
+          "buyOffplan": "Buying off-plan",
+          "buyReady": "Buying a ready property",
+          "sell": "Selling my property",
+          "invest": "Investment advice",
+          "other": "Just exploring options"
+        }
+      },
+      "budget": {
+        "label": "Approximate budget (AED)",
+        "placeholder": "e.g. 1M – 2M"
+      },
+      "name": {
+        "label": "Full name",
+        "placeholder": "Your full name"
+      },
+      "email": {
+        "label": "Email address",
+        "placeholder": "you@example.com"
+      },
+      "phone": {
+        "label": "Phone / WhatsApp",
+        "placeholder": "+971 ..."
+      },
+      "phoneHint": "Optional, but helps us reach you faster.",
+      "areas": {
+        "label": "Areas you're considering",
+        "placeholder": "Downtown, Dubai Marina, Dubai Hills..."
+      },
+      "message": {
+        "label": "Tell us a bit more",
+        "placeholder": "Share any details about your timeframe, preferences or questions..."
+      },
+      "submitIdle": "Send enquiry",
+      "submitSubmitting": "Sending..."
+    },
+    "disclaimer": "By sending this form you agree to be contacted by DubaiHaus about property opportunities. We respect your privacy.",
+    "status": {
+      "success": "✅ Message sent! We'll get back to you soon.",
+      "error": "❌ Something went wrong. Please try again."
+    },
+    "aside": {
+      "badge": "Contact details",
+      "title": "Talk to a DubaiHaus specialist",
+      "whatsapp": {
+        "label": "WhatsApp",
+        "number": "+971 50 523 1194",
+        "hours": "Mon–Sat, 10:00 – 19:00 (GST)"
+      },
+      "email": {
+        "label": "Email",
+        "value": "hello@dubaihaus.com"
+      },
+      "location": {
+        "label": "Based in",
+        "value": "Dubai & Abu Dhabi, UAE",
+        "hint": "Supporting buyers from GCC, Europe & worldwide."
+      },
+      "stats": {
+        "clients": "Clients assisted",
+        "satisfaction": "Avg. satisfaction"
+      },
+      "strip": {
+        "title": "Not ready to talk yet?",
+        "body": "Save this page and reach out whenever you're ready. We'll be here with updated projects, verified information and transparent advice."
+      }
+    },
+    "modal": {
+      "headingWithProject": "Let's discuss {projectTitle}",
+      "headingGeneric": "Let's discuss your project",
+      "subtitle": "Our expert will contact you within 24 hours",
+      "fields": {
+        "name": "Full name",
+        "email": "Email address",
+        "phone": "Phone number",
+        "message": "Your message",
+        "messagePlaceholder": "Tell us about your requirements, timeline, or any specific needs..."
+      },
+      "consent": {
+        "and": "and",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "requiredPrefix": "I agree to the ",
+        "marketing": "Send me updates about new projects and exclusive offers"
+      },
+      "status": {
+        "successTitle": "Message sent successfully!",
+        "successBody": "We'll get back to you soon.",
+        "errorTitle": "Unable to send message",
+        "errorBody": "Please check all fields and try again."
+      },
+      "submit": {
+        "default": "Get expert consultation",
+        "loading": "Sending..."
+      },
+      "trust": "Your information is secure and never shared with third parties.",
+      "closeAriaLabel": "Close"
+    }
+  },
+  "about": {
+    "badge": "About DubaiHaus",
+    "headlinePrefix": "Building",
+    "headlineHighlight": "Trust & Transparency",
+    "headlineSuffix": "in Every Property",
+    "intro": "Since 2024, DubaiHaus has been redefining how people buy, sell, and invest in real estate across Dubai and Abu Dhabi — with verified data, genuine advice, and expert guidance from people who care.",
+    "stats": {
+      "happyClients": "Happy Clients",
+      "clientRating": "Client Rating",
+      "propertyValue": "Property Value",
+      "established": "Established"
+    },
+    "values": {
+      "verified": {
+        "title": "Verified & Authentic",
+        "body": "Every project we recommend undergoes rigorous verification. No fake listings, no hidden agendas — only developer-approved data."
+      },
+      "clientFirst": {
+        "title": "Client-First Approach",
+        "body": "Your goals come first. We listen carefully and design property options that truly match your lifestyle and investment goals."
+      },
+      "globalSupport": {
+        "title": "Global Buyer Support",
+        "body": "Remote consultations, digital paperwork, and guidance for clients from GCC, Europe, and around the world."
+      }
+    },
+    "plan": {
+      "badge": "Our Plan",
+      "title": "What We’re Building",
+      "body": "A faster, more transparent discovery experience: verified project data, live availability, expert concierge recommendations, and one-tap booking support.",
+      "list": {
+        "verifiedData": "Developer-verified data & brochures",
+        "tailoredShortlists": "Tailored shortlists by budget & area",
+        "transparentPlans": "Transparent payment plans & handovers"
+      }
+    },
+    "authenticity": {
+      "badge": "Authenticity",
+      "body": "We work directly with authorized developers and agencies. All information and pricing are verified before being published."
+    },
+    "cta": {
+      "title": "Ready to start your property journey?",
+      "body": "Book a quick consultation—no obligation, just clear guidance.",
+      "button": "Book a consultation",
+      "note": "No obligation — just honest advice from verified property experts."
+    }
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Frequently Asked Questions about",
+    "highlight": "Dubai Real Estate",
+    "subtitle": "Clear, concise answers to help you make confident investment decisions in Dubai's property market.",
+    "buttons": {
+      "seeMore": "See More Questions",
+      "showLess": "Show Less Questions"
+    },
+    "stats": {
+      "questionsAnswered": "Questions Answered",
+      "verifiedInformation": "Verified Information",
+      "expertSupport": "Expert Support",
+      "investorsHelped": "Investors Helped"
+    },
+    "items": {
+      "q1": {
+        "question": "How to Sell Property in Dubai?",
+        "answer": "Selling property in Dubai is far from a complicated process with the help of a qualified real estate agent. After finding a specialist, you will need to sign a 'FORM A', to formally mandate brokering and marketing with that agent."
+      },
+      "q2": {
+        "question": "How to Sell Off-Plan Property in Dubai?",
+        "answer": "While it is perfectly legal to sell off-plan property in Dubai, developers set certain restrictions in order to keep these transactions under control."
+      },
+      "q3": {
+        "question": "Why Invest in Dubai?",
+        "answer": "The investment property market in Dubai offers higher rental yields than many other mature real estate markets. The average ROI ranges between 5% and 9% as property prices per square foot are significantly lower than in other global cities such as London, Hong Kong and Paris."
+      },
+      "q4": {
+        "question": "How to Start Real Estate Investing in Dubai?",
+        "answer": "First, identify your investment purpose. Besides using property as a private residence, you can rent it out or resell it, which are great options if you are looking to generate income."
+      },
+      "q5": {
+        "question": "How to Invest in Property?",
+        "answer": "In Dubai, UAE residents are allowed to buy properties only in designated freehold areas. Off-plan developments are very attractive as prices are lower and developers offer flexible payment plans."
+      },
+      "q6": {
+        "question": "How to Invest in Dubai's Real Estate?",
+        "answer": "Many investors secure a long-term income by becoming landlords. Residential real estate can generate from 5% up to 12% ROI, which is high compared to many European capital cities."
+      },
+      "q7": {
+        "question": "How to Invest for Beginners with Little Money?",
+        "answer": "Dubai's property market offers plenty of options for any budget. Popular affordable communities include Dubai International City, Jumeirah Lake Towers, Jumeirah Village Circle and Dubai Sports City."
+      },
+      "q8": {
+        "question": "How to Buy an Apartment in Dubai?",
+        "answer": "When choosing an area, consider factors such as infrastructure, public transport, healthcare facilities, academic institutions and overall lifestyle."
+      },
+      "q9": {
+        "question": "Where to Buy Property in Dubai?",
+        "answer": "Dubai offers many options for every budget. Popular family-friendly and affordable communities include Jumeirah Lake Towers, Jumeirah Village Circle, Dubai International City and Dubai Sports City."
+      },
+      "q10": {
+        "question": "What Is Off-Plan Property in Dubai?",
+        "answer": "Off-plan property is real estate under construction. It usually has a lower purchase price than ready units, and there is often the possibility to resell before completion for higher capital appreciation."
+      },
+      "q11": {
+        "question": "How to Buy Off-Plan Property in Dubai?",
+        "answer": "The UAE real estate market is open to any buyer. You do not need a visa or Emirates ID to buy off-plan property in Dubai, only a valid passport copy."
+      },
+      "q12": {
+        "question": "What is Real Estate Investment in Dubai?",
+        "answer": "Real estate investment in Dubai is ideal for long-term income. For example, you can buy a home, renovate and resell it, or purchase a commercial building with tenants whose rent covers your costs and generates profit."
+      },
+      "q13": {
+        "question": "Why Invest in Real Estate in Dubai?",
+        "answer": "Property prices in Dubai are significantly lower than in many cities in Europe, America or Asia, while rental yields often remain attractive."
+      },
+      "q14": {
+        "question": "Can Foreigners Buy Property in Dubai?",
+        "answer": "Foreign nationals can buy real estate only in designated freehold areas. In these zones, foreigners and expats can acquire freehold ownership rights without restriction, or leasehold rights for up to 99 years."
+      },
+      "q15": {
+        "question": "Can You Obtain Dubai Citizenship?",
+        "answer": "In January 2021, the UAE approved amendments allowing several categories of foreign nationals, their spouses and children to obtain Emirati citizenship under specific conditions."
+      },
+      "q16": {
+        "question": "Are Properties in Dubai Affordable?",
+        "answer": "Dubai offers properties across different price categories, from affordable units to ultra-luxury real estate. Location is one of the key factors influencing price."
+      },
+      "q17": {
+        "question": "Is It Worth Buying a Property in Dubai?",
+        "answer": "Yes. One major advantage is high rental yields, averaging from 5% to 9% depending on the area and property type."
+      },
+      "q18": {
+        "question": "How Much Is an Apartment in Dubai?",
+        "answer": "Prices vary based on location and number of bedrooms. More affordable options can be found in areas like Jumeirah Lake Towers, Dubai Investment Park and International City."
+      },
+      "q19": {
+        "question": "Can You Live in Dubai Without a Job?",
+        "answer": "While job-linked visas are common, there are alternatives such as investor, property, freelancer and Golden Visas, each with specific financial and regulatory requirements."
+      },
+      "q20": {
+        "question": "Can I Live in Dubai Permanently?",
+        "answer": "The UAE's Golden Visa system offers long-term residence visas (5 or 10 years) that can be renewed, provided all requirements are met."
+      },
+      "q21": {
+        "question": "Where Can Expats Buy Property in Dubai?",
+        "answer": "Expats and foreign nationals can buy property only in freehold areas designated by the government."
+      },
+      "q22": {
+        "question": "Can You Buy Property in Dubai with Cash?",
+        "answer": "Yes, you can. Cash buyers often have stronger negotiating power and may secure better deals."
+      },
+      "q23": {
+        "question": "What Is the Minimum Investment Amount in Dubai?",
+        "answer": "The minimum entry point changes over time, but there are studios and smaller units in emerging communities that provide relatively low starting prices for investors."
+      }
+    },
+    "meta": {
+      "title": "Dubai & Abu Dhabi Property FAQ | Off-Plan, Fees & Golden Visa",
+      "description": "Answers to common questions about buying property in Dubai and Abu Dhabi, including off-plan purchases, service charges, payment plans and Golden Visa eligibility.",
+      "keywords": [
+        "how to buy property in Dubai",
+        "how to buy property in Abu Dhabi",
+        "buy property in UAE",
+        "Dubai property FAQ",
+        "Abu Dhabi property FAQ",
+        "Dubai real estate questions",
+        "off-plan FAQ Dubai",
+        "Golden Visa property requirements",
+        "fees for buying property in Dubai"
+      ],
+      "canonical": "https://dubaihaus.com/faq",
+      "ogTitle": "Dubai & Abu Dhabi Property FAQ | Off-Plan, Fees & Golden Visa | DubaiHaus",
+      "ogDescription": "Get clear explanations on off-plan buying, costs, legal aspects and residency via property investment in Dubai and Abu Dhabi.",
+      "url": "https://dubaihaus.com/faq",
+      "twitterTitle": "Dubai & Abu Dhabi Property FAQ | Off-Plan, Fees & Golden Visa | DubaiHaus",
+      "twitterDescription": "Frequently asked questions about buying and investing in Dubai and Abu Dhabi real estate."
+    }
+  },
+  "developers": {
+    "hero": {
+      "badge": "Developers",
+      "heading": "Discover UAE's leading developers",
+      "description": "Explore trusted names like Emaar, Damac, Sobha, Aldar and more. Filter by name and quickly jump into off-plan projects built by each developer.",
+      "countLabel": "Currently listing {total} {total, plural, one {developer} other {developers}}.",
+      "filterTitle": "Filter developers",
+      "searchLabel": "Search by name",
+      "searchPlaceholder": "Emaar, Damac, Aldar...",
+      "tip": "Tip: start typing to instantly filter the grid below."
+    },
+    "grid": {
+      "summary": "Showing {visible} of {total} {total, plural, one {developer} other {developers}}.",
+      "viewProjects": "View projects",
+      "offplanAndReady": "Off-plan & ready projects",
+      "empty": "No developers match your search. Try another name.",
+      "showAllButton": "Show all developers"
+    }
+  },
+  "areas": {
+    "hero": {
+      "titleLine1": "Discover Prime",
+      "titleHighlight": "UAE Locations",
+      "description": "Explore exclusive communities across Dubai, Abu Dhabi, and beyond. Find your perfect investment in the most sought-after neighborhoods."
+    },
+    "stats": {
+      "primeAreasNumber": "100+",
+      "primeAreas": "Prime Areas",
+      "developmentsNumber": "500+",
+      "developments": "Developments",
+      "investmentValueNumber": "AED 2B+",
+      "investmentValue": "Investment Value"
+    },
+    "filter": {
+      "selectRegionLabel": "Select Region",
+      "searchAreasLabel": "Search Areas",
+      "searchPlaceholder": "Try 'Downtown', 'Marina', 'Yas Island'...",
+      "findAreasButton": "Find Areas",
+      "viewMapButton": "View Map",
+      "regionAllLabel": "All UAE"
+    },
+    "regions": {
+      "Dubai": "Dubai",
+      "AbuDhabi": "Abu Dhabi",
+      "Sharjah": "Sharjah",
+      "Ajman": "Ajman",
+      "RasAlKhaimah": "Ras Al Khaimah",
+      "Fujairah": "Fujairah",
+      "UmmAlQuwain": "Umm Al Quwain"
+    },
+    "results": {
+      "allUaeAreas": "All UAE Areas",
+      "regionAreasSuffix": "Areas",
+      "areaSingular": "area",
+      "areaPlural": "areas",
+      "found": "found",
+      "forQueryPrefix": "for",
+      "sortPopularity": "Sort by: Popularity",
+      "sortName": "Sort by: Name A-Z",
+      "sortPropertyCount": "Sort by: Property Count"
+    },
+    "states": {
+      "errorTitle": "Unable to Load Areas",
+      "errorBody": "We're having trouble loading the areas. Please check your connection and try again.",
+      "retry": "Retry",
+      "emptyTitle": "No Areas Found",
+      "emptyBody": "We couldn't find any areas matching your search criteria.",
+      "clearFilters": "Clear Filters",
+      "loadMore": "Load More Areas"
+    },
+    "card": {
+      "propertiesCountSuffix": "+ properties",
+      "descriptionPrefix": "Discover premium off-plan properties in",
+      "descriptionFeaturing": "Featuring",
+      "descriptionDevelopmentsSuffix": "exclusive developments.",
+      "descriptionFallback": "Prime investment opportunities await.",
+      "cta": "Explore Area",
+      "hot": "Hot"
+    },
+    "abuDhabi": {
+      "headingPrefix": "Top Real Estate Areas in",
+      "headingHighlight": "Abu Dhabi",
+      "description": "Discover Abu Dhabi's leading communities — from waterfront islands to cultural and business hubs.",
+      "fallbackDescription": "Explore premium off-plan developments in Abu Dhabi's most sought-after communities.",
+      "failedToLoadShort": "Failed to load",
+      "errorLoading": "Error loading properties",
+      "ctaSectionTitle": "Can't find your preferred area?",
+      "ctaSectionBody": "Explore our complete collection of premium properties across all Abu Dhabi communities",
+      "ctaSectionButton": "Explore All Abu Dhabi Properties"
+    }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Find latest properties on the map"
+    }
+  },
 
+  "dashboard": {
+    "hero": {
+      "fallbackProjectName": "Featured property",
+      "descriptionWithBedrooms": "{projectName} in {areaTitle}. {bedrooms}-bed apartments with modern amenities.",
+      "descriptionNoBedrooms": "{projectName} in {areaTitle}. Luxury apartments with modern amenities.",
+      "descriptionFallback": "Explore premium off-plan developments in {areaTitle}.",
+      "statusPropertiesAvailable": "Properties Available",
+      "statusExploreArea": "Explore Area",
+      "chipLuxury": "Luxury Apartments",
+      "chipGreen": "Green Spaces",
+      "chipAmenities": "Premium Amenities",
+      "primaryCtaWithProject": "Discover Properties",
+      "primaryCtaNoProject": "Explore Area",
+      "secondaryCtaPrefix": "View All in {areaShort}",
+      "defaultTitle": "Dubai Off-Plan Properties",
+      "defaultDescription": "Discover premium off-plan developments across Dubai's most sought-after locations.",
+      "dotAriaLabel": "Go to {areaTitle}",
+      "ariaPreviousSlide": "Previous slide",
+      "ariaNextSlide": "Next slide"
+    },
+    "areasShowcase": {
+      "sectionTitle": "Best Real Estate Areas in {city}",
+      "sectionCity": "Dubai",
+      "sectionDescription": "Discover Dubai's top property destinations — from luxury beachfronts to urban communities.",
+      "cardErrorTitle": "Failed to load",
+      "cardErrorBody": "Error loading properties",
+      "cardErrorCta": "Try Again",
+      "cardPropertiesCountSuffix": "+ Properties",
+      "cardDescriptionFallback": "Explore premium off-plan developments in this sought-after Dubai community.",
+      "cardCta": "Explore Area",
+      "ctaTitle": "Can't find your preferred area?",
+      "ctaBody": "Explore our complete collection of premium properties across all Dubai communities",
+      "ctaButton": "Explore All Properties"
+    }
+  },
+  "map": {
+    "popup": {
+      "fallbackTitle": "Property",
+      "fallbackLocation": "Dubai",
+      "viewDetails": "View details"
+    },
+    "section": {
+      "defaultTitle": "Explore properties on the map",
+      "loading": "Loading map…",
+      "errorTitle": "Failed to load map data.",
+      "errorBody": "Please try refreshing the page in a moment.",
+      "emptyTitle": "No properties with valid coordinates.",
+      "emptyBody": "Found {count} projects but none have location data."
+    },
+    "status": {
+      "markersLoading": "Loading properties…",
+      "mapboxMissingTitle": "Mapbox token not configured",
+      "mapboxMissingBody": "Check NEXT_PUBLIC_MAPBOX_TOKEN"
+    }
+  }
 }

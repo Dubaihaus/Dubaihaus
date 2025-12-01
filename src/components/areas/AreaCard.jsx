@@ -6,11 +6,14 @@ import Image from "next/image";
 import { useProperties } from "@/hooks/useProperties";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const FALLBACK_IMG = "/dashboard/building.jpg";
 
 export default function AreaCard({ area, index }) {
   if (!area) return null;
+
+  const t = useTranslations("areas");
 
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -38,6 +41,19 @@ export default function AreaCard({ area, index }) {
 
   const coverFromProperty = data?.results?.[0]?.coverImage || null;
   const imageSrc = coverFromProperty || FALLBACK_IMG;
+
+  const count = data?.count || 0;
+
+  const baseDescription = `${t("card.descriptionPrefix")} ${area.name}${
+    area.region ? `, ${area.region}` : ""
+  }.`;
+
+  const fullDescription =
+    count > 0
+      ? `${baseDescription} ${t("card.descriptionFeaturing")} ${count} ${t(
+          "card.descriptionDevelopmentsSuffix"
+        )}`
+      : `${baseDescription} ${t("card.descriptionFallback")}`;
 
   // Parallax effect
   useEffect(() => {
@@ -133,7 +149,8 @@ export default function AreaCard({ area, index }) {
             transition={{ delay: index * 0.1 + 0.4 }}
             className="absolute top-4 right-4 text-xs font-medium px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-sm text-white"
           >
-            {data?.count || 0}+ properties
+            {count}
+            {t("card.propertiesCountSuffix")}
           </motion.div>
         </div>
 
@@ -154,10 +171,7 @@ export default function AreaCard({ area, index }) {
             transition={{ delay: index * 0.1 + 0.3 }}
             className="text-sm text-gray-600 mb-4 line-clamp-2 flex-1"
           >
-            Discover premium off-plan properties in {area.name}, {area.region}.
-            {data?.count
-              ? ` Featuring ${data.count} exclusive developments.`
-              : " Prime investment opportunities await."}
+            {fullDescription}
           </motion.p>
 
           <motion.div
@@ -171,7 +185,7 @@ export default function AreaCard({ area, index }) {
               href={areaHref}
               className="inline-flex items-center text-sm font-semibold text-sky-600 group-hover:text-sky-700 transition-colors duration-300"
             >
-              Explore Area
+              {t("card.cta")}
               <svg
                 className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
                 fill="none"
@@ -190,7 +204,11 @@ export default function AreaCard({ area, index }) {
             {/* Interactive stats */}
             <div className="flex items-center space-x-3 text-xs text-gray-500">
               <span className="flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                   <path
                     fillRule="evenodd"
@@ -198,7 +216,7 @@ export default function AreaCard({ area, index }) {
                     clipRule="evenodd"
                   />
                 </svg>
-                Hot
+                {t("card.hot")}
               </span>
             </div>
           </motion.div>

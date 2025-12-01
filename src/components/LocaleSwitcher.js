@@ -1,8 +1,7 @@
-// src/components/LocaleSwitcher.js
+// src/components/LocaleSwitcher.js (updated)
 'use client';
 import { usePathname, useRouter } from 'next/navigation';
-import { setCookie } from 'cookies-next';
-import { useLocale } from 'next-intl';
+import { useLocale } from '@/hooks/useLocale';
 
 export default function LocaleSwitcher() {
   const router = useRouter();
@@ -10,11 +9,21 @@ export default function LocaleSwitcher() {
   const currentLocale = useLocale();
 
   const switchLocale = (locale) => {
-    setCookie('NEXT_LOCALE', locale, { 
-      path: '/', 
-      maxAge: 365 * 24 * 60 * 60 
-    });
-    router.refresh(); // Important: Triggers server re-render
+    if (locale === currentLocale) return;
+    
+    const parts = pathname.split('/');
+    let newPath;
+
+    if (['en', 'de'].includes(parts[1])) {
+      parts[1] = locale;
+      newPath = parts.join('/') || '/';
+    } else {
+      parts.splice(1, 0, locale);
+      newPath = parts.join('/') || '/';
+    }
+
+    // Force full page reload to trigger middleware
+    window.location.href = newPath;
   };
 
   return (

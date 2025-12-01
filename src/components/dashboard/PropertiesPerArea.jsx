@@ -6,8 +6,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { AREAS } from "@/lib/Areas";
 import { useAreaProperties } from "@/hooks/useProperties";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 const PLACEHOLDER = "/project_detail_images/building.jpg";
 
@@ -35,9 +36,10 @@ const cardVariants = {
 };
 
 function AreaCard({ area, index }) {
+  const t = useTranslations("dashboard.areasShowcase");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const { data, isLoading, error } = useAreaProperties(area.slug, area.filters);
 
   const firstProperty = data?.results?.[0];
@@ -74,14 +76,20 @@ function AreaCard({ area, index }) {
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
               <span className="text-red-500 text-xl">⚠️</span>
             </div>
-            <span className="text-red-600 font-medium">Failed to load</span>
+            <span className="text-red-600 font-medium">
+              {t("cardErrorTitle")}
+            </span>
           </div>
         </div>
         <div className="p-6 flex flex-col flex-1">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">{area.title}</h3>
-          <p className="text-gray-600 text-sm mb-5">Error loading properties</p>
+          <h3 className="text-lg font-bold text-gray-800 mb-2">
+            {area.title}
+          </h3>
+          <p className="text-gray-600 text-sm mb-5">
+            {t("cardErrorBody")}
+          </p>
           <Button asChild className="mt-auto">
-            <Link href={loadMoreHref}>Try Again</Link>
+            <Link href={loadMoreHref}>{t("cardErrorCta")}</Link>
           </Button>
         </div>
       </motion.div>
@@ -98,7 +106,7 @@ function AreaCard({ area, index }) {
     >
       {/* Shine effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10" />
-      
+
       {/* Image container */}
       <div className="relative h-56 overflow-hidden">
         <Image
@@ -106,38 +114,40 @@ function AreaCard({ area, index }) {
           alt={area.title}
           fill
           className={`object-cover transition-transform duration-700 ${
-            isHovered ? 'scale-110' : 'scale-100'
-          } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            isHovered ? "scale-110" : "scale-100"
+          } ${imageLoaded ? "opacity-100" : "opacity-0"}`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onLoad={() => setImageLoaded(true)}
           onError={(e) => {
+            // @ts-ignore
             e.target.src = PLACEHOLDER;
           }}
         />
-        
+
         {/* Loading skeleton */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse" />
         )}
-        
+
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
+
         {/* Property count badge */}
         {data?.count && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             className="absolute top-4 right-4 bg-black/80 text-white text-xs font-semibold px-3 py-2 rounded-full backdrop-blur-sm"
           >
-            {data.count}+ Properties
+            {data.count}
+            {t("cardPropertiesCountSuffix")}
           </motion.div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-6 flex flex-col flex-1 relative z-0">
-        <motion.h3 
+        <motion.h3
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 + 0.2 }}
@@ -145,14 +155,14 @@ function AreaCard({ area, index }) {
         >
           {area.title}
         </motion.h3>
-        
-        <motion.p 
+
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: index * 0.1 + 0.3 }}
           className="text-gray-600 text-sm mb-5 line-clamp-2 flex-1 leading-relaxed"
         >
-          {area.description || "Explore premium off-plan developments in this sought-after Dubai community."}
+          {area.description || t("cardDescriptionFallback")}
         </motion.p>
 
         <motion.div
@@ -164,23 +174,32 @@ function AreaCard({ area, index }) {
           <Button
             asChild
             className="w-full text-white rounded-xl font-semibold py-3 text-base shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group/btn"
-            style={{ backgroundColor: '#00C6FF' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00C6FF')}
+            style={{ backgroundColor: "#00C6FF" }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#003C7A")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#00C6FF")
+            }
           >
             <Link href={loadMoreHref}>
               {/* Button shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
-              
+
               <span className="relative z-10 flex items-center justify-center">
-                Explore Area
+                {t("cardCta")}
                 <svg
                   className="ml-2 w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </span>
             </Link>
@@ -195,6 +214,7 @@ function AreaCard({ area, index }) {
 }
 
 export default function AreasShowcaseClient() {
+  const t = useTranslations("dashboard.areasShowcase");
   const [hasEntered, setHasEntered] = useState(false);
   const sectionRef = useRef(null);
 
@@ -217,8 +237,10 @@ export default function AreasShowcaseClient() {
     return () => observer.disconnect();
   }, []);
 
+  const sectionTitle = t("sectionTitle", { city: t("sectionCity") });
+
   return (
-    <section 
+    <section
       ref={sectionRef}
       className="px-4 py-20 md:px-8 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden"
       dir="ltr"
@@ -226,7 +248,7 @@ export default function AreasShowcaseClient() {
       {/* Background Elements */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-30" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-20" />
-      
+
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <motion.div
@@ -235,24 +257,21 @@ export default function AreasShowcaseClient() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={hasEntered ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.2, duration: 0.7 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
           >
-            Best Real Estate Areas in{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00C6FF] to-blue-600">
-              Dubai
-            </span>
+            {sectionTitle}
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={hasEntered ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed"
           >
-            Discover Dubai's top property destinations — from luxury beachfronts to urban communities.
+            {t("sectionDescription")}
           </motion.p>
         </motion.div>
 
@@ -275,13 +294,13 @@ export default function AreasShowcaseClient() {
           transition={{ delay: 0.8, duration: 0.6 }}
           className="text-center pt-12 border-t border-gray-200"
         >
-          <motion.h3 
+          <motion.h3
             initial={{ opacity: 0 }}
             animate={hasEntered ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 1, duration: 0.6 }}
             className="text-2xl font-bold text-gray-900 mb-4"
           >
-            Can't find your preferred area?
+            {t("ctaTitle")}
           </motion.h3>
           <motion.p
             initial={{ opacity: 0 }}
@@ -289,32 +308,45 @@ export default function AreasShowcaseClient() {
             transition={{ delay: 1.1, duration: 0.6 }}
             className="text-gray-600 mb-8 max-w-2xl mx-auto"
           >
-            Explore our complete collection of premium properties across all Dubai communities
+            {t("ctaBody")}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={hasEntered ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            animate={
+              hasEntered
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 0, scale: 0.9 }
+            }
             transition={{ delay: 1.2, duration: 0.5 }}
           >
             <Link
               href="/off-plan"
               className="inline-flex items-center text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
-              style={{ backgroundColor: '#00C6FF' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#003C7A')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#00C6FF')}
+              style={{ backgroundColor: "#00C6FF" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#003C7A")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#00C6FF")
+              }
             >
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              
+
               <span className="relative z-10 flex items-center">
-                Explore All Properties
+                {t("ctaButton")}
                 <svg
                   className="ml-3 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </span>
             </Link>
