@@ -1,3 +1,4 @@
+
 // src/lib/ProjectNormalizer.js
 
 function cleanup(str) {

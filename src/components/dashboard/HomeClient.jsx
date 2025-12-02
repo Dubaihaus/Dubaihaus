@@ -48,7 +48,7 @@ export default function HomeClient() {
       <AbuDhabiAreasSection />
       <AreasShowcaseClient />
 
-      <Footer />
+     
     </>
   );
 }
