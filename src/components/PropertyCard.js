@@ -139,19 +139,14 @@ export default function PropertyCard({
     property?.rawData?.cover_image?.url ||
     '/project_detail_images/building.jpg';
 
-  const rawPrice =
+    const rawPrice =
     property.price ?? property.minPrice ?? property.min_price ?? null;
 
-  // currency conversion first, then round to nearest integer
-  let converted = rawPrice;
-  if (currency === 'EUR' && rawPrice != null) converted = rawPrice * 0.25;
-  else if (currency === 'USD' && rawPrice != null) converted = rawPrice * 0.27;
-
-  // remove any decimals — ensure integer
-  const price = converted != null ? Math.round(Number(converted)) : null;
+  // Backend already converted to correct currency
+  const price = rawPrice != null ? Math.round(Number(rawPrice)) : null;
 
   const shownCurrency =
-    currency || property.priceCurrency || property.price_currency || 'AED';
+    property.priceCurrency || property.price_currency || currency || 'AED';
 
   const locationLabel = fmtLocation(
     property.locationObj || property.rawData?.location || property.location,

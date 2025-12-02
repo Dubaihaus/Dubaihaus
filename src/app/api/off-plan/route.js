@@ -1,7 +1,15 @@
-
 // src/app/api/off-plan/route.js
-import { searchProperties, listRegions, listDistricts, searchAllProjects ,  getPropertyById} from "@/lib/reellyApi";
-import { cookies } from "next/headers";
+import {
+  searchProperties,
+  listRegions,
+  listDistricts,
+  searchAllProjects,
+  getPropertyById,
+} from '@/lib/reellyApi';
+import { cookies } from 'next/headers';
+import { applyCurrencyToProjects } from '@/lib/currencyService';
+
+export const runtime = 'nodejs';
 
 // Helper function to search across all location fields
 async function resolveAreaToFilters(areaName) {
@@ -12,7 +20,9 @@ async function resolveAreaToFilters(areaName) {
   try {
     const districts = await listDistricts(areaName);
     const districtMatch = districts.find((d) =>
-      String(d.name || "").toLowerCase().includes(String(areaName).toLowerCase())
+      String(d.name || '')
+        .toLowerCase()
+        .includes(String(areaName).toLowerCase())
     );
 
     if (districtMatch?.id) {
@@ -22,7 +32,9 @@ async function resolveAreaToFilters(areaName) {
 
     const regions = await listRegions();
     const regionMatch = regions.find((r) =>
-      String(r.name || "").toLowerCase().includes(String(areaName).toLowerCase())
+      String(r.name || '')
+        .toLowerCase()
+        .includes(String(areaName).toLowerCase())
     );
 
     if (regionMatch) {
@@ -35,7 +47,7 @@ async function resolveAreaToFilters(areaName) {
 
     filters.search_query = areaName;
   } catch (error) {
-    console.error("Error resolving area:", error);
+    console.error('Error resolving area:', error);
     filters.search_query = areaName;
   }
 
@@ -63,8 +75,8 @@ async function dedupedSearchProperties(filters) {
 // LATEST PROJECTS FILTER LOGIC
 function getLatestProjectsFilters() {
   return {
-    sale_status: "on_sale",
-    status: "presale", // SaleStatusEnum / status usually lower-case
+    sale_status: 'on_sale',
+    status: 'presale',
     pricedOnly: true,
   };
 }
@@ -73,21 +85,28 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const filters = {};
 
-  // Parse all query parameters
+  // 👇 New: currency param (default AED)
+  const currency = (searchParams.get('currency') || 'AED').toUpperCase();
+
+  // Parse all query parameters EXCEPT currency
   searchParams.forEach((value, key) => {
-    if (key === "page") filters.page = parseInt(value);
-    else if (key === "pageSize") filters.pageSize = parseInt(value);
-    else if (key === "pricedOnly") filters.pricedOnly = value === "true";
-    else if (key === "latest") filters.latest = value === "true";
-    else if (key === "forMap" || key === "mode") filters[key] = value;
-    else if (value === "true" || value === "false") filters[key] = value === "true";
+    if (key === 'currency') {
+      return;
+    }
+
+    if (key === 'page') filters.page = parseInt(value);
+    else if (key === 'pageSize') filters.pageSize = parseInt(value);
+    else if (key === 'pricedOnly') filters.pricedOnly = value === 'true';
+    else if (key === 'latest') filters.latest = value === 'true';
+    else if (key === 'forMap' || key === 'mode') filters[key] = value;
+    else if (value === 'true' || value === 'false') filters[key] = value === 'true';
     else filters[key] = value;
   });
 
   const forMap =
     filters.forMap === true ||
-    filters.forMap === "true" ||
-    filters.mode === "map";
+    filters.forMap === 'true' ||
+    filters.mode === 'map';
 
   // LATEST mode: /api/off-plan?latest=true
   if (filters.latest) {
@@ -109,16 +128,21 @@ export async function GET(request) {
       delete filters.sector;
       delete filters.region;
     } catch (error) {
-      console.error("Area resolution failed:", error);
+      console.error('Area resolution failed:', error);
       filters.search_query = areaName;
     }
   }
 
   const cookieStore = await cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
   // locale reserved if you later localize queries
 
-  console.log("🔍 /api/off-plan filters:", { ...filters, locale, forMap });
+  console.log('🔍 /api/off-plan filters:', {
+    ...filters,
+    locale,
+    forMap,
+    currency,
+  });
 
   let data;
 
@@ -138,7 +162,7 @@ export async function GET(request) {
 
   // Fallback strategies only for non-map searches
   if (!forMap && (data?.results?.length ?? 0) === 0 && areaName) {
-    console.log("🔄 Trying fallback strategies for:", areaName);
+    console.log('🔄 Trying fallback strategies for:', areaName);
 
     const fallbackStrategies = [
       async () => {
@@ -172,13 +196,13 @@ export async function GET(request) {
           break;
         }
       } catch (error) {
-        console.error("Fallback strategy failed:", error);
+        console.error('Fallback strategy failed:', error);
       }
     }
   }
 
-
- if (!forMap && data?.results?.length) {
+  // 🔹 Enrich with detail API (same as before)
+  if (!forMap && data?.results?.length) {
     try {
       const enrichedResults = await Promise.all(
         data.results.map(async (item) => {
@@ -187,13 +211,12 @@ export async function GET(request) {
 
             return {
               ...item,
-              // prefer detail meta, fall back to existing values if any
               propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
-                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlans: detail?.paymentPlans || item.paymentPlans || [],
               paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
             };
           } catch (err) {
-            console.error("Failed to enrich project", item.id, err);
+            console.error('Failed to enrich project', item.id, err);
             return item;
           }
         })
@@ -201,16 +224,17 @@ export async function GET(request) {
 
       data = { ...data, results: enrichedResults };
     } catch (err) {
-      console.error("Bulk enrichment failed:", err);
+      console.error('Bulk enrichment failed:', err);
     }
   }
 
-  
+  // 🔹 NEW: Apply currency conversion on top of enriched data
+  data = await applyCurrencyToProjects(data, currency);
 
   const responseHeaders = {
-    "Content-Type": "application/json",
-    "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",
-    Vary: "Accept-Encoding, Cookie, Next-Locale",
+    'Content-Type': 'application/json',
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+    Vary: 'Accept-Encoding, Cookie, Next-Locale',
   };
 
   return new Response(JSON.stringify(data || { results: [], total: 0 }), {

@@ -135,3 +135,13 @@ model Translation {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+model CurrencyRate {
+  id        Int      @id @default(autoincrement())
+  base      String   // e.g. "AED"
+  target    String   // e.g. "USD"
+  rate      Float    // e.g. 0.27 (1 AED = 0.27 USD)
+  provider  String   @default("exchangerateapi")
+  fetchedAt DateTime @default(now())
+
+  @@unique([base, target])
+}

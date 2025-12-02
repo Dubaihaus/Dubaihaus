@@ -1,34 +1,43 @@
-
 // src/app/api/off-plan/latest/route.js
-import { searchProperties, getPropertyById} from "@/lib/reellyApi";
-import { cookies } from "next/headers";
+import { searchProperties, getPropertyById } from '@/lib/reellyApi';
+import { cookies } from 'next/headers';
+import { applyCurrencyToProjects } from '@/lib/currencyService';
+
+export const runtime = 'nodejs';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
 
+  const currency = (searchParams.get('currency') || 'AED').toUpperCase();
+
   const filters = {
-    sale_status: "on_sale",
-    status: "presale",
-    ordering: "-updated_at",
+    sale_status: 'on_sale',
+    status: 'presale',
+    ordering: '-updated_at',
     pricedOnly: false, // allow 0-price projects, you can hide in UI if needed
-    page: parseInt(searchParams.get("page")) || 1,
-    pageSize: Math.min(parseInt(searchParams.get("pageSize")) || 12, 50),
+    page: parseInt(searchParams.get('page')) || 1,
+    pageSize: Math.min(parseInt(searchParams.get('pageSize')) || 12, 50),
   };
 
-  if (searchParams.get("region")) {
-    filters.region = searchParams.get("region");
+  if (searchParams.get('region')) {
+    filters.region = searchParams.get('region');
   }
-  if (searchParams.get("country")) {
-    filters.country = searchParams.get("country");
+  if (searchParams.get('country')) {
+    filters.country = searchParams.get('country');
   }
 
   const cookieStore = await cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
 
-  console.log("🆕 /api/off-plan/latest filters:", { ...filters, locale });
+  console.log('🆕 /api/off-plan/latest filters:', {
+    ...filters,
+    locale,
+    currency,
+  });
 
-  const data = await searchProperties(filters);
- // ✅ Enrich with paymentPlan + propertyTypes from detail API
+  let data = await searchProperties(filters);
+
+  // ✅ Enrich with paymentPlan + propertyTypes from detail API
   if (data?.results?.length) {
     try {
       const enrichedResults = await Promise.all(
@@ -39,26 +48,28 @@ export async function GET(request) {
             return {
               ...item,
               propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
-                paymentPlans: detail?.paymentPlans || item.paymentPlans || [], 
+              paymentPlans: detail?.paymentPlans || item.paymentPlans || [],
               paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
             };
           } catch (err) {
-            console.error("Failed to enrich latest project", item.id, err);
+            console.error('Failed to enrich latest project', item.id, err);
             return item;
           }
         })
       );
       data = { ...data, results: enrichedResults };
     } catch (err) {
-      console.error("Bulk enrichment for latest failed:", err);
+      console.error('Bulk enrichment for latest failed:', err);
     }
   }
 
- 
+  // 🔹 NEW: Apply currency conversion
+  data = await applyCurrencyToProjects(data, currency);
+
   const responseHeaders = {
-    "Content-Type": "application/json",
-    "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",
-    Vary: "Accept-Encoding, Cookie, Next-Locale",
+    'Content-Type': 'application/json',
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+    Vary: 'Accept-Encoding, Cookie, Next-Locale',
   };
 
   return new Response(JSON.stringify(data || { results: [], total: 0 }), {
