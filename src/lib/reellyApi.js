@@ -1,4 +1,3 @@
-
 // src/lib/reellyApi.js
 import dns from "node:dns";
 import { normalizeProject } from "./ProjectNormalizer";
@@ -132,6 +131,7 @@ export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
   _developersCache = { at: now, data: rows };
   return rows;
 }
+
 export async function getDeveloperById(id) {
   const developers = await listDevelopers({ limit: 200, offset: 0 });
   return developers.find((d) => String(d.id) === String(id)) || null;
@@ -323,7 +323,14 @@ export async function getProjectMarkers() {
 // ---------- Transform helpers ----------
 function transformPropertiesResponse(reellyData, page, pageSize) {
   const items = reellyData?.results || reellyData || [];
-  const results = items.map(normalizeProject).filter(Boolean);
+
+  // ✅ Global filter: never show OUT OF STOCK projects anywhere (including map)
+  const visibleItems = items.filter((p) => {
+    const rawStatus = String(p?.sale_status || p?.status || "").toLowerCase();
+    return rawStatus !== "out_of_stock";
+  });
+
+  const results = visibleItems.map(normalizeProject).filter(Boolean);
 
   return {
     results,
@@ -338,7 +345,3 @@ function transformPropertiesResponse(reellyData, page, pageSize) {
 function transformPropertyResponse(reellyProperty) {
   return normalizeProject(reellyProperty);
 }
-
-
-
-

@@ -11,7 +11,8 @@ export async function GET(request) {
   const currency = (searchParams.get('currency') || 'AED').toUpperCase();
 
   const filters = {
-    sale_status: 'on_sale',
+    // ✅ Latest endpoint: only PRESALE projects
+    sale_status: 'presale', // <--- changed from 'on_sale'
     status: 'presale',
     ordering: '-updated_at',
     pricedOnly: false, // allow 0-price projects, you can hide in UI if needed

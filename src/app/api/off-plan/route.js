@@ -73,9 +73,11 @@ async function dedupedSearchProperties(filters) {
 }
 
 // LATEST PROJECTS FILTER LOGIC
+// ✅ Now: "latest" = only PRESALE projects (no on_sale here)
+// Global out_of_stock filtering is handled in reellyApi.transformPropertiesResponse
 function getLatestProjectsFilters() {
   return {
-    sale_status: 'on_sale',
+    sale_status: 'presale', // <--- changed from 'on_sale'
     status: 'presale',
     pricedOnly: true,
   };
