@@ -10,7 +10,8 @@
     "faq": "FAQ",
     "blog": "Blog",
     "find": "Finden",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "featuredProperties": "Ausgewählte Immobilien"
   },
   "hero": {
     "headline": "PALM JEBEL ALI",
@@ -201,13 +202,12 @@
         "messagePlaceholder": "Erzählen Sie uns von Ihren Anforderungen, Ihrem Zeitplan oder besonderen Wünschen …"
       },
       "consent": {
-  "requiredPrefix": "Ich stimme der ",
-  "privacyPolicy": "Datenschutzerklärung",
-  "termsOfService": "den Nutzungsbedingungen",
-  "and": "und",
-  "marketing": "Senden Sie mir Updates zu neuen Projekten und exklusiven Angeboten"
-},
-
+        "requiredPrefix": "Ich stimme der ",
+        "privacyPolicy": "Datenschutzerklärung",
+        "termsOfService": "den Nutzungsbedingungen",
+        "and": "und",
+        "marketing": "Senden Sie mir Updates zu neuen Projekten und exklusiven Angeboten"
+      },
       "status": {
         "successTitle": "Nachricht erfolgreich gesendet!",
         "successBody": "Wir melden uns in Kürze bei Ihnen.",
@@ -496,7 +496,6 @@
       "title": "Finden Sie die neuesten Immobilien auf der Karte"
     }
   },
- 
   "dashboard": {
     "hero": {
       "fallbackProjectName": "Top-Immobilie",
@@ -552,5 +551,4 @@
       "mapboxMissingBody": "Überprüfen Sie die Umgebungsvariable NEXT_PUBLIC_MAPBOX_TOKEN"
     }
   }
-
 }

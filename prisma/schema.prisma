@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,7 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 
 // --- USERS ---
 model User {
@@ -37,12 +35,29 @@ model Property {
   status      PropertyStatus
   featured    Boolean           @default(false)
   images      PropertyImage[]
-  amenities   PropertyAmenity[] // 👈 relation instead of String[]
+  amenities   PropertyAmenity[]
   media       Media[]
   seo         SEO?              @relation(fields: [seoId], references: [id])
-  seoId       String?           @unique // 👈 fixed
+  seoId       String?           @unique
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+
+  // NEW:
+  blogHighlights BlogPostProperty[]
+}
+
+model BlogPostProperty {
+  id          String   @id @default(cuid())
+
+  blog        BlogPost @relation(fields: [blogId], references: [id])
+  blogId      String
+
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  String
+
+  position    Int      @default(0) // ordering inside the article
+
+  @@unique([blogId, propertyId])
 }
 
 enum PropertyStatus {
@@ -67,18 +82,29 @@ model PropertyAmenity {
 
 // --- BLOG POSTS ---
 model BlogPost {
-  id          String         @id @default(cuid())
+  id          String              @id @default(cuid())
   title       String
-  content     String
+  excerpt     String?             @db.Text   // short summary for list / meta
+  content     String              @db.Text   // full article, markdown or text
   featuredImg String?
+  readMinutes Int?                // e.g. 5 (min)
+  status      BlogStatus          @default(DRAFT)
+  publishedAt DateTime?           // null = draft
+
   categories  BlogCategory[]
   tags        BlogTag[]
   media       Media[]
-  seo         SEO?           @relation(fields: [seoId], references: [id])
-  seoId       String?        @unique // 👈 fixed
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+
+  seo         SEO?                @relation(fields: [seoId], references: [id])
+  seoId       String?             @unique
+
+  // NEW: properties mentioned in this blog (many-to-many via join table)
+  featuredProperties BlogPostProperty[]
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 }
+
 
 model BlogCategory {
   id     String   @id @default(cuid())
@@ -104,6 +130,11 @@ model SEO {
   property Property?
   blog     BlogPost?
 }
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
 
 // --- MEDIA ---
 model Media {
@@ -123,9 +154,10 @@ enum MediaType {
   FLOORPLAN
   FILE
 }
+
 model Translation {
   id             Int      @id @default(autoincrement())
-  key            String   @unique               // hash key
+  key            String   @unique // hash key
   sourceText     String
   sourceLang     String   @default("en")
   targetLang     String
@@ -135,13 +167,91 @@ model Translation {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
 model CurrencyRate {
   id        Int      @id @default(autoincrement())
-  base      String   // e.g. "AED"
-  target    String   // e.g. "USD"
-  rate      Float    // e.g. 0.27 (1 AED = 0.27 USD)
+  base      String // e.g. "AED"
+  target    String // e.g. "USD"
+  rate      Float // e.g. 0.27 (1 AED = 0.27 USD)
   provider  String   @default("exchangerateapi")
   fetchedAt DateTime @default(now())
 
   @@unique([base, target])
+}
+
+// --- REELLY CACHE ---
+model ReellyProject {
+  id          Int     @id // matches Reelly ID
+  slug        String? @unique
+  title       String
+  description String? @db.Text
+
+  // Location
+  locationString String?
+  city           String?
+  area           String?
+  region         String?
+  district       String?
+
+  latitude  Float?
+  longitude Float?
+
+  // Developer
+  developerName String?
+
+  // Status
+  status             String?
+  saleStatus         String?
+  constructionStatus String?
+
+  // Prices & Specs
+  priceFrom Decimal?
+  priceTo   Decimal?
+  currency  String?  @default("AED")
+
+  bedroomsMin Int?
+  bedroomsMax Int?
+
+  areaFrom Decimal?
+  areaTo   Decimal?
+  areaUnit String?
+
+  // Dates
+  completionDate DateTime?
+  handoverDate   DateTime?
+
+  // Media
+  mainImageUrl String?
+
+  // Flags
+  isFeatured Boolean @default(false)
+  isComingSoon Boolean @default(false)
+
+  // Sync Meta
+  lastSyncedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  paymentPlans  ReellyProjectPaymentPlan[]
+  propertyTypes ReellyProjectPropertyType[]
+}
+
+model ReellyProjectPaymentPlan {
+  id        Int           @id @default(autoincrement())
+  projectId Int
+  project   ReellyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  name    String?
+  rawData Json?
+}
+
+model ReellyProjectPropertyType {
+  id        Int           @id @default(autoincrement())
+  projectId Int
+  project   ReellyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  type      String
+  priceFrom Decimal?
+  sizeFrom  Decimal?
+  rawData   Json?
 }

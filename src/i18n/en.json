@@ -10,7 +10,8 @@
     "faq": "FAQ",
     "blog": "Blog",
     "find": "Find",
-    "contact": "Contact"
+    "contact": "Contact",
+    "featuredProperties": "Featured Properties"
   },
   "hero": {
     "headline": "PALM JEBEL ALI",
@@ -495,7 +496,6 @@
       "title": "Find latest properties on the map"
     }
   },
-
   "dashboard": {
     "hero": {
       "fallbackProjectName": "Featured property",

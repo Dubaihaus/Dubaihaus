@@ -1,72 +1,62 @@
 // src/app/blog/[slug]/page.jsx
-
-import { BLOG_POSTS } from "@/data/blogPosts";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-function findPost(slug) {
-  return BLOG_POSTS.find((p) => p.slug === slug) || null;
-}
-
-// Pre-generate static params for all known posts
-export function generateStaticParams() {
-  return BLOG_POSTS.filter(Boolean).map((post) => ({ slug: post.slug }));
+async function getPost(slug) {
+  return prisma.blogPost.findFirst({
+    where: {
+      seo: { slug },
+      status: "PUBLISHED",
+    },
+    include: {
+      seo: true,
+      featuredProperties: {
+        orderBy: { position: "asc" },
+        include: { property: true },
+      },
+    },
+  });
 }
 
 export async function generateMetadata({ params }) {
-  const post = findPost(params.slug);
+  const post = await getPost(params.slug);
 
   if (!post) {
-    return {
-      title: "Article not found | DubaiHaus",
-    };
+    return { title: "Article not found | DubaiHaus" };
   }
 
-  const baseTitle = `${post.title} | DubaiHaus Insights`;
+  const metaTitle =
+    post.seo?.metaTitle || `${post.title} | DubaiHaus Insights`;
+  const metaDesc =
+    post.seo?.metaDesc || post.excerpt || post.content.slice(0, 150);
+
   return {
-    title: baseTitle,
-    description: post.excerpt || "",
+    title: metaTitle,
+    description: metaDesc,
     openGraph: {
-      title: baseTitle,
-      description: post.excerpt || "",
+      title: metaTitle,
+      description: metaDesc,
       type: "article",
     },
   };
 }
 
-export default function BlogDetailPage({ params }) {
-  const post = findPost(params.slug);
+export default async function BlogDetailPage({ params }) {
+  const post = await getPost(params.slug);
 
-  if (!post) {
-    return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]">
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <p className="text-xs text-slate-500 mb-3">
-            <Link
-              href="/blog"
-              className="text-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]"
-            >
-              ← Back to all articles
-            </Link>
-          </p>
-          <h1 className="text-2xl font-semibold text-slate-900">
-            Article not found
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            The blog post you are looking for doesn&apos;t exist or may have
-            been moved.
-          </p>
-        </div>
-      </main>
-    );
-  }
+  if (!post) return notFound();
 
   const safeTitle = post.title || "Untitled article";
-  const safeDate = post.date
-    ? new Date(post.date).toLocaleDateString("en-GB")
+  const published = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString("en-GB")
     : "";
-  const safeReadTime = post.readTime || "";
-  const tags = Array.isArray(post.tags) ? post.tags : [];
-  const blocks = Array.isArray(post.content) ? post.content : [];
+  const readTime = post.readMinutes ? `${post.readMinutes} min` : "";
+
+  const featuredProps = post.featuredProperties ?? [];
+
+  // Simple paragraph split; later you can switch to react-markdown
+  const paragraphs = post.content.split(/\n\s*\n/);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]">
@@ -87,74 +77,86 @@ export default function BlogDetailPage({ params }) {
             {safeTitle}
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
-            {safeDate && <span>{safeDate}</span>}
-            {safeReadTime && (
+            {published && <span>{published}</span>}
+            {readTime && (
               <>
                 <span>•</span>
-                <span>{safeReadTime}</span>
-              </>
-            )}
-            {tags.length > 0 && (
-              <>
-                <span>•</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 border border-sky-100"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <span>{readTime} read</span>
               </>
             )}
           </div>
         </header>
 
-        {/* Hero image – null safe */}
-        {post.heroImage ? (
+        {/* Hero image */}
+        {post.featuredImg && (
           <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 shadow-[0_18px_60px_rgba(15,23,42,0.12)] bg-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={post.heroImage}
+              src={post.featuredImg}
               alt={safeTitle}
               className="w-full h-auto max-h-[420px] object-cover"
             />
           </div>
-        ) : null}
+        )}
 
-        {/* Content */}
+        {/* Main article content */}
         <div className="prose prose-sm sm:prose-base max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-li:text-slate-700 prose-a:text-[var(--color-brand-sky)]">
-          {blocks.map((block, idx) => {
-            if (!block || typeof block !== "object") return null;
-
-            if (block.type === "heading") {
-              return (
-                <h2 key={idx} className="mt-6 text-xl font-semibold">
-                  {block.text}
-                </h2>
-              );
-            }
-
-            if (block.type === "list" && Array.isArray(block.items)) {
-              return (
-                <ul key={idx} className="list-disc pl-5 mt-3 space-y-1">
-                  {block.items.map((item, ii) => (
-                    <li key={ii}>{item}</li>
-                  ))}
-                </ul>
-              );
-            }
-
-            // default paragraph
-            return (
-              <p key={idx} className="mt-3">
-                {block.text}
-              </p>
-            );
-          })}
+          {paragraphs.map((p, idx) => (
+            <p key={idx}>{p}</p>
+          ))}
         </div>
+
+        {/* Featured projects section */}
+        {featuredProps.length > 0 && (
+          <section className="mt-12 border-t border-slate-200 pt-8">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">
+              Projects mentioned in this article
+            </h2>
+            <p className="text-xs text-slate-500 mb-4">
+              Explore off-plan projects referenced above. Click “Discover
+              project” to view full details.
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {featuredProps.map((fp) => {
+                const p = fp.property;
+                if (!p) return null;
+
+                // TODO: adjust href to match your public property detail route
+                const href = `/properties/${p.id}`;
+
+                return (
+                  <div
+                    key={fp.id}
+                    className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 flex flex-col gap-2"
+                  >
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-slate-500">{p.location}</p>
+                    <p className="text-xs text-slate-600">
+                      From{" "}
+                      <span className="font-semibold">
+                        AED {p.price.toLocaleString()}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      {p.bedrooms} BR • {p.bathrooms} bath • {p.area} sq.ft
+                    </p>
+                    <div className="mt-2">
+                      <Link
+                        href={href}
+                        className="inline-flex items-center rounded-full bg-[var(--color-brand-sky)] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[var(--color-brand-dark)]"
+                      >
+                        Discover project
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </article>
     </main>
   );

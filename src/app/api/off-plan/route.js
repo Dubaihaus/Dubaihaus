@@ -1,241 +1,133 @@
 // src/app/api/off-plan/route.js
-import {
-  searchProperties,
-  listRegions,
-  listDistricts,
-  searchAllProjects,
-  getPropertyById,
-} from '@/lib/reellyApi';
-import { cookies } from 'next/headers';
+import { getCachedProjects } from '@/lib/projectService';
 import { applyCurrencyToProjects } from '@/lib/currencyService';
 
 export const runtime = 'nodejs';
-
-// Helper function to search across all location fields
-async function resolveAreaToFilters(areaName) {
-  if (!areaName) return {};
-
-  const filters = {};
-
-  try {
-    const districts = await listDistricts(areaName);
-    const districtMatch = districts.find((d) =>
-      String(d.name || '')
-        .toLowerCase()
-        .includes(String(areaName).toLowerCase())
-    );
-
-    if (districtMatch?.id) {
-      filters.districts = String(districtMatch.id);
-      return filters;
-    }
-
-    const regions = await listRegions();
-    const regionMatch = regions.find((r) =>
-      String(r.name || '')
-        .toLowerCase()
-        .includes(String(areaName).toLowerCase())
-    );
-
-    if (regionMatch) {
-      filters.bbox_sw_lat = regionMatch.sw_latitude;
-      filters.bbox_sw_lng = regionMatch.sw_longitude;
-      filters.bbox_ne_lat = regionMatch.ne_latitude;
-      filters.bbox_ne_lng = regionMatch.ne_longitude;
-      return filters;
-    }
-
-    filters.search_query = areaName;
-  } catch (error) {
-    console.error('Error resolving area:', error);
-    filters.search_query = areaName;
-  }
-
-  return filters;
-}
-
-// Request deduplication in memory
-const inFlightRequests = new Map();
-
-async function dedupedSearchProperties(filters) {
-  const key = JSON.stringify(filters);
-
-  if (inFlightRequests.has(key)) {
-    return inFlightRequests.get(key);
-  }
-
-  const promise = searchProperties(filters).finally(() => {
-    inFlightRequests.delete(key);
-  });
-
-  inFlightRequests.set(key, promise);
-  return promise;
-}
-
-// LATEST PROJECTS FILTER LOGIC
-// ✅ Now: "latest" = only PRESALE projects (no on_sale here)
-// Global out_of_stock filtering is handled in reellyApi.transformPropertiesResponse
-function getLatestProjectsFilters() {
-  return {
-    sale_status: 'presale', // <--- changed from 'on_sale'
-    status: 'presale',
-    pricedOnly: true,
-  };
-}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const filters = {};
 
-  // 👇 New: currency param (default AED)
   const currency = (searchParams.get('currency') || 'AED').toUpperCase();
 
-  // Parse all query parameters EXCEPT currency
+  // Parse params
   searchParams.forEach((value, key) => {
-    if (key === 'currency') {
-      return;
-    }
+    if (key === 'currency') return;
+    if (value == null || value === '') return;
 
-    if (key === 'page') filters.page = parseInt(value);
-    else if (key === 'pageSize') filters.pageSize = parseInt(value);
-    else if (key === 'pricedOnly') filters.pricedOnly = value === 'true';
-    else if (key === 'latest') filters.latest = value === 'true';
-    else if (key === 'forMap' || key === 'mode') filters[key] = value;
-    else if (value === 'true' || value === 'false') filters[key] = value === 'true';
-    else filters[key] = value;
+    switch (key) {
+      // pagination
+      case 'page':
+        filters.page = parseInt(value, 10) || 1;
+        break;
+      case 'pageSize':
+        filters.pageSize = parseInt(value, 10) || 20;
+        break;
+
+      // numeric filters (we keep as string; projectService parses)
+      case 'minPrice':
+      case 'maxPrice':
+      case 'minBedrooms':
+      case 'maxBedrooms':
+      case 'minSize':
+      case 'maxSize':
+        filters[key] = value;
+        break;
+
+      // booleans
+      case 'latest':
+      case 'isFeatured':
+      case 'isComingSoon':
+        filters[key] = value === 'true';
+        break;
+
+      // map mode
+      case 'forMap':
+      case 'mode':
+        filters[key] = value;
+        break;
+
+      // location filters (critical for areas sections)
+      case 'area':
+      case 'region':
+      case 'city':
+      case 'district':
+      case 'country':
+        filters[key] = value;
+        break;
+
+      // generic search
+      case 'search':
+      case 'search_query':
+        filters.search = value;
+        break;
+
+      // legacy status keys
+      case 'sale_status':
+        filters.saleStatus = value;
+        break;
+      case 'construction_status':
+        filters.constructionStatus = value;
+        break;
+
+      // bounding box (from old region resolver)
+      case 'bbox_sw_lat':
+      case 'bbox_sw_lng':
+      case 'bbox_ne_lat':
+      case 'bbox_ne_lng':
+        filters[key] = value;
+        break;
+
+      default:
+        filters[key] = value;
+    }
   });
 
   const forMap =
-    filters.forMap === true ||
+    filters.mode === 'map' ||
     filters.forMap === 'true' ||
-    filters.mode === 'map';
+    filters.forMap === true;
 
-  // LATEST mode: /api/off-plan?latest=true
+  // Specific "latest" logic – presale only
   if (filters.latest) {
-    const latestFilters = getLatestProjectsFilters();
-    Object.assign(filters, latestFilters);
+    filters.saleStatus = 'presale';
     delete filters.latest;
   }
 
-  // Enhanced area resolution
-  const areaName =
-    filters.area || filters.sector || filters.region || filters.search || null;
-
-  if (areaName && !filters.districts && !filters.search_query) {
-    try {
-      const areaFilters = await resolveAreaToFilters(areaName);
-      Object.assign(filters, areaFilters);
-
-      delete filters.area;
-      delete filters.sector;
-      delete filters.region;
-    } catch (error) {
-      console.error('Area resolution failed:', error);
-      filters.search_query = areaName;
-    }
-  }
-
-  const cookieStore = await cookies();
-  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
-  // locale reserved if you later localize queries
-
-  console.log('🔍 /api/off-plan filters:', {
-    ...filters,
-    locale,
-    forMap,
-    currency,
-  });
+  console.log('🔍 /api/off-plan (Cached) filters:', { ...filters, currency });
 
   let data;
 
   if (forMap) {
-    // MAP MODE: aggregate multiple pages, no price restriction
-    const { pageSize = 200, forMap: _fm, mode, ...rest } = filters;
-    data = await searchAllProjects({
-      pageSize: Math.min(pageSize || 200, 300),
-      maxPages: 6,
-      pricedOnly: false,
-      ...rest,
+    // 🌍 Map mode: ignore all filters, get ALL projects and then
+    // filter to those with valid coordinates.
+    data = await getCachedProjects({
+      page: 1,
+      pageSize: 1000, // you currently have ~1010 projects
+      limit: 1000,
     });
-  } else {
-    // NORMAL / LATEST MODE
-    data = await dedupedSearchProperties(filters);
-  }
 
-  // Fallback strategies only for non-map searches
-  if (!forMap && (data?.results?.length ?? 0) === 0 && areaName) {
-    console.log('🔄 Trying fallback strategies for:', areaName);
-
-    const fallbackStrategies = [
-      async () => {
-        const fallbackFilters = { ...filters, search_query: areaName };
-        delete fallbackFilters.districts;
-        delete fallbackFilters.bbox_sw_lat;
-        delete fallbackFilters.bbox_sw_lng;
-        delete fallbackFilters.bbox_ne_lat;
-        delete fallbackFilters.bbox_ne_lng;
-        delete fallbackFilters.sale_status;
-        delete fallbackFilters.status;
-        return await dedupedSearchProperties(fallbackFilters);
-      },
-      async () => {
-        const fallbackFilters = {
-          search: areaName,
-          pageSize: filters.pageSize || 20,
-        };
-        return await dedupedSearchProperties(fallbackFilters);
-      },
-    ];
-
-    for (const strategy of fallbackStrategies) {
-      try {
-        const fallbackResult = await strategy();
-        if (fallbackResult?.results?.length > 0) {
-          console.log(
-            `✅ Fallback successful with ${fallbackResult.results.length} results`
-          );
-          data = fallbackResult;
-          break;
-        }
-      } catch (error) {
-        console.error('Fallback strategy failed:', error);
-      }
-    }
-  }
-
-  // 🔹 Enrich with detail API (same as before)
-  if (!forMap && data?.results?.length) {
-    try {
-      const enrichedResults = await Promise.all(
-        data.results.map(async (item) => {
-          try {
-            const detail = await getPropertyById(item.id);
-
-            return {
-              ...item,
-              propertyTypes: detail?.propertyTypes || item.propertyTypes || [],
-              paymentPlans: detail?.paymentPlans || item.paymentPlans || [],
-              paymentPlan: detail?.paymentPlan || item.paymentPlan || null,
-            };
-          } catch (err) {
-            console.error('Failed to enrich project', item.id, err);
-            return item;
-          }
-        })
+    if (data?.results) {
+      data.results = data.results.filter(
+        (p) =>
+          typeof p.lat === 'number' &&
+          typeof p.lng === 'number' &&
+          !Number.isNaN(p.lat) &&
+          !Number.isNaN(p.lng)
       );
-
-      data = { ...data, results: enrichedResults };
-    } catch (err) {
-      console.error('Bulk enrichment failed:', err);
+      data.total = data.results.length;
+      data.totalPages = 1;
     }
+  } else {
+    data = await getCachedProjects(filters);
   }
 
-  // 🔹 NEW: Apply currency conversion on top of enriched data
+  // 🔹 Enrich with currency
   data = await applyCurrencyToProjects(data, currency);
 
   const responseHeaders = {
     'Content-Type': 'application/json',
-    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
+    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
     Vary: 'Accept-Encoding, Cookie, Next-Locale',
   };
 

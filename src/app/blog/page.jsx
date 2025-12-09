@@ -1,7 +1,8 @@
 // src/app/blog/page.jsx
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-import { BLOG_POSTS } from "@/data/blogPosts";
-import BlogCard from "@/components/blog/BlogCard";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "DubaiHaus Insights | Guides & Articles",
@@ -15,17 +16,18 @@ export const metadata = {
   },
 };
 
-export default function BlogPage() {
-  const posts = BLOG_POSTS.filter(Boolean);
+export default async function BlogPage() {
+  const posts = await prisma.blogPost.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { publishedAt: "desc" },
+    include: { seo: true },
+  });
 
   return (
-    <main
-      className="
-        min-h-screen 
-        bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]
-      "
-    >
-      {/* Hero */}
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]">
+      {/* Hero (reuse your existing layout) */}
+          
+  {/* Hero */}
       <section className="relative w-full py-16 md:py-20 px-4 border-b border-sky-100/60">
         {/* floating blobs */}
         <div className="pointer-events-none absolute -top-10 -left-10 h-40 w-40 rounded-full bg-[var(--color-brand-sky)] blur-3xl opacity-30" />
@@ -80,7 +82,43 @@ export default function BlogPage() {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
+              <Link
+                key={post.id}
+                href={`/blog/${post.seo?.slug}`}
+                className="group rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col"
+              >
+                {post.featuredImg && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={post.featuredImg}
+                    alt={post.title}
+                    className="h-44 w-full object-cover group-hover:scale-[1.02] transition-transform"
+                  />
+                )}
+                <div className="p-4 flex flex-col gap-2 flex-1">
+                  <p className="text-[11px] text-slate-500">
+                    {post.publishedAt
+                      ? new Date(post.publishedAt).toLocaleDateString(
+                          "en-GB"
+                        )
+                      : ""}
+                    {post.readMinutes && (
+                      <>
+                        {" "}
+                        • {post.readMinutes} min read
+                      </>
+                    )}
+                  </p>
+                  <h3 className="text-sm font-semibold text-slate-900 group-hover:text-[var(--color-brand-sky)]">
+                    {post.title}
+                  </h3>
+                  {post.excerpt && (
+                    <p className="text-xs text-slate-600 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                  )}
+                </div>
+              </Link>
             ))}
           </div>
         </div>

@@ -35,23 +35,33 @@ function fmtLocation(locOrString, unknownLabel = 'Unknown location') {
 }
 
 function TypeBadges({ types, brRange }) {
-  const list = Array.isArray(types) && types.length ? types : null;
+  const list =
+    Array.isArray(types) && types.length ? types : null;
   if (!list && !brRange) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2 mt-2">
-      {/* we pass [] so types themselves are not rendered here */}
-      {list?.map((t, index) => (
-        <motion.span
-          key={t}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.1 + 0.3 }}
-          className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-700"
-        >
-          {t}
-        </motion.span>
-      ))}
+      {list?.map((t, index) => {
+        const label =
+          typeof t === "string"
+            ? t
+            : t?.type || t?.name || t?.unit_category || "";
+
+        if (!label) return null;
+
+        return (
+          <motion.span
+            key={`${label}-${index}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 + 0.3 }}
+            className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-700"
+          >
+            {label}
+          </motion.span>
+        );
+      })}
+
       {brRange && (
         <motion.span
           initial={{ opacity: 0, scale: 0.8 }}
@@ -65,6 +75,7 @@ function TypeBadges({ types, brRange }) {
     </div>
   );
 }
+
 
 // same “usable steps” helper as in PaymentPlanSection
 function hasUsableSteps(plan) {
@@ -158,19 +169,20 @@ export default function PropertyCard({
   // --- Property types & payment plan meta ---
 
   // Property types array from API / normalizer
-  const types =
-    Array.isArray(property.propertyTypes) && property.propertyTypes.length
-      ? property.propertyTypes
-      : property.propertyType
-      ? [property.propertyType]
-      : [];
+const types =
+  Array.isArray(property.propertyTypes) && property.propertyTypes.length
+    ? property.propertyTypes
+    : property.propertyType
+    ? [property.propertyType]
+    : [];
+
+const brRange = property.bedroomsRange || null;
 
   // Comma-separated label for red badge
   const propertyTypesLabel =
     types && types.length ? types.join(', ') : t('badges.propertyFallback');
 
   // Only bedroom summary in chips now
-  const brRange = property.bedroomsRange || null;
 
   // Left red badge: property types
   const leftBadgeLabel = propertyTypesLabel;
@@ -310,8 +322,7 @@ export default function PropertyCard({
           </motion.p>
 
           {/* Type badges – bedrooms only */}
-          <TypeBadges types={[]} brRange={brRange} />
-
+<TypeBadges types={types} brRange={brRange} />
           {/* Developer & Handover */}
           <motion.div
             initial={{ opacity: 0 }}

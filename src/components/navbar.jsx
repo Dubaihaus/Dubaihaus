@@ -59,14 +59,15 @@ export default function Navbar() {
     }
 
     setLangOpen(false);
-    
+
     // Force full navigation to trigger middleware and server components
     window.location.href = newPath;
   };
 
   // Blog popup & "coming soon" logic
   const OTHER_LINKS = [
-    { key: 'navbar.comingSoon', href: '/off-plan', type: 'comingSoon' },
+    { key: 'navbar.comingSoon', href: '/off-plan?isComingSoon=true', type: 'comingSoon' },
+    { key: 'navbar.featuredProperties', href: '/featured-properties', type: 'normal' },
     { key: 'navbar.map', href: '/map', type: 'normal' },
     { key: 'navbar.faq', href: '/faq', type: 'normal' },
     { key: 'navbar.blog', href: '#', type: 'blog' },

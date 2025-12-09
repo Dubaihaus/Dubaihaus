@@ -46,8 +46,21 @@ function AreaCard({ area, index }) {
     area.filters
   );
 
-  const firstProperty = data?.results?.[0];
-  const imageSrc = firstProperty?.coverImage || area.image || PLACEHOLDER;
+ const firstProperty = data?.results?.[0];
+
+const rawCover =
+  firstProperty?.coverPhoto ||
+  (typeof firstProperty?.coverImage === "string"
+    ? firstProperty.coverImage
+    : firstProperty?.cover_image?.url) ||
+  firstProperty?.rawData?.cover_image?.url ||
+  area.image ||
+  PLACEHOLDER;
+
+const imageSrc =
+  typeof rawCover === "string" && rawCover.trim()
+    ? rawCover
+    : PLACEHOLDER;
 
   const params = new URLSearchParams(area.filters || {});
   const loadMoreHref = `/off-plan?${params.toString()}`;

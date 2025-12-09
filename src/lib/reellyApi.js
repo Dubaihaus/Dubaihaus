@@ -235,7 +235,7 @@ export async function searchProperties({
   }
 }
 
-// ---------- Multi-page aggregator: searchAllProjects (for map) ----------
+// ---------- Multi-page aggregator: searchAllProjects (for sync / map) ----------
 export async function searchAllProjects({
   pageSize = 200,
   maxPages = 6,       // safety cap; 6 * 200 = 1200 projects
@@ -247,7 +247,13 @@ export async function searchAllProjects({
   let total = 0;
 
   while (page <= maxPages) {
-    const data = await searchProperties({ page, pageSize, pricedOnly, ...filters });
+    const data = await searchProperties({
+      page,
+      pageSize,
+      pricedOnly,
+      includeAllData: true,   // ✅ get payment_plans, buildings, etc. for sync
+      ...filters,
+    });
     if (!data || !Array.isArray(data.results) || data.results.length === 0) break;
 
     all.push(...data.results);
@@ -324,13 +330,8 @@ export async function getProjectMarkers() {
 function transformPropertiesResponse(reellyData, page, pageSize) {
   const items = reellyData?.results || reellyData || [];
 
-  // ✅ Global filter: never show OUT OF STOCK projects anywhere (including map)
-  const visibleItems = items.filter((p) => {
-    const rawStatus = String(p?.sale_status || p?.status || "").toLowerCase();
-    return rawStatus !== "out_of_stock";
-  });
-
-  const results = visibleItems.map(normalizeProject).filter(Boolean);
+  // ✅ Import EVERYTHING; filtering (e.g. OUT_OF_STOCK) is handled at DB/query/UI level
+  const results = items.map(normalizeProject).filter(Boolean);
 
   return {
     results,
