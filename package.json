@@ -6,7 +6,9 @@
     "dev": "NODE_OPTIONS=--dns-result-order=ipv4first next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
+
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
