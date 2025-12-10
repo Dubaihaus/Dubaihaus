@@ -275,6 +275,9 @@ export async function searchAllProjects({
 
 // ---------- Single project ----------
 export async function getPropertyById(id) {
+  // If ID is falsy, don't even try fetch
+  if (!id) return null;
+
   const url = `${BASE_URL}/projects/${encodeURIComponent(id)}?format=json`;
 
   try {
@@ -285,20 +288,21 @@ export async function getPropertyById(id) {
     });
 
     if (!res.ok) {
+      // Log for debugging but do not throw
       const body = await res.text().catch(() => "");
-      console.error(
-        `❌ Reelly /projects/${id} error:`,
-        res.status,
-        res.statusText,
-        body.slice(0, 200)
+      console.warn(
+        `⚠️ Reelly /projects/${id} returned ${res.status} ${res.statusText}. Returning null.`
       );
+      // Optional: log body if useful
+      // console.warn(body.slice(0, 200));
       return null;
     }
 
     const json = await res.json();
     return transformPropertyResponse(json);
   } catch (err) {
-    console.error("❌ Reelly /projects/{id} fetch error:", err);
+    // Start of robust error handling
+    console.error(`❌ Reelly /projects/${id} fetch exception:`, err);
     return null;
   }
 }
