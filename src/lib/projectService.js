@@ -59,10 +59,106 @@ export async function getCachedProjects(filters = {}) {
     ];
   }
 
-  // Explicit location filters (used by Areas/AbuDhabi sections & filters panel)
-  if (area) {
+  // --- NEW FILTERS START ---
+  // 1. Property Types (Array)
+  // `filters.propertyTypes` = ['Apartment', 'Villa']
+  if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+    where.propertyTypes = {
+      some: {
+        type: {
+          in: filters.propertyTypes,
+          mode: 'insensitive',
+        }
+      }
+    };
+  }
+
+  // 2. Developers (Array) -- overriding single `developer` string if present
+  if (filters.developers && filters.developers.length > 0) {
+    where.developerName = { in: filters.developers }; // Exact match preferred for filters
+  } else if (developer) {
+    // Legacy single fuzzy search
+    where.developerName = { contains: developer, mode: "insensitive" };
+  }
+
+  // 3. Areas (Array) -- overriding single `area` string if present
+  if (filters.areas && filters.areas.length > 0) {
+    where.OR = [
+      ...(where.OR || []), // preserve existing OR if search used it? 
+      // careful: Prisma AND/OR structure. 
+      // If `search` made an OR, we can't just push new ORs for Area constraint 
+      // because top level valid is distinct fields or AND.
+      // Actually where.OR is a top-level "At least one of these". 
+      // If we have Search OR ... AND Area OR ... 
+      // We need to move the Area constraint to a separate AND block or top level field.
+      // But `area` can match `area` OR `district`.
+    ];
+    // To safely add "Area OR District" constraint AND "Search" constraint:
+    const areaConstraint = {
+      OR: [
+        { area: { in: filters.areas } },
+        { district: { in: filters.areas } }
+      ]
+    };
+
+    if (where.OR) {
+      // Using AND to combine Search-OR and Area-OR
+      where.AND = [
+        ...(where.AND || []),
+        { OR: where.OR }, // Wrap the previous Search OR
+        areaConstraint
+      ];
+      delete where.OR; // Move it into AND
+    } else {
+      // Just set OR? No, if we have other fields set, `where` object keys are implicit AND.
+      // But we need `area IN [...] OR district IN [...]`.
+      // We can use AND array for this specific constraint.
+      where.AND = [
+        ...(where.AND || []),
+        areaConstraint
+      ];
+    }
+  } else if (area) {
+    // Legacy single string match
     where.area = { contains: area, mode: "insensitive" };
   }
+
+  // 4. Handover Years
+  if (filters.handoverYears && filters.handoverYears.length > 0) {
+    const dateConditions = filters.handoverYears.map(yearStr => {
+      if (yearStr.toString().toLowerCase() === 'completed') {
+        const now = new Date();
+        return {
+          OR: [
+            { handoverDate: { lte: now } },
+            { AND: [{ handoverDate: null }, { completionDate: { lte: now } }] }
+          ]
+        };
+      }
+      const year = parseInt(yearStr);
+      if (!isNaN(year)) {
+        const start = new Date(`${year}-01-01T00:00:00.000Z`);
+        const end = new Date(`${year}-12-31T23:59:59.999Z`);
+        return {
+          OR: [
+            { handoverDate: { gte: start, lte: end } },
+            { AND: [{ handoverDate: null }, { completionDate: { gte: start, lte: end } }] }
+          ]
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    if (dateConditions.length > 0) {
+      where.AND = [
+        ...(where.AND || []),
+        { OR: dateConditions }
+      ];
+    }
+  }
+  // --- NEW FILTERS END ---
+
+  // Explicit location filters (used by Areas/AbuDhabi sections & filters panel)
   if (city) {
     where.city = { contains: city, mode: "insensitive" };
   }
@@ -97,8 +193,9 @@ export async function getCachedProjects(filters = {}) {
     }
   }
 
-  // Developer filter
-  if (developer) {
+  // Developer filter (Legacy single) - already handled above in "NEW FILTERS" section
+  // but we keep this check for backward compat if "developers" array not passed
+  if (developer && !filters.developers) {
     where.developerName = { contains: developer, mode: "insensitive" };
   }
 
@@ -213,7 +310,7 @@ export async function getCachedProjects(filters = {}) {
       ? p.propertyTypes
       : [];
 
-    const unitTypes = rawPropertyTypes.map((pt) => {
+        const unitTypes = rawPropertyTypes.map((pt) => {
       const raw = pt.rawData || {};
 
       const unitCategory =
@@ -224,14 +321,30 @@ export async function getCachedProjects(filters = {}) {
         raw.unitCategory ||
         null;
 
+      // Cast possible Prisma.Decimals to plain numbers
+      const priceFromAed =
+        pt.priceFrom != null
+          ? Number(pt.priceFrom)
+          : raw.price_from_aed != null
+          ? Number(raw.price_from_aed)
+          : null;
+
+      const sizeFromM2 =
+        pt.sizeFrom != null
+          ? Number(pt.sizeFrom)
+          : raw.size_from_m2 != null
+          ? Number(raw.size_from_m2)
+          : null;
+
       return {
         ...raw,
         unit_category: unitCategory,
         unit_type: raw.unit_type || unitCategory,
-        price_from_aed: pt.priceFrom ?? raw.price_from_aed ?? null,
-        size_from_m2: pt.sizeFrom ?? raw.size_from_m2 ?? null,
+        price_from_aed: priceFromAed,
+        size_from_m2: sizeFromM2,
       };
     });
+
 
     const propertyTypeNames = Array.from(
       new Set(
@@ -258,12 +371,25 @@ export async function getCachedProjects(filters = {}) {
       null;
 
     // Price numbers
-    const minPriceNum = p.priceFrom != null ? Number(p.priceFrom) : null;
-    const maxPriceNum = p.priceTo != null ? Number(p.priceTo) : null;
+        // Price numbers (cast all Decimals to plain numbers)
+    const minPriceNum =
+      p.priceFrom !== null && p.priceFrom !== undefined
+        ? Number(p.priceFrom)
+        : null;
+    const maxPriceNum =
+      p.priceTo !== null && p.priceTo !== undefined
+        ? Number(p.priceTo)
+        : null;
 
-    // Area numbers
-    const minSizeNum = p.areaFrom != null ? Number(p.areaFrom) : null;
-    const maxSizeNum = p.areaTo != null ? Number(p.areaTo) : null;
+    // Area numbers (cast all Decimals to plain numbers)
+    const minSizeNum =
+      p.areaFrom !== null && p.areaFrom !== undefined
+        ? Number(p.areaFrom)
+        : null;
+    const maxSizeNum =
+      p.areaTo !== null && p.areaTo !== undefined
+        ? Number(p.areaTo)
+        : null;
 
     return {
       id: p.id,
@@ -287,13 +413,13 @@ export async function getCachedProjects(filters = {}) {
       lng: p.longitude,
       locationString: p.locationString,
 
-      // Developer – IMPORTANT: keep as string for React text
+      // Developer
       developer: p.developerName || null,
       developerName: p.developerName || null,
       developerObj: { name: p.developerName || null },
 
-      // Prices
-      price_from: p.priceFrom,
+      // Prices – all plain numbers now
+      price_from: minPriceNum,
       minPrice: minPriceNum,
       maxPrice: maxPriceNum,
       currency: p.currency,
@@ -305,19 +431,17 @@ export async function getCachedProjects(filters = {}) {
       bedroomsMax: p.bedroomsMax,
       bedroomsRange,
 
-      // Areas
-      area_min: p.areaFrom,
-      area_max: p.areaTo,
+      // Areas – all plain numbers now
+      area_min: minSizeNum,
+      area_max: maxSizeNum,
       minSize: minSizeNum,
       maxSize: maxSizeNum,
       areaUnit: p.areaUnit,
 
-      // Media – IMPORTANT: coverImage must be STRING again
+      // Media
       coverPhoto: p.mainImageUrl || null,
-      coverImage: p.mainImageUrl || null, // string for Area cards & PropertyCard
-      cover_image: p.mainImageUrl
-        ? { url: p.mainImageUrl }
-        : null, // keep compatibility with old shape
+      coverImage: p.mainImageUrl || null,
+      cover_image: p.mainImageUrl ? { url: p.mainImageUrl } : null,
 
       // Dates
       completion_date: p.completionDate,
@@ -336,6 +460,7 @@ export async function getCachedProjects(filters = {}) {
       isFeatured: p.isFeatured,
       isComingSoon: p.isComingSoon,
     };
+
   });
 
   return {

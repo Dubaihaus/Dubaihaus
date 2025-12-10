@@ -40,9 +40,12 @@ export const metadata = {
 };
 import HomeClient from "@/components/dashboard/HomeClient";
 import JsonLd from "@/components/seo/JsonLd";
+import { getFilterOptions } from "@/lib/offplanFilters";
 
-export default function Home() {
-     const jsonLd = {
+export default async function Home() {
+  const filterOptions = await getFilterOptions();
+
+  const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -82,11 +85,11 @@ export default function Home() {
 
   return (
     <>
-       <JsonLd data={jsonLd} />
-       <HomeClient/>
-   
+      <JsonLd data={jsonLd} />
+      <HomeClient filterOptions={filterOptions} />
 
-  
+
+
     </>
   );
 }

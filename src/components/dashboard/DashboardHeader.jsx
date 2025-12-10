@@ -305,22 +305,19 @@ export default function DashboardHeader() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-8 md:px-16">
+      <div className="relative z-10 flex flex-col justify-center h-full px-4 sm:px-8 md:px-26">
         {active ? (
           <div className="max-w-3xl mb-6 sm:mb-8 transform transition-transform duration-500">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight uppercase mb-3 sm:mb-4 text-white drop-shadow-lg">
               {active.areaTitle}
             </h1>
-            <p className="text-base sm:text-lg md:text-xl mb-5 sm:mb-6 text-white/90 leading-relaxed max-w-2xl drop-shadow-md">
+            {/* <p className="text-base sm:text-lg md:text-xl mb-5 sm:mb-6 text-white/90 leading-relaxed max-w-2xl drop-shadow-md">
               {active.description}
-            </p>
+            </p> */}
 
             {active.hasProject ? (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-green-200 text-xs sm:text-sm font-medium">
-                  {t('statusPropertiesAvailable')}
-                </span>
+                
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
@@ -332,7 +329,7 @@ export default function DashboardHeader() {
             )}
 
             {/* Chips */}
-            <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+            {/* <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
               {[t('chipLuxury'), t('chipGreen'), t('chipAmenities')].map(
                 (txt) => (
                   <span
@@ -343,13 +340,13 @@ export default function DashboardHeader() {
                   </span>
                 )
               )}
-            </div>
+            </div> */}
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href={active.hrefDetail}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:hover:-translate-y-1 flex items-center justify-center gap-2"
+                className="bg-brand-sky hover:bg-brand-dark text-white font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-lg transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 sm:hover:-translate-y-1 flex items-center justify-center gap-2"
                 prefetch
               >
                 <span>

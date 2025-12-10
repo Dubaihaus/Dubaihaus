@@ -10,8 +10,9 @@ import AreasShowcaseClient from "@/components/dashboard/PropertiesPerArea";
 import MapSection from "@/components/map/MapSection";
 import AbuDhabiAreasSection from "@/components/dashboard/AbuDhabiAreas";
 import { useTranslations } from "next-intl";
+import OffPlanFilterPanel from "@/components/offplan/OffPlanFilterPanel";
 
-export default function HomeClient() {
+export default function HomeClient({ filterOptions }) {
   const [mapProjects, setMapProjects] = useState([]);
   const tHome = useTranslations("home");
 
@@ -29,10 +30,18 @@ export default function HomeClient() {
 
   return (
     <>
-      <DashboardHeader />
+      <DashboardHeader filterOptions={filterOptions} />
+      
 
-      {/* Embed the same off-plan UI, but limited + latest */}
-      <OffPlanClient limit={9} latest={true} />
+     {/* 2. Filter panel: half-overlap hero, half on white */}
+      <div className="relative z-30 -mt-12 sm:-mt-16 lg:-mt-20">
+        <OffPlanFilterPanel filterOptions={filterOptions} />
+      </div>
+
+      {/* 3. Push OffPlan section down so it doesn't touch the card */}
+      <div className="mt-04 sm:mt-14 lg:mt-10">
+        <OffPlanClient limit={9} latest={true} />
+      </div>
 
       <OffPlanPropertyTypesSection />
 
@@ -48,7 +57,7 @@ export default function HomeClient() {
       <AbuDhabiAreasSection />
       <AreasShowcaseClient />
 
-     
+
     </>
   );
 }
