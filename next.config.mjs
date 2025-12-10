@@ -5,6 +5,31 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   reactStrictMode: true,
+   async redirects() {
+    return [
+      {
+        source: '/about',
+        destination: '/en/contact',
+        permanent: true,
+      },
+      {
+        source: '/services',
+        destination: '/en/contact',
+        permanent: true,
+      },
+      {
+        source: '/buy-a-home',
+        destination: '/en/off-plan',
+        permanent: true,
+      },
+      {
+        source: '/rent-a-home',
+        destination: '/en/off-plan',
+        permanent: true,
+      },
+    ];
+  },  
+
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'api.reelly.io', pathname: '/**' },
