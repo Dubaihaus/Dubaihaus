@@ -49,12 +49,15 @@ const SkeletonList = () => (
 export default function Footer() {
   const { data, isLoading } = useFooterData();
 
-  const MAX_ITEMS = 8;
+  // Limits per-column
+  const MAX_DUBAI_DEVS = 16;
+  const MAX_OTHERS = 8;
 
   // Always keep arrays safe, even if API doesn't return a key yet
-  const developers = data?.developers ?? [];
-  const areas = data?.areas ?? [];
-  const abuDhabiAreas = data?.abuDhabiAreas ?? [];
+  const developers = data?.developers ?? []; // Dubai devs
+  const abuDhabiDevelopers = data?.abuDhabiDevelopers ?? []; // Abu Dhabi devs
+  const areas = data?.areas ?? []; // Popular areas in Dubai
+  const abuDhabiAreas = data?.abuDhabiAreas ?? []; // Properties in Abu Dhabi
   const usefulLinks = data?.usefulLinks ?? [];
 
   return (
@@ -67,16 +70,41 @@ export default function Footer() {
 
       {/* Main content */}
       <div className="relative max-w-screen-xl mx-auto px-4 py-10 space-y-8">
-        <div className="grid md:grid-cols-4 sm:grid-cols-2 gap-8">
-          {/* Developers */}
+        {/* Top columns */}
+        <div className="grid md:grid-cols-5 sm:grid-cols-2 gap-8">
+          {/* Developers in Dubai */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Developers in Dubai</h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
-              <ul className="space-y-1 text-sm">
-                {developers.slice(0, MAX_ITEMS).map((d, idx) => (
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                {developers.slice(0, MAX_DUBAI_DEVS).map((d, idx) => (
                   <li key={`${d?.name || 'dev'}-${idx}`}>
+                    <SafeInternalLink
+                      href={d?.href}
+                      className="hover:underline"
+                    >
+                      {d?.name || 'Developer'}
+                    </SafeInternalLink>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Developers in Abu Dhabi */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">
+              Developers in Abu Dhabi
+            </h3>
+            {isLoading ? (
+              <SkeletonList />
+            ) : (
+              // single-column list
+              <ul className="space-y-1 text-sm">
+                {abuDhabiDevelopers.slice(0, MAX_OTHERS).map((d, idx) => (
+                  <li key={`${d?.name || 'abu-dev'}-${idx}`}>
                     <SafeInternalLink
                       href={d?.href}
                       className="hover:underline"
@@ -91,12 +119,14 @@ export default function Footer() {
 
           {/* Popular Areas (Dubai) */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Popular Areas in Dubai</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Popular Areas in Dubai
+            </h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {areas.slice(0, MAX_ITEMS).map((a, idx) => (
+                {areas.slice(0, MAX_OTHERS).map((a, idx) => (
                   <li key={`${a?.name || 'area'}-${idx}`}>
                     <SafeInternalLink
                       href={a?.href}
@@ -112,12 +142,14 @@ export default function Footer() {
 
           {/* Properties in Abu Dhabi */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Properties in Abu Dhabi</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Properties in Abu Dhabi
+            </h3>
             {isLoading ? (
               <SkeletonList />
             ) : (
               <ul className="space-y-1 text-sm">
-                {abuDhabiAreas.slice(0, MAX_ITEMS).map((t, idx) => (
+                {abuDhabiAreas.slice(0, MAX_OTHERS).map((t, idx) => (
                   <li key={`${t?.name || 'abu-dhabi-area'}-${idx}`}>
                     <SafeInternalLink
                       href={t?.href}
@@ -158,11 +190,22 @@ export default function Footer() {
           {[
             { label: 'Properties in Dubai', href: '/off-plan?region=Dubai' },
             {
+              label: 'Properties in Abu Dhabi',
+              href: '/off-plan?region=Abu Dhabi',
+            },
+            {
               label: 'Properties in Ras Al Khaimah',
               href: '/off-plan?region=Ras Al Khaimah',
             },
-            { label: 'Properties in Sharjah', href: '/off-plan?region=Sharjah' },
+            {
+              label: 'Properties in Sharjah',
+              href: '/off-plan?region=Sharjah',
+            },
             { label: 'Properties in Ajman', href: '/off-plan?region=Ajman' },
+            {
+              label: 'Properties in Umm Al Quwain',
+              href: '/off-plan?region=Umm Al Quwain',
+            },
           ].map((item) => (
             <SafeInternalLink
               key={item.label}
@@ -175,17 +218,6 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Newsletter */}
-        {/* <div className="flex items-center gap-4 flex-wrap">
-          <div className="bg-white p-3 rounded shadow-md">
-            <div className="w-6 h-6 bg-cyan-600" />
-          </div>
-          <p className="text-sm font-medium">
-            Join over 9500 members and get updates of new off-plan launches &
-            latest real estate news
-          </p>
-        </div> */}
-
         {/* Bottom Links & Social Icons */}
         <div className="flex flex-wrap items-center justify-between border-t border-white/20 pt-6 relative z-10">
           <div className="flex gap-6 text-sm mb-4 sm:mb-0">
@@ -195,9 +227,6 @@ export default function Footer() {
             <Link href="/legal?tab=privacy" className="hover:underline">
               Privacy Policy
             </Link>
-            {/* <Link href="/legal?lang=de" className="hover:underline">
-              German Version
-            </Link> */}
           </div>
 
           {/* Socials */}
@@ -249,7 +278,7 @@ export default function Footer() {
               aria-label="TikTok"
               className="hover:text-gray-100 transition-colors"
             >
-              <i className="fab fa-tiktok text-xl"></i>
+              <i className="fab fa-tiktok text-xl" />
             </a>
 
             <a
@@ -265,7 +294,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Floating WhatsApp Button (Call removed) */}
+      {/* Floating WhatsApp Button */}
       <div className="fixed right-4 bottom-4 md:right-6 md:bottom-6 z-50 flex flex-col gap-3 pb-[env(safe-area-inset-bottom)]">
         <a
           href="https://wa.me/971505231194"

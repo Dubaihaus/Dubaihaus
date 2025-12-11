@@ -8,46 +8,72 @@ import { useQueries } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 // ====== CONFIG ======
+// ====== CONFIG ======
+// ====== CONFIG ======
 const AREAS_CONFIG = [
-  {
-    title: 'Jumeirah Village Circle (JVC)',
-    filters: { districts: '269' },
-    gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
-    fallbackImg: '/dashboard/palm1.jpg',
-  },
-  {
-    title: 'Business Bay',
-    filters: { districts: '187' },
-    gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
-    fallbackImg: '/dashboard/BusinessBay.webp',
-  },
-  {
-    title: 'Dubai Hills Estate',
-    filters: { districts: ['204', '210'] },
-    gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
-    fallbackImg: '/dashboard/Marina.jpg',
-  },
+  // --- Abu Dhabi ---
+
   {
     title: 'Downtown Dubai',
-    filters: { districts: '201' },
+    filters: {
+      search_query: 'Downtown Dubai',
+      region: 'Dubai',
+    },
     gradient: 'bg-gradient-to-r from-slate-900/60 to-sky-900/60',
     fallbackImg: '/dashboard/downtown.webp',
   },
   {
-    title: 'Dubai Marina',
-    filters: { districts: '217' },
-    gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',
-    fallbackImg: '/dashboard/Marina.jpg',
+    title: 'Saadiyat Island',
+    filters: {
+      search_query: 'Saadiyat Island',
+      region: 'Abu Dhabi',
+    },
+    gradient: 'bg-gradient-to-r from-sky-900/60 to-blue-900/60',
+    fallbackImg: '/dashboard/abu-dhabi/saadiyat-island.jpg',
   },
+  
+    {
+      title: 'Jumeirah Village Circle (JVC)',
+      filters: {
+        search_query: 'Jumeirah Village Circle',
+        region: 'Dubai',
+      },
+      gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
+      fallbackImg: '/dashboard/palm1.jpg',
+    },
   {
-    title: 'Palm Jumeirah',
-    filters: { districts: '308' },
-    gradient: 'bg-gradient-to-r from-fuchsia-900/60 to-rose-900/60',
-    fallbackImg: '/dashboard/palm.jpg',
+    title: 'Yas Island',
+    filters: {
+      search_query: 'Yas Island',
+      region: 'Abu Dhabi',
+    },
+    gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
+    fallbackImg: '/dashboard/abu-dhabi/yas-island.jpg',
+  },
+  
+    // --- Dubai ---
+    {
+      title: 'Business Bay',
+      filters: {
+        search_query: 'Business Bay',
+        region: 'Dubai',
+      },
+      gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
+      fallbackImg: '/dashboard/BusinessBay.webp',
+    },
+  {
+    title: 'Al Reem Island',
+    filters: {
+      search_query: 'Al Reem Island',
+      region: 'Abu Dhabi',
+    },
+    gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',
+    fallbackImg: '/dashboard/abu-dhabi/reem-island.jpg',
   },
 ];
 
 const PLACEHOLDER = '/project_detail_images/building.jpg';
+
 
 // ====== HELPERS ======
 function extractImageUrl(project) {
@@ -73,48 +99,34 @@ function extractImageUrl(project) {
 async function fetchAreaSlideData(areaConfig) {
   const baseParams = { page: '1', pageSize: '1', pricedOnly: 'false' };
 
-  // Strategy 1: district
-  if (areaConfig.filters.districts) {
-    try {
-      const params = new URLSearchParams({
-        ...baseParams,
-        districts: areaConfig.filters.districts,
-      });
-      const res = await fetch(`/api/off-plan?${params}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.results?.length > 0) return data.results[0];
-      }
-    } catch {}
+  // Prefer explicit filters.search_query, fallback to title without "(JVC)" etc.
+  const searchQuery =
+    areaConfig.filters?.search_query ||
+    areaConfig.title.split('(')[0].trim();
+
+  const paramsObj = {
+    ...baseParams,
+    search_query: searchQuery,
+  };
+
+  // If region is provided in filters, pass it through as well
+  if (areaConfig.filters?.region) {
+    paramsObj.region = areaConfig.filters.region;
   }
 
-  // Strategy 2: area name
-  try {
-    const areaName = areaConfig.title.split('(')[0].trim();
-    const params = new URLSearchParams({ ...baseParams, area: areaName });
-    const res = await fetch(`/api/off-plan?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.results?.length > 0) return data.results[0];
-    }
-  } catch {}
+  const params = new URLSearchParams(paramsObj);
 
-  // Strategy 3: search query
   try {
-    const searchQuery = areaConfig.title.split('(')[0].trim();
-    const params = new URLSearchParams({
-      ...baseParams,
-      search_query: searchQuery,
-    });
-    const res = await fetch(`/api/off-plan?${params}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.results?.length > 0) return data.results[0];
-    }
-  } catch {}
-
-  return null;
+    const res = await fetch(`/api/off-plan?${params.toString()}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.results?.length > 0) return data.results[0];
+    return null;
+  } catch {
+    return null;
+  }
 }
+
 
 function useAreaSlides() {
   return useQueries({
@@ -409,7 +421,7 @@ export default function DashboardHeader() {
         )}
 
         {/* Arrows (hidden on small screens) */}
-        {slides.length > 1 && (
+        {/* {slides.length > 1 && (
           <>
             <button
               onClick={() =>
@@ -452,7 +464,7 @@ export default function DashboardHeader() {
               </svg>
             </button>
           </>
-        )}
+        )} */}
       </div>
 
       {/* Progress bar */}
