@@ -1,4 +1,3 @@
-// src/components/offplan/OffPlanClient.jsx  (CLIENT)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,19 +21,39 @@ export default function OffPlanClient({ limit, latest = false }) {
 
   // Initialize filters from query params (for full page)
   const initialFilters = {};
-  for (const [key, value] of searchParams.entries()) initialFilters[key] = value;
+  for (const [key, value] of searchParams.entries()) {
+    if (key !== 'page') {
+      initialFilters[key] = value;
+    }
+  }
 
   const [filters, setFilters] = useState(initialFilters);
   const [projects, setProjects] = useState([]);
   const [currency, setCurrency] = useState('AED');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [areaDescription, setAreaDescription] = useState(null);
+
+  // 🔹 Pagination
+  const initialPage = Number(searchParams.get('page')) || 1;
+  const [page, setPage] = useState(initialPage);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const pageSize = limit || 21; // embeds use `limit`, full page uses 21
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const fetchProjects = async () => {
     setLoading(true);
     try {
       const paramsObj = { ...filters, currency };
-      if (latest) paramsObj.latest = 'true';
+
+      if (latest) {
+        paramsObj.latest = 'true';
+        // latest sections normally limited on frontend; backend can ignore page/pageSize
+      } else {
+        paramsObj.page = page;
+        paramsObj.pageSize = pageSize;
+      }
 
       Object.keys(paramsObj).forEach((k) => {
         if (!paramsObj[k]) delete paramsObj[k];
@@ -46,15 +65,44 @@ export default function OffPlanClient({ limit, latest = false }) {
         const text = await res.text();
         console.error('off-plan API error:', res.status, text.slice(0, 300));
         setProjects([]);
+        setAreaDescription(null);
+        setTotalCount(0);
         return;
       }
+
       const data = await res.json();
-      setProjects(
-        limit ? (data.results || []).slice(0, limit) : data.results || []
-      );
+      const results = data.results || [];
+const visibleResults = limit ? results.slice(0, limit) : results;
+
+      setProjects(visibleResults);
+   
+     const total =
+      (typeof data.total === 'number' && data.total) ||
+       (typeof data.count === 'number' && data.count) ||
+       results.length;
+
+     setTotalCount(total);
+
+      // 🔹 For full off-plan page + area filter: read area description from API
+      if (!limit && paramsObj.search_query && Array.isArray(results) && results.length > 0) {
+        const first = results[0];
+        const rawLoc = first?.rawData?.location || {};
+
+        const areaDesc =
+          rawLoc.description ||
+          rawLoc.overview ||
+          rawLoc.short_description ||
+          null;
+
+        setAreaDescription(areaDesc || null);
+      } else {
+        setAreaDescription(null);
+      }
     } catch (e) {
       console.error('Error fetching projects:', e);
       setProjects([]);
+      setAreaDescription(null);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
@@ -63,21 +111,85 @@ export default function OffPlanClient({ limit, latest = false }) {
   useEffect(() => {
     fetchProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, currency, latest]);
+  }, [filters, currency, latest, page]);
 
   // Sync URL only on the full page
   useEffect(() => {
     if (!limit) {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([k, v]) => v && params.set(k, v));
+      if (page > 1) params.set('page', String(page));
       router.replace(`/off-plan?${params.toString()}`, { scroll: false });
     }
-  }, [filters, limit, router]);
+  }, [filters, limit, router, page]);
 
   const handleViewMore = () => {
     setLoading(true);
     setTimeout(() => router.push('/off-plan'), 300);
   };
+
+  // Reset to page 1 whenever filters change (user applies new filters)
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setPage(1);
+  };
+
+  // 🔹 Dynamic heading / subheading (only on full page)
+  const isFullPage = !limit;
+  const region = filters.region;
+  const areaName = filters.search_query;
+
+  let headingText = t('heading');
+  let subText = t('description');
+
+  if (isFullPage) {
+    if (areaName) {
+      headingText = `Off-plan properties in ${areaName}`;
+      subText = areaDescription || null;
+    } else if (region === 'Dubai') {
+      headingText = 'Off-plan properties in Dubai';
+    } else if (region === 'Abu Dhabi') {
+      headingText = 'Off-plan properties in Abu Dhabi';
+    }
+  }
+
+  // Small helper to render numbered page buttons
+  const renderPageButtons = () => {
+    if (totalPages <= 1 || limit) return null;
+
+    const MAX_VISIBLE = 10;
+
+    // Which "block" of 10 does the current page belong to?
+    const blockIndex = Math.floor((page - 1) / MAX_VISIBLE);
+    const start = blockIndex * MAX_VISIBLE + 1;
+    const end = Math.min(start + MAX_VISIBLE - 1, totalPages);
+
+    const buttons = [];
+    for (let p = start; p <= end; p++) {
+      buttons.push(
+        <Button
+          key={p}
+          variant={p === page ? 'default' : 'outline'}
+          className={`h-9 min-w-[2.25rem] text-sm ${
+            p === page
+              ? 'text-white'
+              : 'border-sky-500 text-sky-700 hover:bg-sky-50'
+          }`}
+          style={p === page ? { backgroundColor: '#00C6FF' } : {}}
+          onClick={() => setPage(p)}
+        >
+          {p}
+        </Button>
+      );
+    }
+    return buttons;
+  };
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto" dir="ltr">
@@ -85,11 +197,14 @@ export default function OffPlanClient({ limit, latest = false }) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            {t('heading')}
+            {headingText}
           </h1>
-          <p className="text-sm text-gray-600 max-w-xl mt-1">
-            {t('description')}
-          </p>
+
+          {subText && (
+            <p className="text-sm text-gray-600 max-w-xl mt-1">
+              {subText}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -140,7 +255,10 @@ export default function OffPlanClient({ limit, latest = false }) {
                 <SheetTitle>{t('filters.title')}</SheetTitle>
               </SheetHeader>
               <div className="mt-4">
-                <FiltersPanel filters={filters} setFilters={setFilters} />
+                <FiltersPanel
+                  filters={filters}
+                  setFilters={handleFiltersChange}
+                />
               </div>
             </SheetContent>
           </Sheet>
@@ -148,7 +266,7 @@ export default function OffPlanClient({ limit, latest = false }) {
           {Object.keys(filters).length > 0 && (
             <Button
               variant="outline"
-              onClick={() => setFilters({})}
+              onClick={handleClearFilters}
               className="px-4"
             >
               {t('filters.clear')}
@@ -164,24 +282,55 @@ export default function OffPlanClient({ limit, latest = false }) {
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid + Pagination */}
       {!loading && (
-        <div>
+        <>
           {projects.length === 0 ? (
             <p className="text-gray-500">{t('noResults')}</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-              {projects.map((p) => (
-                <PropertyCard
-                  key={p.id}
-                  property={p}
-                  currency={currency}
-                  selectedUnitType={filters.unit_types || filters.unit_type}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {projects.map((p) => (
+                  <PropertyCard
+                    key={p.id}
+                    property={p}
+                    currency={currency}
+                    selectedUnitType={filters.unit_types || filters.unit_type}
+                  />
+                ))}
+              </div>
+
+              {/* 🔹 Pagination – only on full page */}
+              {!limit && totalPages > 1 && (
+                <div className="flex justify-center mt-10">
+                  <div className="inline-flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-sky-500 text-sky-700 hover:bg-sky-50"
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                      Previous
+                    </Button>
+
+                    {renderPageButtons()}
+
+                    <Button
+                      variant="outline"
+                      className="border-sky-500 text-sky-700 hover:bg-sky-50"
+                      disabled={page === totalPages}
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-        </div>
+        </>
       )}
     </div>
   );

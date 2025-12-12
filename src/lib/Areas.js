@@ -60,6 +60,7 @@ export const DUBAI_AREAS = [
 ];
 
 // 🔹 Abu Dhabi areas
+// 🔹 Abu Dhabi areas
 export const ABU_DHABI_AREAS = [
   {
     slug: "al-reem-island",
@@ -109,13 +110,42 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "jubail-island",
     title: "Jubail Island",
-    image: "/dashboard/abu-dhabi/al-ghadeer.jpg",
+    image: "/dashboard/abu-dhabi/jubail-island.jpg", // change image if you have a better one
     filters: {
       search_query: "Jubail Island",
       region: "Abu Dhabi",
     },
   },
+  // NEW
+  {
+    slug: "hudayriyat-island",
+    title: "Hudayriyat Island",
+    image: "/dashboard/abu-dhabi/hudayriyat-island.jpg", // use placeholder/building.jpg if you don’t have assets yet
+    filters: {
+      search_query: "Hudayriyat Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "fahid-island",
+    title: "Fahid Island",
+    image: "/dashboard/abu-dhabi/fahid-island.jpg",
+    filters: {
+      search_query: "Fahid Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "ramhan-island",
+    title: "Ramhan Island",
+    image: "/dashboard/abu-dhabi/ramhan-island.jpg",
+    filters: {
+      search_query: "Ramhan Island",
+      region: "Abu Dhabi",
+    },
+  },
 ];
+
 
 export const AREAS = DUBAI_AREAS;
 

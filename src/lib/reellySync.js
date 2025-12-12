@@ -1,7 +1,6 @@
 // src/lib/reellySync.js
 import { prisma } from './prisma';
-import { searchAllProjects } from './reellyApi';
-// import { normalizeProject } from './ProjectNormalizer'; // not needed here
+import { searchAllProjects, getPropertyById } from './reellyApi';// import { normalizeProject } from './ProjectNormalizer'; // not needed here
 
 function safeDate(value) {
     if (!value) return null;
@@ -123,48 +122,93 @@ export async function syncProjects() {
 
         let count = 0;
 
-        for (const p of allProjects) {
-            const data = mapProjectToPrisma(p);
+        for (const base of allProjects) {
+  let p = base;
 
-            try {
-                await prisma.reellyProject.upsert({
-                    where: { id: p.id },
-                    update: {
-                        ...data,
-                        // reset relations before re-inserting
-                        paymentPlans: { deleteMany: {} },
-                        propertyTypes: { deleteMany: {} },
-                    },
-                    create: data,
-                });
+  // 🔹 1) Try to fetch full project details (payment_plans, unit types, etc.)
+  try {
+    const detail = await getPropertyById(base.id);
 
-                if (p.paymentPlans && p.paymentPlans.length > 0) {
-                    await prisma.reellyProjectPaymentPlan.createMany({
-                        data: p.paymentPlans.map((plan) => ({
-                            projectId: p.id,
-                            name: plan.name || plan.title || 'Payment Plan',
-                            rawData: plan, // json
-                        })),
-                    });
-                }
+    if (detail) {
+      p = {
+        // keep anything we already had
+        ...base,
+        ...detail,
+        // but be explicit about these:
+        paymentPlans: detail.paymentPlans || base.paymentPlans || [],
+        unitTypes: detail.unitTypes || base.unitTypes || [],
+      };
+    }
+  } catch (err) {
+    console.warn(`⚠️ Failed to fetch detail for project ${base.id}`, err);
+    // fall back to base listing object
+  }
 
-                if (p.unitTypes && p.unitTypes.length > 0) {
-                    await prisma.reellyProjectPropertyType.createMany({
-                        data: p.unitTypes.map((u) => ({
-                            projectId: p.id,
-                            type: u.unitCategory || u.unitType || 'Unit',
-                            priceFrom: u.priceFromAED ?? null,
-                            sizeFrom: u.sizeFromM2 ?? null,
-                            rawData: u,
-                        })),
-                    });
-                }
+  const data = mapProjectToPrisma(p);
 
-                count++;
-            } catch (err) {
-                console.error(`❌ Failed to sync project ${p.id}:`, err);
-            }
-        }
+  try {
+    await prisma.reellyProject.upsert({
+      where: { id: p.id },
+      update: {
+        ...data,
+        // reset relations before re-inserting
+        paymentPlans: { deleteMany: {} },
+        propertyTypes: { deleteMany: {} },
+      },
+      create: data,
+    });
+
+    // 🔹 2) Store payment plans (from DETAIL)
+    if (Array.isArray(p.paymentPlans) && p.paymentPlans.length > 0) {
+      await prisma.reellyProjectPaymentPlan.createMany({
+        data: p.paymentPlans.map((plan) => ({
+          projectId: p.id,
+          name: plan.name || plan.title || 'Payment Plan',
+          rawData: plan, // JSON – includes steps, etc.
+        })),
+      });
+    }
+
+    // 🔹 3) Store property types / unit types (from DETAIL)
+    if (Array.isArray(p.unitTypes) && p.unitTypes.length > 0) {
+      await prisma.reellyProjectPropertyType.createMany({
+        data: p.unitTypes.map((u) => {
+          const type =
+            u.unitCategory ||
+            u.unitType ||
+            u.unit_category ||
+            u.unit_type ||
+            u.name ||
+            'Unit';
+
+          const priceFrom =
+            u.priceFromAED ??
+            u.price_from_aed ??
+            u.price_from ??
+            null;
+
+          const sizeFrom =
+            u.sizeFromM2 ??
+            u.size_from_m2 ??
+            u.area_from_m2 ??
+            null;
+
+          return {
+            projectId: p.id,
+            type,
+            priceFrom,
+            sizeFrom,
+            rawData: u,
+          };
+        }),
+      });
+    }
+
+    count++;
+  } catch (err) {
+    console.error(`❌ Failed to sync project ${p.id}:`, err);
+  }
+}
 
         console.log(`✅ Sync complete. Updated ${count} projects.`);
         return { count };

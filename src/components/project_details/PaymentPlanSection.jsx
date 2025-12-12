@@ -12,25 +12,37 @@ function planTitle(plan, property) {
     property?.developer ||
     null;
 
-  // Try to infer a concise headline like "60/40" from step totals (optional).
-  // We’ll pick the two largest buckets if they stand out, else show plan.name.
   const sorted = [...(plan.steps || [])]
-    .filter(s => typeof s?.percentage === 'number')
+    .filter((s) => typeof s?.percentage === 'number')
     .sort((a, b) => b.percentage - a.percentage);
 
   let ratio = '';
   if (sorted.length >= 2) {
     const a = Math.round(sorted[0].percentage);
     const b = Math.round(sorted[1].percentage);
-    const total = plan.steps.reduce((t, s) => t + (Number(s.percentage) || 0), 0);
-    // Only show ratio if the top two account for most of the total
+    const total = (plan.steps || []).reduce(
+      (t, s) => t + (Number(s.percentage) || 0),
+      0
+    );
     if (total > 0 && a + b >= total * 0.9) {
       ratio = `${a}/${b}`;
     }
   }
 
-  const base = ratio || plan.name || 'Payment Plan';
-  return dev ? `${base} Payment Plan from ${dev}` : `${base} Payment Plan`;
+  const rawName = (plan.name || '').trim();
+
+  // Base text:
+  // - If we have a ratio, use that (e.g. "60/40")
+  // - Else use plan.name
+  // - Else fall back to "Payment Plan"
+  let base = ratio || rawName || 'Payment Plan';
+
+  // 🔹 Avoid "Payment Plan Payment Plan" duplication
+  if (!ratio && rawName && /payment\s*plan/i.test(rawName)) {
+    base = rawName; // already contains "Payment Plan"
+  }
+
+  return dev ? `${base} from ${dev}` : base;
 }
 
 export default function PaymentPlanSection({ property }) {

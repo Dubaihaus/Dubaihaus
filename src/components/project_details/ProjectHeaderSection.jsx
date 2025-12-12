@@ -74,65 +74,55 @@ function hasUsableSteps(plan) {
   return plan && Array.isArray(plan.steps) && plan.steps.length > 0;
 }
 
-function planTitle(plan, property) {
-  const raw = property?.rawData ?? property ?? {};
-  const dev =
-    raw?.developer?.name ||
-    property?.developer?.name ||
-    raw?.developer_name ||
-    property?.developer ||
-    null;
-
-  const sorted = [...(plan.steps || [])]
-    .filter((s) => typeof s?.percentage === 'number')
-    .sort((a, b) => b.percentage - a.percentage);
-
-  let ratio = '';
-  if (sorted.length >= 2) {
-    const a = Math.round(sorted[0].percentage);
-    const b = Math.round(sorted[1].percentage);
-    const total = (plan.steps || []).reduce(
-      (t, s) => t + (Number(s.percentage) || 0),
-      0
-    );
-    if (total > 0 && a + b >= total * 0.9) {
-      ratio = `${a}/${b}`;
-    }
-  }
-
-  const base = ratio || plan.name || 'Payment Plan';
-  return dev ? `${base} Payment Plan from ${dev}` : `${base} Payment Plan`;
-}
-
-function getHeaderPaymentPlan(property) {
+// 🔹 Extract first usable payment plan (from normalized or raw)
+function getFirstPaymentPlan(property) {
   const raw = property?.rawData ?? property ?? {};
 
-  // Prefer normalized property.paymentPlans (enriched) if available
   const fromProp = Array.isArray(property?.paymentPlans)
     ? property.paymentPlans.filter(hasUsableSteps)
     : [];
 
-  // Fallback to raw.payment_plans if needed
   const fromRaw = Array.isArray(raw?.payment_plans)
     ? raw.payment_plans.filter(hasUsableSteps)
     : [];
 
   const plans = fromProp.length ? fromProp : fromRaw;
-
-  if (plans.length) {
-    return planTitle(plans[0], property);
-  }
-
-  // Simple string fallback if you ever set property.paymentPlan
-  if (
-    typeof property?.paymentPlan === 'string' &&
-    property.paymentPlan.trim().length
-  ) {
-    return property.paymentPlan.trim();
-  }
-
-  return 'Flexible Payment Plan';
+  return plans[0] || null;
 }
+
+// 🔹 Label for header card: "20% / 20% / 60%"
+function getHeaderPaymentPlanLabel(property) {
+  const plan = getFirstPaymentPlan(property);
+
+  if (!plan) {
+    // simple fallback if you ever set a string
+    if (
+      typeof property?.paymentPlan === 'string' &&
+      property.paymentPlan.trim().length
+    ) {
+      return property.paymentPlan.trim();
+    }
+    return 'Flexible Payment Plan';
+  }
+
+  const percentages = (plan.steps || [])
+    .map((s) => Number(s.percentage))
+    .filter((n) => Number.isFinite(n) && n > 0)
+    .map((n) => Math.round(n));
+
+  if (!percentages.length) return 'Flexible Payment Plan';
+
+  // show first 3–4 steps max to keep it clean
+  const label = percentages
+    .slice(0, 4)
+    .map((p) => `${p}%`)
+    .join(' / ');
+
+  return label;
+}
+
+
+
 
 /* ---------- Component ---------- */
 export default function ProjectHeaderSection({ property }) {
@@ -147,7 +137,9 @@ export default function ProjectHeaderSection({ property }) {
   const priceLabel = formatAED(startPrice);
 
   // ✅ Correct payment plan (same logic as PaymentPlanSection heading)
-  const paymentPlan = getHeaderPaymentPlan(property);
+  // ✅ Header card: show percentages like "20% / 20% / 60%"
+const paymentPlan = getHeaderPaymentPlanLabel(property);
+
 
   // ✅ Correct handover label (same as cards & highlights)
   const handoverDate = getHandoverLabel(property) || 'TBA';
