@@ -20,9 +20,8 @@ export default function AreaCard({ area, index }) {
   const cardRef = useRef(null);
 
   // Build href to off-plan page for this area
-  const areaHref = `/off-plan?region=${encodeURIComponent(
-    area.region || ""
-  )}&districts=${area.id}`;
+ const areaHref = area.href || `/off-plan?region=${encodeURIComponent(area.region || "")}&area=${encodeURIComponent(area.name || "")}`;
+
 
   // Fetch a single property in this area to use its cover image
   const { data } = useProperties(
@@ -30,8 +29,8 @@ export default function AreaCard({ area, index }) {
       page: 1,
       pageSize: 1,
       pricedOnly: false,
-      districts: area.id,
-      region: area.region,
+      area: area.name,
+    region: area.region,
     },
     {
       enabled: !!area.id,
@@ -42,8 +41,7 @@ export default function AreaCard({ area, index }) {
   const coverFromProperty = data?.results?.[0]?.coverImage || null;
   const imageSrc = coverFromProperty || FALLBACK_IMG;
 
-  const count = data?.count || 0;
-
+const count = data?.total || 0;
   const baseDescription = `${t("card.descriptionPrefix")} ${area.name}${
     area.region ? `, ${area.region}` : ""
   }.`;

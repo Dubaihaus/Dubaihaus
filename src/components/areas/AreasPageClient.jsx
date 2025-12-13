@@ -15,6 +15,10 @@ export default function AreasPageClient() {
   const [areaQuery, setAreaQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  // ✅ Pagination (client-side)
+  const PAGE_SIZE = 20;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   const { data, isLoading: areasLoading, error } = useAreas(region);
   const areas = data?.areas || [];
 
@@ -31,6 +35,16 @@ export default function AreasPageClient() {
     if (!q) return areas;
     return areas.filter((a) => a.name.toLowerCase().includes(q));
   }, [areas, areaQuery]);
+
+  // ✅ Reset visible count when region/search changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [region, areaQuery]);
+
+  // ✅ Only show visible areas
+  const visibleAreas = useMemo(() => {
+    return filteredAreas.slice(0, visibleCount);
+  }, [filteredAreas, visibleCount]);
 
   // Loading skeleton array
   const skeletonItems = Array.from({ length: 9 }, (_, i) => i);
@@ -63,6 +77,8 @@ export default function AreasPageClient() {
       label: t("stats.investmentValue"),
     },
   ];
+
+  const canLoadMore = !isLoading && !error && visibleCount < filteredAreas.length;
 
   return (
     <main className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -183,15 +199,6 @@ export default function AreasPageClient() {
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             <p className="text-gray-600 mt-1">{countLabel}</p>
           </div>
-
-          {/* Sort dropdown */}
-          <div className="mt-4 sm:mt-0">
-            <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-              <option>{t("results.sortPopularity")}</option>
-              <option>{t("results.sortName")}</option>
-              <option>{t("results.sortPropertyCount")}</option>
-            </select>
-          </div>
         </motion.div>
 
         {/* Loading State */}
@@ -268,16 +275,16 @@ export default function AreasPageClient() {
 
         {/* Areas Grid */}
         <AnimatePresence mode="wait">
-          {!isLoading && filteredAreas.length > 0 && (
+          {!isLoading && visibleAreas.length > 0 && (
             <motion.div
-              key={`grid-${region}-${areaQuery}`}
+              key={`grid-${region}-${areaQuery}-${visibleCount}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
             >
-              {filteredAreas.map((area, index) => (
+              {visibleAreas.map((area, index) => (
                 <AreaCard
                   key={area.id || area.name}
                   area={area}
@@ -289,19 +296,22 @@ export default function AreasPageClient() {
         </AnimatePresence>
 
         {/* Load More Button */}
-        {!isLoading &&
-          filteredAreas.length > 0 &&
-          filteredAreas.length % 9 === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mt-12"
+        {canLoadMore && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mt-12"
+          >
+            <button
+              onClick={() =>
+                setVisibleCount((c) => Math.min(c + PAGE_SIZE, filteredAreas.length))
+              }
+              className="px-8 py-3 border-2 border-sky-500 text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all duration-300 hover:border-sky-600"
             >
-              <button className="px-8 py-3 border-2 border-sky-500 text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all duration-300 hover:border-sky-600">
-                {t("states.loadMore")}
-              </button>
-            </motion.div>
-          )}
+              {t("states.loadMore")}
+            </button>
+          </motion.div>
+        )}
       </section>
     </main>
   );

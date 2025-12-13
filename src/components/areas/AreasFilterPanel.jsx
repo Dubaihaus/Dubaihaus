@@ -1,27 +1,30 @@
 // src/components/areas/AreasFilterPanel.jsx
 "use client";
+import { useRouter } from "next/navigation";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 const REGIONS = [
-  { value: "Dubai", labelKey: "regions.Dubai", count: 42 },
-  { value: "Abu Dhabi", labelKey: "regions.AbuDhabi", count: 28 },
-  { value: "Sharjah", labelKey: "regions.Sharjah", count: 15 },
-  { value: "Ajman", labelKey: "regions.Ajman", count: 8 },
-  { value: "Ras Al Khaimah", labelKey: "regions.RasAlKhaimah", count: 6 },
-  { value: "Fujairah", labelKey: "regions.Fujairah", count: 4 },
-  { value: "Umm Al Quwain", labelKey: "regions.UmmAlQuwain", count: 3 },
-  { value: "all", labelKey: "filter.regionAllLabel", count: 106 },
+  { value: "Dubai", labelKey: "regions.Dubai", count: "100+" },
+  { value: "Abu Dhabi", labelKey: "regions.AbuDhabi", count: "20+" },
+  { value: "Sharjah", labelKey: "regions.Sharjah", count: "10+" },
+  { value: "Ajman", labelKey: "regions.Ajman", count: "10+" },
+  { value: "Ras Al Khaimah", labelKey: "regions.RasAlKhaimah", count: "0+" },
+  { value: "Fujairah", labelKey: "regions.Fujairah", count: "0+" },
+  { value: "Umm Al Quwain", labelKey: "regions.UmmAlQuwain", count: "0+" },
+  { value: "all", labelKey: "filter.regionAllLabel", count: "150+" },
 ];
 
 export default function AreasFilterPanel({
+  
   region,
   onRegionChange,
   areaQuery,
   onAreaQueryChange,
 }) {
+  const router = useRouter();
   const t = useTranslations("areas");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -169,6 +172,7 @@ export default function AreasFilterPanel({
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 type="button"
+                onClick={() => router.push("/map")}
                 className="w-full lg:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-sm font-semibold border-2 border-sky-500 text-sky-600 bg-white hover:bg-sky-50 hover:border-sky-600 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 <svg

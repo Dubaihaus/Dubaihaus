@@ -119,8 +119,32 @@ export async function getCachedProjects(filters = {}) {
       ];
     }
   } else if (area) {
-    // Legacy single string match
-    where.area = { contains: area, mode: "insensitive" };
+    // Legacy single string match - UPDATED to check distinct & area & district
+    // Because some data is in `area` and some in `district`.
+    const areaOrDistrict = [
+      { area: { contains: area, mode: "insensitive" } },
+      { district: { contains: area, mode: "insensitive" } }
+    ];
+
+    if (where.OR) {
+      // If we already have a wrapper OR (e.g. from generic search),
+      // we must preserve it and ADD this new requirement as an AND.
+      // But we can't do `where.OR.push` because that makes it "Search OR Area", which is wrong.
+      // We want "Search AND (Area OR District)".
+      where.AND = [
+        ...(where.AND || []),
+        { OR: where.OR },
+        { OR: areaOrDistrict }
+      ];
+      delete where.OR;
+    } else {
+      // Just set keys? specific fields are implicit AND.
+      // but we need (A or B).
+      // So we use where.OR directly? No, where.OR is for top-level.
+      // If we have other top-level fields (like city), those are ANDed with where.OR.
+      // So `{ city: 'Dubai', OR: [ {area: X}, {district: X} ] }` works perfectly.
+      where.OR = areaOrDistrict;
+    }
   }
 
   // 4. Handover Years
@@ -310,7 +334,7 @@ export async function getCachedProjects(filters = {}) {
       ? p.propertyTypes
       : [];
 
-        const unitTypes = rawPropertyTypes.map((pt) => {
+    const unitTypes = rawPropertyTypes.map((pt) => {
       const raw = pt.rawData || {};
 
       const unitCategory =
@@ -326,15 +350,15 @@ export async function getCachedProjects(filters = {}) {
         pt.priceFrom != null
           ? Number(pt.priceFrom)
           : raw.price_from_aed != null
-          ? Number(raw.price_from_aed)
-          : null;
+            ? Number(raw.price_from_aed)
+            : null;
 
       const sizeFromM2 =
         pt.sizeFrom != null
           ? Number(pt.sizeFrom)
           : raw.size_from_m2 != null
-          ? Number(raw.size_from_m2)
-          : null;
+            ? Number(raw.size_from_m2)
+            : null;
 
       return {
         ...raw,
@@ -371,7 +395,7 @@ export async function getCachedProjects(filters = {}) {
       null;
 
     // Price numbers
-        // Price numbers (cast all Decimals to plain numbers)
+    // Price numbers (cast all Decimals to plain numbers)
     const minPriceNum =
       p.priceFrom !== null && p.priceFrom !== undefined
         ? Number(p.priceFrom)

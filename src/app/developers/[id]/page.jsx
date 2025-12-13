@@ -1,6 +1,6 @@
 // src/app/developers/[id]/page.jsx
-
-import { getDeveloperById, searchProperties } from "@/lib/reellyApi";
+import { getDeveloperById } from "@/lib/reellyApi";
+import { getCachedProjects } from "@/lib/projectService";
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 
@@ -8,9 +8,7 @@ export async function generateMetadata({ params }) {
   const developer = await getDeveloperById(params.id);
 
   if (!developer) {
-    return {
-      title: "Developer not found | DubaiHaus",
-    };
+    return { title: "Developer not found | DubaiHaus" };
   }
 
   const baseTitle = `${developer.name} Properties in Dubai | DubaiHaus`;
@@ -19,11 +17,7 @@ export async function generateMetadata({ params }) {
   return {
     title: baseTitle,
     description,
-    openGraph: {
-      title: baseTitle,
-      description,
-      type: "website",
-    },
+    openGraph: { title: baseTitle, description, type: "website" },
   };
 }
 
@@ -38,7 +32,10 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
       <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)] text-slate-900">
         <div className="mx-auto max-w-4xl px-4 py-16">
           <p className="text-xs text-slate-500">
-            <Link href="/developers" className="text-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]">
+            <Link
+              href="/developers"
+              className="text-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]"
+            >
               ← Back to all developers
             </Link>
           </p>
@@ -46,19 +43,20 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
             Developer not found
           </h1>
           <p className="mt-2 text-sm text-slate-600">
-            We couldn&apos;t find this developer. It may have been removed or is not available yet.
+            We couldn&apos;t find this developer.
           </p>
         </div>
       </main>
     );
   }
 
-  const properties = await searchProperties({
+  // ✅ IMPORTANT: DB has developerName, not developerId
+  const properties = await getCachedProjects({
     page,
     pageSize: 12,
-    developer: developerId,
-    pricedOnly: true,
-    includeAllData: false,
+    developer: developer.name, // match by name (contains, insensitive)
+    sortBy: "updatedAt",
+    sortOrder: "desc",
   });
 
   const items = properties?.results || [];
@@ -133,8 +131,7 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
 
         {items.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-6 text-sm text-slate-600">
-            No properties found for this developer yet. Please check back soon or
-            explore other developers.
+            No properties found for this developer yet.
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

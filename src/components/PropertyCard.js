@@ -87,48 +87,39 @@ function hasUsableSteps(plan) {
  * 1) Try to infer "80/20" from steps.
  * 2) Else use plan.name or fallback paymentPlanLabel.
  */
-function getCardPaymentPlanLabel(property, paymentPlanLabel = 'Payment plan') {
-  const plans = Array.isArray(property?.paymentPlans)
-    ? property.paymentPlans.filter(hasUsableSteps)
+function getCardPaymentPlanLabel(property, paymentPlanLabel = "Payment plan") {
+  const plans = Array.isArray(property?.paymentPlans) ? property.paymentPlans : [];
+  if (!plans.length) return null;
+
+  const plan = plans[0];
+
+  // Steps may be directly on plan OR nested inside rawData (depending on mapping)
+  const steps = Array.isArray(plan?.steps)
+    ? plan.steps
+    : Array.isArray(plan?.rawData?.steps)
+    ? plan.rawData.steps
     : [];
 
-  // 1) If we have a plan with steps, try ratio + label
-  if (plans.length) {
-    const plan = plans[0];
-    const steps = Array.isArray(plan.steps) ? plan.steps : [];
+  // ✅ Prefer showing numbers from steps (20/20/60, 50/50, etc.)
+  const percentages = steps
+    .map((s) => Number(s?.percentage ?? s?.percent))
+    .filter((n) => Number.isFinite(n) && n > 0)
+    .map((n) => Math.round(n));
 
-    const sorted = [...steps]
-      .filter((s) => typeof s?.percentage === 'number')
-      .sort((a, b) => b.percentage - a.percentage);
-
-    if (sorted.length >= 2) {
-      const a = Math.round(sorted[0].percentage);
-      const b = Math.round(sorted[1].percentage);
-      const total = steps.reduce(
-        (t, s) => t + (Number(s.percentage) || 0),
-        0
-      );
-
-      // Only show ratio if the top two account for most of the total
-      if (total > 0 && a + b >= total * 0.9) {
-        return `${a}/${b} ${paymentPlanLabel}`;
-      }
-    }
-
-    if (plan.name) {
-      return `${plan.name} ${paymentPlanLabel}`;
-    }
-
-    return paymentPlanLabel;
+  if (percentages.length) {
+    const ratio = percentages.slice(0, 4).join("/"); // keep badge short
+    return `${ratio} ${paymentPlanLabel}`; // "50/50 Payment plan"
   }
 
-  // 2) Fallback: use simple string they might have normalized
-  if (typeof property?.paymentPlan === 'string' && property.paymentPlan.trim()) {
-    return property.paymentPlan.trim();
+  // Fallback: use plan.name only if it's not generic "Payment plan"
+  const name = String(plan?.name || plan?.title || "").trim();
+  if (name && name.toLowerCase() !== "payment plan" && name.toLowerCase() !== "payment plan payment plan") {
+    return name; // don't append "Payment plan" again
   }
 
-  return null;
+  return paymentPlanLabel;
 }
+
 
 /* ---------------- component ---------------- */
 

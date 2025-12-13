@@ -122,7 +122,7 @@ export const ABU_DHABI_AREAS = [
     title: "Hudayriyat Island",
     image: "/dashboard/abu-dhabi/hudayriyat-island.jpg", // use placeholder/building.jpg if you don’t have assets yet
     filters: {
-      search_query: "Hudayriyat Island",
+      search_query: "Al Hudayriyat Island",
       region: "Abu Dhabi",
     },
   },
