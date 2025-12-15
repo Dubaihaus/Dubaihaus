@@ -33,6 +33,19 @@ export async function createBlog(formData) {
   // propertyIds comes from <select multiple name="propertyIds">
   const propertyIds = formData.getAll("propertyIds").map(String).filter(Boolean);
 
+  const status = formData.get("status") || "DRAFT";
+  const publishedAtStr = formData.get("publishedAt");
+  const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
+
+  // JSON fields
+  const categories = JSON.parse(formData.get("categories") || "[]"); // array of strings
+  const tags = JSON.parse(formData.get("tags") || "[]"); // array of strings
+  const mediaItems = JSON.parse(formData.get("media") || "[]"); // array of objects
+
+  // Helper: Sync featuredImg if a HERO media exists
+  const hero = mediaItems.find(m => m.role === "HERO");
+  const finalFeaturedImg = hero ? hero.url : featuredImg;
+
   // 1) Create SEO row
   const seo = await prisma.sEO.create({
     data: {
@@ -42,23 +55,41 @@ export async function createBlog(formData) {
     },
   });
 
-  // 2) Create blog with featured properties
+  // 2) Create blog with all relations
   await prisma.blogPost.create({
     data: {
       title,
       content,
       excerpt,
-      featuredImg,
+      featuredImg: finalFeaturedImg,
       readMinutes,
-      status: "PUBLISHED",
-      publishedAt: new Date(),
+      status,
+      publishedAt,
       seo: { connect: { id: seo.id } },
+
+      // Relations
       featuredProperties: {
         create: propertyIds.map((propertyId, index) => ({
           property: { connect: { id: propertyId } },
           position: index,
         })),
       },
+      categories: {
+        create: categories.map(name => ({ name }))
+      },
+      tags: {
+        create: tags.map(name => ({ name }))
+      },
+      media: {
+        create: mediaItems.map(m => ({
+          url: m.url,
+          type: "IMAGE", // default
+          role: m.role || "INLINE",
+          alt: m.alt,
+          caption: m.caption,
+          position: m.position || 0
+        }))
+      }
     },
   });
 
@@ -88,6 +119,19 @@ export async function updateBlog(id, formData) {
 
   const propertyIds = formData.getAll("propertyIds").map(String).filter(Boolean);
 
+  const status = formData.get("status") || "DRAFT";
+  const publishedAtStr = formData.get("publishedAt");
+  const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
+
+  // JSON fields
+  const categories = JSON.parse(formData.get("categories") || "[]");
+  const tags = JSON.parse(formData.get("tags") || "[]");
+  const mediaItems = JSON.parse(formData.get("media") || "[]");
+
+  // Sync featuredImg
+  const hero = mediaItems.find(m => m.role === "HERO");
+  const finalFeaturedImg = hero ? hero.url : featuredImg;
+
   // Find existing blog including SEO
   const existing = await prisma.blogPost.findUnique({
     where: { id },
@@ -112,10 +156,16 @@ export async function updateBlog(id, formData) {
     seoId = seo.id;
   }
 
-  // Replace featured property links
-  await prisma.blogPostProperty.deleteMany({
-    where: { blogId: id },
-  });
+  // Replace related data (Delete All -> Create All pattern)
+  // 1. Featured Properties
+  await prisma.blogPostProperty.deleteMany({ where: { blogId: id } });
+
+  // 2. Categories & Tags
+  await prisma.blogCategory.deleteMany({ where: { blogId: id } });
+  await prisma.blogTag.deleteMany({ where: { blogId: id } });
+
+  // 3. Media (safe to replace since no external FKs usually point to Blog Media)
+  await prisma.media.deleteMany({ where: { blogId: id } });
 
   await prisma.blogPost.update({
     where: { id },
@@ -123,17 +173,34 @@ export async function updateBlog(id, formData) {
       title,
       content,
       excerpt,
-      featuredImg,
+      featuredImg: finalFeaturedImg,
       readMinutes,
-      status: "PUBLISHED",
-      publishedAt: existing.publishedAt ?? new Date(),
+      status,
+      publishedAt, // Can be null now
       seo: seoId ? { connect: { id: seoId } } : undefined,
+
       featuredProperties: {
         create: propertyIds.map((propertyId, index) => ({
           property: { connect: { id: propertyId } },
           position: index,
         })),
       },
+      categories: {
+        create: categories.map(name => ({ name }))
+      },
+      tags: {
+        create: tags.map(name => ({ name }))
+      },
+      media: {
+        create: mediaItems.map(m => ({
+          url: m.url,
+          type: "IMAGE",
+          role: m.role || "INLINE",
+          alt: m.alt,
+          caption: m.caption,
+          position: m.position || 0
+        }))
+      }
     },
   });
 
@@ -157,7 +224,7 @@ export async function deleteBlog(id) {
   });
 
   if (blog.seoId) {
-    await prisma.sEO.delete({ where: { id: blog.seoId } }).catch(() => {});
+    await prisma.sEO.delete({ where: { id: blog.seoId } }).catch(() => { });
   }
 
   await prisma.blogPost.delete({ where: { id } });

@@ -32,6 +32,7 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "imgs.search.brave.com" },
       { protocol: 'https', hostname: 'api.reelly.io', pathname: '/**' },
       { protocol: 'https', hostname: 'reelly-public.s3.amazonaws.com', pathname: '/**' },
       { protocol: 'https', hostname: 'reelly-backend.s3.amazonaws.com', pathname: '/**' }, // ← add this

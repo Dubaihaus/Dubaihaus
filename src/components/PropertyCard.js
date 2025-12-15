@@ -1,6 +1,7 @@
 // src/components/PropertyCard.js
 'use client';
 
+
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -97,8 +98,8 @@ function getCardPaymentPlanLabel(property, paymentPlanLabel = "Payment plan") {
   const steps = Array.isArray(plan?.steps)
     ? plan.steps
     : Array.isArray(plan?.rawData?.steps)
-    ? plan.rawData.steps
-    : [];
+      ? plan.rawData.steps
+      : [];
 
   // ✅ Prefer showing numbers from steps (20/20/60, 50/50, etc.)
   const percentages = steps
@@ -141,7 +142,7 @@ export default function PropertyCard({
     property?.rawData?.cover_image?.url ||
     '/project_detail_images/building.jpg';
 
-    const rawPrice =
+  const rawPrice =
     property.price ?? property.minPrice ?? property.min_price ?? null;
 
   // Backend already converted to correct currency
@@ -160,14 +161,14 @@ export default function PropertyCard({
   // --- Property types & payment plan meta ---
 
   // Property types array from API / normalizer
-const types =
-  Array.isArray(property.propertyTypes) && property.propertyTypes.length
-    ? property.propertyTypes
-    : property.propertyType
-    ? [property.propertyType]
-    : [];
+  const types =
+    Array.isArray(property.propertyTypes) && property.propertyTypes.length
+      ? property.propertyTypes
+      : property.propertyType
+        ? [property.propertyType]
+        : [];
 
-const brRange = property.bedroomsRange || null;
+  const brRange = property.bedroomsRange || null;
 
   // Comma-separated label for red badge
   const propertyTypesLabel =
@@ -190,10 +191,23 @@ const brRange = property.bedroomsRange || null;
 
   // Build an href STRING for router.prefetch (Link can still use object)
   const href = useMemo(() => {
-    const pathname = `/ui/project_details/${property.id}`;
+    // Determine base path based on source or ID format
+    let pathname;
+    if (property.source === 'ADMIN') {
+      pathname = `/ui/property_details/${property.id}`;
+    } else if (property.source === 'REELLY') {
+      pathname = `/ui/project_details/${property.id}`;
+    } else {
+      // Fallback heuristic: Admin IDs are UUIDs (strings), Reelly IDs are integers
+      // But Reelly IDs might be strings in some contexts if fetched from DB as string.
+      // Safer to assume numeric regex for Reelly.
+      const isNumeric = /^\d+$/.test(String(property.id));
+      pathname = isNumeric ? `/ui/project_details/${property.id}` : `/ui/property_details/${property.id}`;
+    }
+
     const search = new URLSearchParams(queryParams).toString();
     return search ? `${pathname}?${search}` : pathname;
-  }, [property.id, queryParams]);
+  }, [property.id, property.source, queryParams]);
 
   const prefetchDetail = useCallback(() => {
     router.prefetch(href);
@@ -221,10 +235,7 @@ const brRange = property.bedroomsRange || null;
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10 pointer-events-none" />
 
       <Link
-        href={{
-          pathname: `/ui/project_details/${property.id}`,
-          query: queryParams,
-        }}
+        href={href}
         prefetch
         onMouseEnter={prefetchDetail}
         onFocus={prefetchDetail}
@@ -237,9 +248,8 @@ const brRange = property.bedroomsRange || null;
             <motion.img
               src={coverPhoto}
               alt={property.title || property.name}
-              className={`w-full h-64 object-cover transition-all duration-700 ${
-                isHovered ? 'scale-110' : 'scale-100'
-              } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`w-full h-64 object-cover transition-all duration-700 ${isHovered ? 'scale-110' : 'scale-100'
+                } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImageLoaded(true)}
               initial={false}
               animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
@@ -313,7 +323,7 @@ const brRange = property.bedroomsRange || null;
           </motion.p>
 
           {/* Type badges – bedrooms only */}
-<TypeBadges types={types} brRange={brRange} />
+          <TypeBadges types={types} brRange={brRange} />
           {/* Developer & Handover */}
           <motion.div
             initial={{ opacity: 0 }}

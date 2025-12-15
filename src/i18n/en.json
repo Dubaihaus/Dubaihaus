@@ -86,9 +86,9 @@
         "unknown": "Unknown location"
       },
       "badges": {
-        "propertyFallback": "Property",
+        "propertyFallback": "Apartments",
         "comingSoon": "Coming soon",
-        "paymentPlan": "Payment plan"
+        "paymentPlan": "Payment Plan"
       },
       "labels": {
         "developer": "Developer:",

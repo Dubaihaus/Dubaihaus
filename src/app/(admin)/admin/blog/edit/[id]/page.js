@@ -10,6 +10,9 @@ export default async function AdminEditBlogPage({ params }) {
     include: {
       seo: true,
       featuredProperties: true,
+      media: true,
+      categories: true,
+      tags: true,
     },
   });
 

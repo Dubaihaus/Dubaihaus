@@ -10,6 +10,13 @@ export default async function EditPropertyPage({ params }) {
         include: {
             images: true,
             amenities: true,
+            details: true,
+            gallery: { orderBy: { position: 'asc' } },
+            types: { orderBy: { position: 'asc' } },
+            features: { orderBy: { position: 'asc' } },
+            paymentPlans: {
+                include: { steps: { orderBy: { position: 'asc' } } }
+            }
         }
     });
 

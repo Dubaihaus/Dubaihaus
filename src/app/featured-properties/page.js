@@ -20,6 +20,7 @@ function normalizeManualProperty(p) {
         handoverDate: null,
         // Normalized city for grouping
         city: p.location.toLowerCase().includes("abu dhabi") ? "Abu Dhabi" : "Dubai", // Simple heuristic for manual
+        source: 'ADMIN',
     };
 }
 
@@ -36,6 +37,7 @@ function normalizeReellyProject(p) {
         developer: p.developerName,
         handoverDate: p.handoverDate || p.completionDate,
         city: p.city || "Dubai",
+        source: 'REELLY',
     };
 }
 

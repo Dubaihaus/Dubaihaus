@@ -44,6 +44,13 @@ model Property {
 
   // NEW:
   blogHighlights BlogPostProperty[]
+
+  // NEW: Detail extensions
+  details       PropertyDetails?
+  gallery       PropertyGalleryImage[]
+  paymentPlans  PropertyPaymentPlan[]
+  types         PropertyType[]
+  features      PropertyFeature[]
 }
 
 model BlogPostProperty {
@@ -58,6 +65,94 @@ model BlogPostProperty {
   position    Int      @default(0) // ordering inside the article
 
   @@unique([blogId, propertyId])
+}
+
+// --- PROPERTY DETAILS EXTENSIONS ---
+
+model PropertyDetails {
+  id                String    @id @default(cuid())
+  property          Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId        String    @unique
+
+  developerName     String?
+  constructionStatus String?
+  saleStatus        String?
+  furnishing        String?
+  
+  completionDate    DateTime?
+  handoverDate      DateTime?
+
+  overviewTitle     String?
+  overviewText      String?   @db.Text
+  
+  locationDescription String? @db.Text
+  // We can store bullet points or JSON for benefits
+  locationBenefits    Json?   
+
+  signatureTitle    String?
+  signatureSubtitle String?
+  
+  featuredPaymentPlanTitle String?
+
+  updatedAt         DateTime @updatedAt
+}
+
+model PropertyGalleryImage {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  url        String
+  category   String   @default("EXTERIOR") // EXTERIOR, INTERIOR, FEATURE
+  position   Int      @default(0)
+
+  updatedAt  DateTime @updatedAt
+}
+
+model PropertyPaymentPlan {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  title      String
+  subtitle   String?
+  
+  steps      PropertyPaymentPlanStep[]
+
+  updatedAt  DateTime @updatedAt
+}
+
+model PropertyPaymentPlanStep {
+  id            String              @id @default(cuid())
+  plan          PropertyPaymentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId        String
+
+  percent       String
+  label         String
+  note          String?
+  position      Int                 @default(0)
+}
+
+model PropertyType {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  name       String   // Studio, 1BR, etc
+  sizeFrom   String?
+  sizeTo     String?
+  priceFrom  String?
+  
+  position   Int      @default(0)
+}
+
+model PropertyFeature {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String
+
+  text       String
+  position   Int      @default(0)
 }
 
 enum PropertyStatus {
@@ -136,23 +231,36 @@ enum BlogStatus {
 }
 
 
-// --- MEDIA ---
-model Media {
-  id         String    @id @default(cuid())
-  url        String
-  type       MediaType
-  property   Property? @relation(fields: [propertyId], references: [id])
-  propertyId String?
-  blog       BlogPost? @relation(fields: [blogId], references: [id])
-  blogId     String?
-  createdAt  DateTime  @default(now())
-}
-
 enum MediaType {
   IMAGE
   VIDEO
   FLOORPLAN
   FILE
+}
+
+enum MediaRole {
+  HERO
+  INLINE
+  GALLERY
+}
+
+// --- MEDIA ---
+model Media {
+  id         String    @id @default(cuid())
+  url        String
+  type       MediaType
+  
+  // New fields for blog media richness
+  role       MediaRole? @default(INLINE) 
+  alt        String?
+  caption    String?
+  position   Int        @default(0)
+
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  blog       BlogPost? @relation(fields: [blogId], references: [id])
+  blogId     String?
+  createdAt  DateTime  @default(now())
 }
 
 model Translation {

@@ -86,7 +86,7 @@
         "unknown": "Unbekannter Standort"
       },
       "badges": {
-        "propertyFallback": "Immobilie",
+        "propertyFallback": "Apartments",
         "comingSoon": "Demnächst verfügbar",
         "paymentPlan": "Zahlungsplan"
       },
