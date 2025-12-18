@@ -61,25 +61,25 @@ export default function MegaMenu() {
   const categories = [
     {
       title: 'All Properties in Dubai',
-      image: '/dashboard/building.jpg',
+      image: '/dashboard/palm1.jpg',
       badge: null,
       filters: {},
     },
     {
       title: 'Apartments',
-      image: '/dashboard/apartments.jpg',
+      image: '/dashboard/Apartments.jpeg',
       badge: 'FROM AED 700,000',
       filters: { unit_types: 'Apartment' },
     },
     {
       title: 'Penthouses',
-      image: '/dashboard/property1.jpg',
+      image: '/dashboard/Penthhouse.jpeg',
       badge: 'FROM AED 2,000,000',
       filters: { unit_types: 'Penthouse' },
     },
     {
       title: 'Townhouses',
-      image: '/dashboard/townhouses.jpg',
+      image: '/dashboard/Townhouse.jpeg',
       badge: 'FROM AED 1,000,000',
       filters: { unit_types: 'Townhouse' },
     },

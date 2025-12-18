@@ -63,11 +63,11 @@ const FEATURED_ABU_DHABI_DEVELOPER_NAMES = [
 
 // ✅ Featured Abu Dhabi areas (will be shown first)
 const FEATURED_ABU_DHABI_AREA_NAMES = [
-  "Ghantoot",
-  "Hudayriyat Island",
+  "Al Reem Island",
+  "Marina Square",
   "Ramhan Island",
   "Fahid Island",
-  "Jubail Island",
+  "Zayed City",
   "Al Reem Island",
   "Yas Island",
   "Saadiyat Island",

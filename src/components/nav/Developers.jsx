@@ -7,10 +7,10 @@ import Image from 'next/image';
 
 // Configure which devs to feature + the card background image to show
 const FEATURED = [
-  { match: 'Emaar', img: '/dashboard/property1.jpg', label: 'Emaar' },
-  { match: 'Meraas', img: '/dashboard/property2.jpg', label: 'Meraas' },
-  { match: 'DAMAC', img: '/dashboard/property3.jpg', label: 'DAMAC' },
-  { match: 'Nakheel', img: '/dashboard/building.jpg', label: 'Nakheel' },
+  { match: 'Emaar', img: '/dashboard/emaar.webp', label: 'Emaar' },
+  { match: 'Meraas', img: '/dashboard/meraas.webp', label: 'Meraas' },
+  { match: 'DAMAC', img: '/dashboard/damac.webp', label: 'DAMAC' },
+  { match: 'Nakheel', img: '/dashboard/nakheel.webp', label: 'Nakheel' },
 ];
 
 export default function DevelopersMegaMenu({ label = 'Developers' }) {
@@ -68,7 +68,7 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
     ? FEATURED.map((cfg) => ({ cfg, dev: null }))
     : featured;
 
-  const fallbackImg = '/dashboard/land.jpg';
+  const fallbackImg = '/dashboard/all-dev.webp';
 
   return (
     <div
@@ -107,7 +107,7 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
             >
               <div className="relative h-36">
                 <Image
-                  src="/dashboard/land.jpg"
+                  src="/dashboard/all-dev.webp"
                   alt="All Developers"
                   fill
                   className="object-cover"

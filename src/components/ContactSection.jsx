@@ -1,5 +1,8 @@
 // src/components/ContactSection.jsx
 "use client";
+import PhoneInput, { getCountries, getCountryCallingCode } from "react-phone-number-input";
+import { isValidPhoneNumber } from "libphonenumber-js";
+
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -13,11 +16,27 @@ const containerVariants = {
     transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
+function countryToFlagEmoji(countryCode) {
+  // "AE" -> 🇦🇪
+  return String(countryCode || "")
+    .toUpperCase()
+    .replace(/./g, (char) =>
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+}
+
+const PHONE_LABELS = getCountries().reduce((acc, c) => {
+  // label becomes: "🇦🇪 +971" (no name)
+  acc[c] = `${countryToFlagEmoji(c)} +${getCountryCallingCode(c)}`;
+  return acc;
+}, {});
+
 
 export default function ContactSection() {
   const t = useTranslations(); // use full keys, e.g. "contact.badge"
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // "ok" | "error" | null
+  const [phone, setPhone] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,11 +47,12 @@ export default function ContactSection() {
     const formData = new FormData(form);
 
     const payload = {
+      
       purpose: formData.get("purpose"),
       budget: formData.get("budget"),
       name: formData.get("name"),
       email: formData.get("email"),
-      phone: formData.get("phone"),
+   phone,
       areas: formData.get("areas"),
       message: formData.get("message"),
       projectTitle: "General Contact Form",
@@ -56,6 +76,7 @@ export default function ContactSection() {
         }
         setStatus("ok");
         form.reset();
+        setPhone("");
       } else {
         let data = null;
         try {
@@ -275,17 +296,39 @@ export default function ContactSection() {
                 >
                   {t("contact.form.phone.label")}
                 </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder={t("contact.form.phone.placeholder")}
-                  className="
-                    w-full rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
-                    text-slate-900 shadow-sm placeholder:text-slate-400
-                    focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-sky)] focus:border-[var(--color-brand-sky)]
-                  "
-                />
+              <PhoneInput
+  id="phone"
+  international
+  defaultCountry="AE"
+  addInternationalOption={false}
+  labels={PHONE_LABELS}
+  value={phone}
+  onChange={(val) => setPhone(val || "")}
+  className="
+    w-full flex items-center gap-2
+    rounded-2xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-sm
+    text-slate-900 shadow-sm
+    focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--color-brand-sky)]
+    focus-within:border-[var(--color-brand-sky)]
+  "
+  countrySelectProps={{
+    className: `
+      bg-transparent border-none outline-none p-0
+      text-sm text-slate-900 cursor-pointer
+      w-[92px] shrink-0
+    `,
+    "aria-label": "Country code",
+  }}
+  numberInputProps={{
+    className: `
+      min-w-0 flex-1 bg-transparent border-none outline-none p-0
+      text-sm placeholder:text-slate-400 focus:ring-0
+    `,
+    placeholder: t("contact.form.phone.placeholder"),
+  }}
+/>
+
+
                 <p className="text-[11px] text-slate-500">
                   {t("contact.form.phoneHint")}
                 </p>

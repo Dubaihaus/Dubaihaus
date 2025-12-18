@@ -19,25 +19,25 @@ const OffPlanPropertyTypesSection = () => {
     {
       title: t("propertyTypes.penthouses.title"),
       label: t("propertyTypes.penthouses.label"),
-      image: "/dashboard/apartments.jpg",
+      image: "/dashboard/Penthhouse.jpeg",
       filters: { unit_types: "Penthouse" },
     },
     {
       title: t("propertyTypes.townhouses.title"),
       label: t("propertyTypes.townhouses.label"),
-      image: "/dashboard/townhouses.jpg",
+      image: "/dashboard/Townhouse.jpeg",
       filters: { unit_types: "Townhouse" },
     },
     {
       title: t("propertyTypes.villas.title"),
       label: t("propertyTypes.villas.label"),
-      image: "/dashboard/villas.jpg",
+      image: "/dashboard/Villa.jpeg",
       filters: { unit_types: "Villa" },
     },
     {
       title: t("propertyTypes.all.title"),
       label: t("propertyTypes.all.label"),
-      image: "/dashboard/building.jpg",
+      image: "/dashboard/Apartments.jpeg",
       filters: {},
     },
   ];

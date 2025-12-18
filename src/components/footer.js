@@ -64,7 +64,7 @@ export default function Footer() {
     <footer className="relative bg-brand-sky text-white overflow-hidden">
       {/* Background image layer */}
       <div
-        className="absolute inset-0 bg-[url('/dashboard/building.jpg')] bg-cover bg-center opacity-20"
+        className="absolute inset-0 bg-[url('/dashboard/building.jpg')] bg-cover bg-center opacity-10"
         aria-hidden="true"
       />
 

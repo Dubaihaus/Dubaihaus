@@ -154,7 +154,7 @@ export default function Navbar() {
             </div>
 
             {/* Search pill */}
-            <button className="inline-flex items-center gap-2 rounded-full bg-sky-500 px-4 py-1.5 text-xs font-semibold text-white shadow-md hover:bg-sky-600 transition">
+            {/* <button className="inline-flex items-center gap-2 rounded-full bg-sky-500 px-4 py-1.5 text-xs font-semibold text-white shadow-md hover:bg-sky-600 transition">
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -169,7 +169,7 @@ export default function Navbar() {
                 />
               </svg>
               <span>{t('navbar.find')}</span>
-            </button>
+            </button> */}
           </div>
 
           {/* Mobile button + language */}

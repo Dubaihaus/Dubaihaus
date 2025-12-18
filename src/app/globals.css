@@ -284,3 +284,37 @@
 .field-input--sm.textarea {
   @apply leading-6 md:leading-6;
 }
+/* Make react-phone-number-input match our Tailwind design */
+.PhoneInput {
+  display: flex;
+  gap: 0.5rem; /* similar spacing */
+  align-items: center;
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInputCountrySelect {
+  height: 42px; /* matches py-2.5-ish */
+  border-radius: 1rem; /* rounded-2xl */
+  border: 1px solid rgb(226 232 240); /* border-slate-200 */
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(15 23 42); /* slate-900 */
+  outline: none;
+}
+
+.PhoneInputCountrySelect:focus {
+  box-shadow: 0 0 0 2px var(--color-brand-sky);
+  border-color: var(--color-brand-sky);
+}
+
+.PhoneInputCountryIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  overflow: hidden;
+}

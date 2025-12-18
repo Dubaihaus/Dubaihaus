@@ -108,21 +108,21 @@ export const ABU_DHABI_AREAS = [
     },
   },
   {
-    slug: "jubail-island",
-    title: "Jubail Island",
-    image: "/dashboard/abu-dhabi/jubail-island.jpg", // change image if you have a better one
+    slug: "zayed-city",
+    title: "Zayed City",
+    image: "/dashboard/abu-dhabi/zayed-city.jpg", // change image if you have a better one
     filters: {
-      search_query: "Jubail Island",
+      search_query: "Zayed City",
       region: "Abu Dhabi",
     },
   },
   // NEW
   {
-    slug: "hudayriyat-island",
-    title: "Hudayriyat Island",
-    image: "/dashboard/abu-dhabi/hudayriyat-island.jpg", // use placeholder/building.jpg if you don’t have assets yet
+    slug: "marina-square",
+    title: "Marina Square",
+    image: "/dashboard/abu-dhabi/marina-square.jpg", // use placeholder/building.jpg if you don’t have assets yet
     filters: {
-      search_query: "Al Hudayriyat Island",
+      search_query: "Marina Square",
       region: "Abu Dhabi",
     },
   },

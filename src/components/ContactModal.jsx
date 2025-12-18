@@ -1,9 +1,27 @@
 'use client';
 
+import PhoneInput, {
+  getCountries,
+  getCountryCallingCode,
+} from "react-phone-number-input";
+import { isValidPhoneNumber } from "libphonenumber-js";
+
+
 import { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send, Phone, Mail, User, MessageCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+function countryToFlagEmoji(countryCode) {
+  return String(countryCode || "")
+    .toUpperCase()
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+}
+
+const PHONE_LABELS = getCountries().reduce((acc, c) => {
+  acc[c] = `${countryToFlagEmoji(c)} +${getCountryCallingCode(c)}`; // no country name
+  return acc;
+}, {});
+
 
 export default function ContactModal({ open, onClose, projectTitle }) {
   const t = useTranslations('contact.modal');
@@ -156,23 +174,43 @@ export default function ContactModal({ open, onClose, projectTitle }) {
                 </div>
 
                 {/* Phone */}
-                <Field
-                  label={t('fields.phone')}
-                  icon={<Phone size={16} className="text-gray-400" />}
-                >
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={form.phone}
-                      onChange={handlePhoneChange}
-                      required
-                      placeholder="+971 50 123 4567"
-                      className="field-input field-input--sm pl-20 pr-3"
-                    />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5" />
-                  </div>
-                </Field>
+             <Field
+  label={t("fields.phone")}
+  icon={<Phone size={16} className="text-gray-400" />}
+>
+  <div className="relative">
+    <PhoneInput
+  international
+  defaultCountry="AE"
+  addInternationalOption={false}
+  labels={PHONE_LABELS}
+  value={form.phone}
+  onChange={(val) => setForm((p) => ({ ...p, phone: val || "" }))}
+  className="
+    field-input field-input--sm pl-9 pr-3
+    flex items-center gap-2
+    focus-within:ring-0
+  "
+  countrySelectProps={{
+    className: `
+      bg-transparent border-none outline-none p-0
+      text-sm text-gray-900 cursor-pointer
+      w-[92px] shrink-0
+    `,
+    "aria-label": "Country code",
+  }}
+  numberInputProps={{
+    required: true,
+    className: `
+      min-w-0 flex-1 bg-transparent border-none outline-none p-0
+      text-sm placeholder:text-gray-400
+    `,
+    placeholder: "+971 50 123 4567",
+  }}
+/>
+
+  </div>
+</Field>
 
                 {/* Message */}
                 <Field label={t('fields.message')}>

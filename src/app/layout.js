@@ -1,6 +1,7 @@
 // src/app/layout.js
 import './globals.css';
 import { headers } from 'next/headers';
+import "react-phone-number-input/style.css";
 import { NextIntlClientProvider } from 'next-intl';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
