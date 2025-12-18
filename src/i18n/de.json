@@ -41,8 +41,8 @@
     },
     "cta": "Finden Sie Ihre Off-Plan Immobilie in Dubai",
     "propertyTypes": {
-      "penthouses": {
-        "title": "Penthäuser zum Verkauf",
+      "apartments": {
+        "title": "Wohnungen zum Verkauf",
         "label": "AB AED 240.000"
       },
       "townhouses": {
@@ -550,5 +550,11 @@
       "mapboxMissingTitle": "Mapbox-Token nicht konfiguriert",
       "mapboxMissingBody": "Überprüfen Sie die Umgebungsvariable NEXT_PUBLIC_MAPBOX_TOKEN"
     }
-  }
+  },
+  "featuredProperties": {
+  "title": "Ausgewählte Immobilien",
+  "subtitle": "Handverlesene Auswahl der besten Immobilien und Projekte.",
+  "empty": "Keine ausgewählten Immobilien gefunden."
+}
+
 }
