@@ -2,8 +2,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
+
+import { usePathname } from 'next/navigation';
 
 // Configure which devs to feature + the card background image to show
 const FEATURED = [
@@ -14,11 +17,22 @@ const FEATURED = [
 ];
 
 export default function DevelopersMegaMenu({ label = 'Developers' }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [devs, setDevs] = useState([]);
+
   const wrapRef = useRef(null);
+  const panelRef = useRef(null);
   const timer = useRef(null);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Close menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   const openNow = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -41,16 +55,23 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
   // Close on ESC and outside click
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
+
     const onClick = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
-        setOpen(false);
+      // Check both wrapper (trigger) and portal panel
+      if (
+        (wrapRef.current && wrapRef.current.contains(e.target)) ||
+        (panelRef.current && panelRef.current.contains(e.target))
+      ) {
+        return;
       }
+      setOpen(false);
     };
+
     window.addEventListener('keydown', onKey);
-    document.addEventListener('mousedown', onClick);
+    document.addEventListener('pointerdown', onClick);
     return () => {
       window.removeEventListener('keydown', onKey);
-      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('pointerdown', onClick);
     };
   }, []);
 
@@ -87,9 +108,17 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
         {label}
       </button>
 
-      {open && (
-        <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[980px] max-w-[95vw] rounded-2xl border bg-white shadow-2xl p-5 z-50">
-          <div className="flex items-center justify-between px-1 pb-3">
+      {/* Portal Panel - Fixed Position */}
+      {open && mounted && createPortal(
+        <div
+          ref={panelRef}
+          className="fixed left-1/2 top-[72px] -translate-x-1/2 w-[980px] max-w-[95vw]
+                     max-h-[calc(100vh-96px)] overflow-y-auto
+                     rounded-2xl border bg-white shadow-2xl z-[9999]"
+          onMouseEnter={openNow}
+          onMouseLeave={closeSoon}
+        >
+          <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <div className="text-sm font-semibold text-slate-800">
               Featured Developers
             </div>
@@ -99,11 +128,12 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
           </div>
 
           {/* Row: All Developers + 4 featured cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="px-5 pb-5 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* All Developers */}
             <Link
               href="/developers"
               className="group rounded-xl overflow-hidden border bg-white hover:shadow-md transition"
+              onClick={() => setOpen(false)}
             >
               <div className="relative h-36">
                 <Image
@@ -146,6 +176,7 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
                   href={href}
                   className="group rounded-xl overflow-hidden border bg-white hover:shadow-md transition"
                   title={labelText}
+                  onClick={() => setOpen(false)}
                 >
                   <div className="relative h-36">
                     {/* Background / property-style image */}
@@ -177,7 +208,8 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
               );
             })}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

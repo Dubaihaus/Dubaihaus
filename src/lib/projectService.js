@@ -33,6 +33,7 @@ export async function getCachedProjects(filters = {}) {
     city,
     district,
     region,
+    regions, // Array of selected regions
     // optional bounding box (from legacy area resolver)
     bbox_sw_lat,
     bbox_sw_lng,
@@ -110,7 +111,7 @@ export async function getCachedProjects(filters = {}) {
       ];
       delete where.OR; // Move it into AND
     } else {
-      // Just set OR? No, if we have other fields set, `where` object keys are implicit AND.
+      // Just set OR? No, if we have other fields set, `where` object keys are implicit implicit AND.
       // But we need `area IN [...] OR district IN [...]`.
       // We can use AND array for this specific constraint.
       where.AND = [
@@ -189,7 +190,11 @@ export async function getCachedProjects(filters = {}) {
   if (district) {
     where.district = { contains: district, mode: "insensitive" };
   }
-  if (region) {
+
+  // REGION logic (supports Array OR String)
+  if (regions && regions.length > 0) {
+    where.region = { in: regions, mode: 'insensitive' };
+  } else if (region) {
     where.region = { contains: region, mode: "insensitive" };
   }
 

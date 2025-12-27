@@ -1,5 +1,7 @@
 // src/components/nav/MegaMenu.jsx
 'use client';
+import { createPortal } from 'react-dom';
+
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -26,10 +28,16 @@ const toHref = (filters = {}) => {
   return `/off-plan${params ? `?${params}` : ''}`;
 };
 
+import { usePathname } from 'next/navigation';
+
 export default function MegaMenu() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef(null);
   const menuRef = useRef(null);
+  const panelRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Close on ESC
   useEffect(() => {
@@ -41,12 +49,24 @@ export default function MegaMenu() {
   // Close when clicking outside
   useEffect(() => {
     const onClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setOpen(false);
+      // If clicking inside the trigger or the portal panel, do nothing
+      if (
+        (menuRef.current && menuRef.current.contains(e.target)) ||
+        (panelRef.current && panelRef.current.contains(e.target))
+      ) {
+        return;
+      }
+      setOpen(false);
     };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    // Use pointerdown for better touch/click handling
+    document.addEventListener('pointerdown', onClick);
+    return () => document.removeEventListener('pointerdown', onClick);
   }, []);
+
+  // Close menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   // Hover helpers (little delay prevents flicker)
   const openNow = () => {
@@ -141,9 +161,12 @@ export default function MegaMenu() {
       </button>
 
       {/* Panel */}
-      {open && (
+      {open && mounted && createPortal(
         <div
-          className="absolute left-1/2 -translate-x-1/2 mt-3 w-[980px] max-w-[95vw] rounded-2xl border bg-white shadow-2xl z-50"
+          ref={panelRef}
+          className="fixed left-1/2 top-[72px] -translate-x-1/2 w-[980px] max-w-[95vw]
+               max-h-[calc(100vh-96px)] overflow-y-auto
+               rounded-2xl border bg-white shadow-2xl z-[9999]"
           onMouseEnter={openNow}
           onMouseLeave={closeSoon}
         >
@@ -161,6 +184,7 @@ export default function MegaMenu() {
                   key={c.title}
                   href={toHref(c.filters)}
                   className="group rounded-xl overflow-hidden border bg-white hover:shadow-md transition"
+                  onClick={() => setOpen(false)}
                 >
                   <div className="relative h-36">
                     <Image
@@ -191,6 +215,7 @@ export default function MegaMenu() {
                   key={label}
                   href={toHref(filters)}
                   className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs bg-white hover:border-sky-500 hover:text-sky-600 transition"
+                  onClick={() => setOpen(false)}
                 >
                   <Icon className="text-sky-600" />
                   <span>{label}</span>
@@ -198,8 +223,10 @@ export default function MegaMenu() {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
+
 
       {/* Mobile fallback: show simple link below md if needed */}
       <div className="md:hidden" />

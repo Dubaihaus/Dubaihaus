@@ -198,6 +198,7 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
 
     // Initialize state from props or URL
     const [types, setTypes] = useState(initialFilters?.types || []);
+    const [regions, setRegions] = useState(initialFilters?.regions || []);
     const [areas, setAreas] = useState(initialFilters?.areas || []);
     const [developers, setDevelopers] = useState(initialFilters?.developers || []);
     const [years, setYears] = useState(initialFilters?.years || []);
@@ -211,9 +212,46 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
         // But if we navigate shallow, we might want to sync.
     }, [searchParams]);
 
+    // Derived area options based on selected regions
+    const availableAreas = React.useMemo(() => {
+        const withRegion = filterOptions?.areasWithRegion || [];
+        const simple = filterOptions?.areas || [];
+
+        if (!regions || regions.length === 0) return simple;
+
+        // Filter areas that belong to selected regions
+        const filtered = withRegion
+            .filter(item => item.region && regions.includes(item.region))
+            .map(item => item.area);
+
+        return [...new Set(filtered)].sort();
+    }, [regions, filterOptions]);
+
+    const handleRegionChange = (newRegions) => {
+        setRegions(newRegions);
+
+        // If we have mapped data, we can validate selected areas
+        const withRegion = filterOptions?.areasWithRegion;
+        if (withRegion && newRegions.length > 0 && areas.length > 0) {
+            // Check if current selected areas are valid for new regions
+            // An area is valid if its region is in newRegions
+            // Find each selected area in metadata
+            const valid = areas.filter(areaName => {
+                const match = withRegion.find(r => r.area === areaName);
+                if (!match) return true; // keep if unknown (safer)
+                return newRegions.includes(match.region);
+            });
+
+            if (valid.length !== areas.length) {
+                setAreas(valid);
+            }
+        }
+    };
+
     const handleSearch = () => {
         const params = new URLSearchParams();
         if (types.length) params.set('type', types.join(','));
+        if (regions.length) params.set('region', regions.join(','));
         if (areas.length) params.set('area', areas.join(','));
         if (developers.length) params.set('developer', developers.join(','));
         if (years.length) params.set('handoverYear', years.join(','));
@@ -246,7 +284,7 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 relative z-30 -mt-24 sm:-mt-32">
             <div className="bg-white rounded-2xl shadow-2xl shadow-black/10 p-4 md:p-6 border border-gray-100">
 
-                {/* Row 1: Dropdowns */}
+                {/* Row 1: Dropdowns (5 columns) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
                     <MultiSelect
                         label="Property Type"
@@ -255,16 +293,17 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
                         selected={types}
                         onChange={setTypes}
                     />
-                    <PriceRangeDropdown
-                        label="Price Range"
-                        min={price.min}
-                        max={price.max}
-                        onChange={setPrice}
+                    <MultiSelect
+                        label="State / Emirate"
+                        placeholder="All Emirates"
+                        options={filterOptions?.regions || ['Dubai', 'Abu Dhabi']}
+                        selected={regions}
+                        onChange={handleRegionChange}
                     />
                     <MultiSelect
                         label="Area / Community"
                         placeholder="All Areas"
-                        options={filterOptions?.areas || []}
+                        options={availableAreas}
                         selected={areas}
                         onChange={setAreas}
                     />
@@ -275,17 +314,27 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
                         selected={developers}
                         onChange={setDevelopers}
                     />
-                    <MultiSelect
-                        label="Handover Date"
-                        placeholder="Any Date"
-                        options={yearOptions}
-                        selected={years}
-                        onChange={setYears}
+                    <PriceRangeDropdown
+                        label="Price Range"
+                        min={price.min}
+                        max={price.max}
+                        onChange={setPrice}
                     />
                 </div>
 
-                {/* Row 2: Search & Actions */}
-                <div className="flex flex-col md:flex-row items-center gap-4">
+                {/* Row 2: Handover Date + Search & Actions */}
+                <div className="flex flex-col lg:flex-row items-end gap-3">
+
+                    {/* Handover Date (Moved to Row 2) */}
+                    <div className="w-full lg:w-56">
+                        <MultiSelect
+                            label="Handover Date"
+                            placeholder="Any Date"
+                            options={yearOptions}
+                            selected={years}
+                            onChange={setYears}
+                        />
+                    </div>
 
                     {/* Search Input */}
                     <div className="relative w-full flex-grow">
@@ -303,7 +352,7 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
                     </div>
 
                     {/* Map Toggle - Styled Switch */}
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start px-2">
+                    <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start px-2 h-[46px]">
                         <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Show Map</span>
                         <button
                             onClick={() => setShowMap(!showMap)}
@@ -316,7 +365,7 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
                     {/* Find Button */}
                     <button
                         onClick={handleSearch}
-                        className="w-full md:w-auto bg-brand-sky border border-transparent rounded-lg py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg shadow-red-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="w-full lg:w-auto bg-brand-sky border border-transparent rounded-lg py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg shadow-red-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 h-[46px]"
                     >
                         <Search className="w-5 h-5 mr-2" />
                         Search

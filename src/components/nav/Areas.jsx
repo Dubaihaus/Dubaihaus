@@ -1,6 +1,7 @@
 // src/components/nav/Areas.jsx
 'use client';
 
+
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -80,7 +81,7 @@ export default function AreasMegaMenu({
   const timer = useRef(null);
 
   const [mounted, setMounted] = useState(false);
-  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
+  // panelPos state removed as we now use fixed centering
 
   useEffect(() => setMounted(true), []);
 
@@ -99,54 +100,28 @@ export default function AreasMegaMenu({
   }, []);
 
   // ---- POSITIONING (Portal-safe) ----
-  const updatePosition = useCallback(() => {
-    const el = btnRef.current;
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    // center the panel on the button
-    const left = rect.left + rect.width / 2;
-    const top = rect.bottom + 12;
-
-    setPanelPos({ top, left });
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    updatePosition();
-
-    const onResize = () => updatePosition();
-    const onScroll = () => updatePosition();
-
-    window.addEventListener('resize', onResize);
-    window.addEventListener('scroll', onScroll, true);
-
-    return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('scroll', onScroll, true);
-    };
-  }, [open, updatePosition]);
+  // Removed old button-relative positioning logic (panelPos) in favor of fixed center.
 
   // Close on ESC / outside click (works with Portal)
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
 
     const onClick = (e) => {
-      const btn = btnRef.current;
-      const panel = panelRef.current;
-      if (!btn || !panel) return;
-
-      const target = e.target;
-      if (!btn.contains(target) && !panel.contains(target)) {
-        setOpen(false);
+      // Check both trigger and portal panel
+      if (
+        (btnRef.current && btnRef.current.contains(e.target)) ||
+        (panelRef.current && panelRef.current.contains(e.target))
+      ) {
+        return;
       }
+      setOpen(false);
     };
 
     window.addEventListener('keydown', onKey);
-    document.addEventListener('mousedown', onClick);
+    document.addEventListener('pointerdown', onClick);
     return () => {
       window.removeEventListener('keydown', onKey);
-      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('pointerdown', onClick);
     };
   }, []);
 
@@ -323,18 +298,11 @@ export default function AreasMegaMenu({
       ref={panelRef}
       onMouseEnter={openNow}
       onMouseLeave={closeSoon}
-      className="rounded-2xl border bg-white shadow-2xl p-5"
-      style={{
-        position: 'fixed',
-        top: panelPos.top,
-        left: panelPos.left,
-        transform: 'translateX(-50%)',
-        width: '980px',
-        maxWidth: '95vw',
-        zIndex: 9999, // ✅ above everything
-      }}
+      className="fixed left-1/2 top-[72px] -translate-x-1/2 w-[980px] max-w-[95vw]
+                 max-h-[calc(100vh-96px)] overflow-y-auto
+                 rounded-2xl border bg-white shadow-2xl z-[9999]"
     >
-      <div className="flex items-center justify-between px-1 pb-3">
+      <div className="flex items-center justify-between px-6 pt-5 pb-3">
         <div className="text-sm font-semibold text-slate-800">
           Popular Areas (UAE)
         </div>
@@ -343,7 +311,8 @@ export default function AreasMegaMenu({
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="px-5 pb-5 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+
         {/* All Areas → /areas */}
         <Link
           href={localePath('/areas')}

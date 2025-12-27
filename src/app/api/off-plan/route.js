@@ -49,7 +49,18 @@ export async function GET(request) {
 
       // location filters (critical for areas sections)
       case 'area':
+        filters.area = value;
+        filters.areas = value.split(',').filter(Boolean);
+        break;
       case 'region':
+        filters.region = value;
+        filters.regions = value.split(',').filter(Boolean);
+        break;
+      case 'developer':
+        filters.developer = value;
+        filters.developers = value.split(',').filter(Boolean);
+        break;
+
       case 'city':
       case 'district':
       case 'country':

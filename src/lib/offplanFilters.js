@@ -23,6 +23,9 @@ export function parseSearchParamsToFilters(searchParams) {
 
         // Pagination
         page: parseInt(searchParams.get('page')) || 1,
+
+        // Region (State/Emirate)
+        regions: searchParams.get('region') ? searchParams.get('region').split(',').filter(Boolean) : [],
     };
 
     return filters;
@@ -74,6 +77,14 @@ export function buildWhereClauseFromFilters(filters) {
             { area: { in: filters.areas } },
             { district: { in: filters.areas } }
         ];
+    }
+
+    // NEW: 4b. Regions (State / Emirate)
+    if (filters.regions && filters.regions.length > 0) {
+        where.region = {
+            in: filters.regions,
+            mode: 'insensitive'
+        };
     }
 
     // 5. Handover Years (or "Completed")
@@ -131,51 +142,64 @@ export function buildWhereClauseFromFilters(filters) {
 }
 
 export async function getFilterOptions() {
-  // 1. Types
-  const typesRaw = await prisma.reellyProjectPropertyType.findMany({
-    select: { type: true },
-    distinct: ['type'],
-    // ❌ remove the "where: { type: { not: null } }"
-  });
+    // 1. Types
+    const typesRaw = await prisma.reellyProjectPropertyType.findMany({
+        select: { type: true },
+        distinct: ['type'],
+        // ❌ remove the "where: { type: { not: null } }"
+    });
 
-  const types = typesRaw
-    .map((t) => t.type)
-    .filter((t) => !!t && t.trim().length > 0) // just in case
-    .sort();
+    const types = typesRaw
+        .map((t) => t.type)
+        .filter((t) => !!t && t.trim().length > 0) // just in case
+        .sort();
 
-  // 2. Developers
-  const devsRaw = await prisma.reellyProject.findMany({
-    select: { developerName: true },
-    distinct: ['developerName'],
-    where: { developerName: { not: null } },
-  });
-  const developers = devsRaw
-    .map((d) => d.developerName)
-    .filter(Boolean)
-    .sort();
+    // 2. Developers
+    const devsRaw = await prisma.reellyProject.findMany({
+        select: { developerName: true },
+        distinct: ['developerName'],
+        where: { developerName: { not: null } },
+    });
+    const developers = devsRaw
+        .map((d) => d.developerName)
+        .filter(Boolean)
+        .sort();
 
-  // 3. Areas
-  const areasRaw = await prisma.reellyProject.findMany({
-    select: { area: true },
-    distinct: ['area'],
-    where: { area: { not: null } },
-  });
-  const areas = areasRaw.map((a) => a.area).filter(Boolean).sort();
+    // 3. Areas & Regions
+    // We fetch areas AND their region so we can filter areas by region in UI
+    const locationsRaw = await prisma.reellyProject.findMany({
+        select: { area: true, region: true },
+        distinct: ['area', 'region'],
+        where: { area: { not: null } },
+    });
 
-  // 4. Prices
-  const priceAgg = await prisma.reellyProject.aggregate({
-    _min: { priceFrom: true },
-    _max: { priceTo: true },
-  });
+    // Unique valid regions
+    const regions = Array.from(new Set(locationsRaw.map(l => l.region).filter(Boolean))).sort();
 
-  return {
-    types,
-    developers,
-    areas,
-    prices: {
-      min: priceAgg._min.priceFrom ? Number(priceAgg._min.priceFrom) : 0,
-      max: priceAgg._max.priceTo ? Number(priceAgg._max.priceTo) : 0,
-    },
-  };
+    // Areas with metadata
+    const areasWithRegion = locationsRaw
+        .filter(l => l.area)
+        .map(l => ({ area: l.area, region: l.region }));
+
+    // Legacy simple list for compatibility
+    const areas = Array.from(new Set(areasWithRegion.map(a => a.area))).sort();
+
+    // 4. Prices
+    const priceAgg = await prisma.reellyProject.aggregate({
+        _min: { priceFrom: true },
+        _max: { priceTo: true },
+    });
+
+    return {
+        types,
+        developers,
+        areas,
+        regions,
+        areasWithRegion,
+        prices: {
+            min: priceAgg._min.priceFrom ? Number(priceAgg._min.priceFrom) : 0,
+            max: priceAgg._max.priceTo ? Number(priceAgg._max.priceTo) : 0,
+        },
+    };
 }
 

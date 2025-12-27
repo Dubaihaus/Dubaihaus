@@ -72,22 +72,31 @@ export default function SearchResultsClient({ results, filters }) {
             )}
 
             {/* Content Area */}
-            <div className="flex flex-col lg:flex-row gap-6">
+            {/* If map is shown, we use a Flex container to allow Side-by-Side with Sticky Map */}
+            <div className={`flex flex-col lg:flex-row items-start gap-6 relative`}>
 
-                {/* Map Column (if shown) - reusing logic or simple dynamic rendering */}
+                {/* Grid Column - Render FIRST in DOM so it's Left on Desktop, but we need Map Top on Mobile?
+                    If we want Map on Right (Desktop) and Top (Mobile), we can:
+                    1. Render Map 2nd in DOM. Flex-row defaults to left-to-right. So Map is Right. 
+                       On Mobile (flex-col), Map is Bottom. This is WRONG.
+                    2. Render Map 1st in DOM. Flex-row-reverse? No.
+                    3. Render Map 1st in DOM. Flex-row (Map Left, Cards Right). WRONG.
+                    4. Render Map 2nd in DOM. Mobile use 'order-first'.
+                       Desktop default order.
+                */}
+
+                {/* Map Column (if shown) */}
                 {showMap && (
-                    <div className="w-full lg:w-1/2 h-[500px] lg:h-auto lg:min-h-[600px] sticky top-24 rounded-2xl overflow-hidden shadow-lg border border-gray-200 order-first lg:order-last">
-                        {/* We can use the existing MapSection but it might need projects passed in specific format 
-                         or simplified. Let's try basic MapSection if it accepts projects. 
-                         HomeClient uses MapSection.
-                      */}
-                        <MapSection
-                            projects={results}
-                            title="Properties Map"
-                            height={600}
-                            maxWidthClass="w-full"
-                            showMarkersInitially={true}
-                        />
+                    <div className="w-full lg:w-1/2 order-first lg:order-last lg:sticky lg:top-24 lg:self-start z-10">
+                        <div className="h-[400px] sm:h-[500px] lg:h-[600px] w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                            <MapSection
+                                projects={results}
+                                title="Properties Map"
+                                height={600} // This prop might be ignored if CSS height overrides, but good to keep
+                                maxWidthClass="w-full h-full" // Ensure it takes 100% of container
+                                showMarkersInitially={true}
+                            />
+                        </div>
                     </div>
                 )}
 
