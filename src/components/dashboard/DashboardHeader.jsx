@@ -29,7 +29,7 @@ const AREAS_CONFIG = [
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-sky-900/60 to-blue-900/60',
-    fallbackImg: '/dashboard/abu-dhabi/saadiyat-island.jpg',
+    fallbackImg: '/dashboard/saadiyat.jpg',
   },
   
     {
@@ -48,7 +48,7 @@ const AREAS_CONFIG = [
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
-    fallbackImg: '/dashboard/abu-dhabi/yas-island.jpg',
+    fallbackImg: '/dashboard/yas.webp',
   },
   
     // --- Dubai ---
@@ -68,7 +68,7 @@ const AREAS_CONFIG = [
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',
-    fallbackImg: '/dashboard/abu-dhabi/reem-island.jpg',
+    fallbackImg: '/dashboard/reem.webp',
   },
 ];
 

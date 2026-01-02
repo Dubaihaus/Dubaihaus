@@ -53,8 +53,11 @@ export async function GET(request) {
         filters.areas = value.split(',').filter(Boolean);
         break;
       case 'region':
-        filters.region = value;
-        filters.regions = value.split(',').filter(Boolean);
+        if (value.includes(',')) {
+          filters.regions = value.split(',').filter(Boolean);
+        } else {
+          filters.region = value;
+        }
         break;
       case 'developer':
         filters.developer = value;
@@ -68,9 +71,19 @@ export async function GET(request) {
         break;
 
       // generic search
+      // case 'search':
+      // case 'search_query':
+      //   filters.search = value;
+      //   break;
+      // generic search (free text)
       case 'search':
-      case 'search_query':
         filters.search = value;
+        break;
+
+      // legacy semantics: community / area / sector search
+      case 'search_query':
+        filters.area = value;
+        filters.areas = value.split(',').filter(Boolean);
         break;
 
       // legacy status keys

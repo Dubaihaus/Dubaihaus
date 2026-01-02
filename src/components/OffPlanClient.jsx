@@ -1,6 +1,7 @@
+// src/components/OffPlanClient.jsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import FiltersPanel from '@/components/FiltersPanel';
 import PropertyCard from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
@@ -14,33 +15,81 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+function shallowEqualObj(a = {}, b = {}) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const k of aKeys) {
+    if (a[k] !== b[k]) return false;
+  }
+  return true;
+}
+
 export default function OffPlanClient({ limit, latest = false }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('offPlan.client');
 
-  // Initialize filters from query params (for full page)
-  const initialFilters = {};
-  for (const [key, value] of searchParams.entries()) {
-    if (key !== 'page') {
-      initialFilters[key] = value;
+  // ✅ Build filters from URL (memoized so it updates when URL changes)
+  const filtersFromUrl = useMemo(() => {
+    const obj = {};
+    for (const [key, value] of searchParams.entries()) {
+      if (key !== 'page') obj[key] = value;
     }
-  }
+    return obj;
+  }, [searchParams]);
 
-  const [filters, setFilters] = useState(initialFilters);
+  // ✅ Page from URL
+  const pageFromUrl = useMemo(() => {
+    return Number(searchParams.get('page')) || 1;
+  }, [searchParams]);
+
+  // Initialize state once (from URL on first mount)
+  const [filters, setFilters] = useState(filtersFromUrl);
   const [projects, setProjects] = useState([]);
   const [currency, setCurrency] = useState('AED');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [areaDescription, setAreaDescription] = useState(null);
 
-  // 🔹 Pagination
-  const initialPage = Number(searchParams.get('page')) || 1;
-  const [page, setPage] = useState(initialPage);
+  const [page, setPage] = useState(pageFromUrl);
   const [totalCount, setTotalCount] = useState(0);
 
-  const pageSize = limit || 21; // embeds use `limit`, full page uses 21
+  const pageSize = limit || 21;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  /**
+   * ✅ CRITICAL FIX:
+   * When URL changes (footer links, internal navigation on same page),
+   * sync component state to URL params.
+   *
+   * Guard against loops:
+   * - This effect runs when searchParams changes.
+   * - Another effect below updates URL when filters/page changes.
+   * We only setState if there's a real mismatch.
+   */
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    // only relevant for full page
+    if (limit) return;
+
+    // On first mount, state already initialized from URL.
+    // Still safe to run, but this avoids extra setState on first render.
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    setFilters((prev) => {
+      if (shallowEqualObj(prev, filtersFromUrl)) return prev;
+      return filtersFromUrl;
+    });
+
+    setPage((prev) => {
+      if (prev === pageFromUrl) return prev;
+      return pageFromUrl;
+    });
+  }, [filtersFromUrl, pageFromUrl, limit]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -49,7 +98,6 @@ export default function OffPlanClient({ limit, latest = false }) {
 
       if (latest) {
         paramsObj.latest = 'true';
-        // latest sections normally limited on frontend; backend can ignore page/pageSize
       } else {
         paramsObj.page = page;
         paramsObj.pageSize = pageSize;
@@ -72,18 +120,17 @@ export default function OffPlanClient({ limit, latest = false }) {
 
       const data = await res.json();
       const results = data.results || [];
-const visibleResults = limit ? results.slice(0, limit) : results;
+      const visibleResults = limit ? results.slice(0, limit) : results;
 
       setProjects(visibleResults);
-   
-     const total =
-      (typeof data.total === 'number' && data.total) ||
-       (typeof data.count === 'number' && data.count) ||
-       results.length;
 
-     setTotalCount(total);
+      const total =
+        (typeof data.total === 'number' && data.total) ||
+        (typeof data.count === 'number' && data.count) ||
+        results.length;
 
-      // 🔹 For full off-plan page + area filter: read area description from API
+      setTotalCount(total);
+
       if (!limit && paramsObj.search_query && Array.isArray(results) && results.length > 0) {
         const first = results[0];
         const rawLoc = first?.rawData?.location || {};
@@ -113,7 +160,7 @@ const visibleResults = limit ? results.slice(0, limit) : results;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, currency, latest, page]);
 
-  // Sync URL only on the full page
+  // Sync URL only on the full page (your existing behavior)
   useEffect(() => {
     if (!limit) {
       const params = new URLSearchParams();
@@ -128,7 +175,6 @@ const visibleResults = limit ? results.slice(0, limit) : results;
     setTimeout(() => router.push('/off-plan'), 300);
   };
 
-  // Reset to page 1 whenever filters change (user applies new filters)
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1);
@@ -139,7 +185,6 @@ const visibleResults = limit ? results.slice(0, limit) : results;
     setPage(1);
   };
 
-  // 🔹 Dynamic heading / subheading (only on full page)
   const isFullPage = !limit;
   const region = filters.region;
   const areaName = filters.search_query;
@@ -158,13 +203,10 @@ const visibleResults = limit ? results.slice(0, limit) : results;
     }
   }
 
-  // Small helper to render numbered page buttons
   const renderPageButtons = () => {
     if (totalPages <= 1 || limit) return null;
 
     const MAX_VISIBLE = 10;
-
-    // Which "block" of 10 does the current page belong to?
     const blockIndex = Math.floor((page - 1) / MAX_VISIBLE);
     const start = blockIndex * MAX_VISIBLE + 1;
     const end = Math.min(start + MAX_VISIBLE - 1, totalPages);
@@ -190,20 +232,15 @@ const visibleResults = limit ? results.slice(0, limit) : results;
     return buttons;
   };
 
-
   return (
     <div className="p-6 max-w-7xl mx-auto" dir="ltr">
       {/* Title & Currencies */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            {headingText}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800">{headingText}</h1>
 
           {subText && (
-            <p className="text-sm text-gray-600 max-w-xl mt-1">
-              {subText}
-            </p>
+            <p className="text-sm text-gray-600 max-w-xl mt-1">{subText}</p>
           )}
         </div>
 
@@ -255,20 +292,13 @@ const visibleResults = limit ? results.slice(0, limit) : results;
                 <SheetTitle>{t('filters.title')}</SheetTitle>
               </SheetHeader>
               <div className="mt-4">
-                <FiltersPanel
-                  filters={filters}
-                  setFilters={handleFiltersChange}
-                />
+                <FiltersPanel filters={filters} setFilters={handleFiltersChange} />
               </div>
             </SheetContent>
           </Sheet>
 
           {Object.keys(filters).length > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              className="px-4"
-            >
+            <Button variant="outline" onClick={handleClearFilters} className="px-4">
               {t('filters.clear')}
             </Button>
           )}
@@ -300,7 +330,6 @@ const visibleResults = limit ? results.slice(0, limit) : results;
                 ))}
               </div>
 
-              {/* 🔹 Pagination – only on full page */}
               {!limit && totalPages > 1 && (
                 <div className="flex justify-center mt-10">
                   <div className="inline-flex items-center gap-2">
@@ -319,9 +348,7 @@ const visibleResults = limit ? results.slice(0, limit) : results;
                       variant="outline"
                       className="border-sky-500 text-sky-700 hover:bg-sky-50"
                       disabled={page === totalPages}
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     >
                       Next
                     </Button>

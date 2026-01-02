@@ -65,7 +65,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "al-reem-island",
     title: "Al Reem Island",
-    image: "/dashboard/abu-dhabi/reem-island.jpg",
+    image: "/dashboard/reem.webp",
     filters: {
       search_query: "Al Reem Island",
       region: "Abu Dhabi",
@@ -74,7 +74,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "yas-island",
     title: "Yas Island",
-    image: "/dashboard/abu-dhabi/yas-island.jpg",
+    image: "/dashboard/yas.webp",
     filters: {
       search_query: "Yas Island",
       region: "Abu Dhabi",
@@ -83,7 +83,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "saadiyat-island",
     title: "Saadiyat Island",
-    image: "/dashboard/abu-dhabi/saadiyat-island.jpg",
+    image: "/dashboard/sadayat.jpg",
     filters: {
       search_query: "Saadiyat Island",
       region: "Abu Dhabi",
@@ -92,7 +92,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "al-raha-beach",
     title: "Al Raha Beach",
-    image: "/dashboard/abu-dhabi/al-raha-beach.jpg",
+    image: "/dashboard/alraha.webp",
     filters: {
       search_query: "Al Raha Beach",
       region: "Abu Dhabi",
@@ -101,7 +101,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "masdar-city",
     title: "Masdar City",
-    image: "/dashboard/abu-dhabi/masdar-city.jpg",
+    image: "/dashboard/masdar.webp",
     filters: {
       search_query: "Masdar City",
       region: "Abu Dhabi",
@@ -110,7 +110,7 @@ export const ABU_DHABI_AREAS = [
   {
     slug: "zayed-city",
     title: "Zayed City",
-    image: "/dashboard/abu-dhabi/zayed-city.jpg", // change image if you have a better one
+    image: "/dashboard/zayed.webp", // change image if you have a better one
     filters: {
       search_query: "Zayed City",
       region: "Abu Dhabi",

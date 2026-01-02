@@ -120,31 +120,35 @@ export async function getCachedProjects(filters = {}) {
       ];
     }
   } else if (area) {
-    // Legacy single string match - UPDATED to check distinct & area & district
-    // Because some data is in `area` and some in `district`.
-    const areaOrDistrict = [
-      { area: { contains: area, mode: "insensitive" } },
-      { district: { contains: area, mode: "insensitive" } }
+    // Legacy single string match - treated as "search_query"
+    // Use fuzzy matching for better resilience (e.g. Al Reem vs Al Reem Island)
+    const term = area;
+    const fuzzyArea = [
+      { area: { contains: term, mode: "insensitive" } },
+      { district: { contains: term, mode: "insensitive" } },
+      { locationString: { contains: term, mode: "insensitive" } },
     ];
 
     if (where.OR) {
-      // If we already have a wrapper OR (e.g. from generic search),
-      // we must preserve it and ADD this new requirement as an AND.
-      // But we can't do `where.OR.push` because that makes it "Search OR Area", which is wrong.
-      // We want "Search AND (Area OR District)".
+      // If "generic search" set an OR, we must preserve it and ADD this new requirement.
+      // "Search AND (Area OR District OR Location)"
       where.AND = [
         ...(where.AND || []),
         { OR: where.OR },
-        { OR: areaOrDistrict }
+        { OR: fuzzyArea }
       ];
       delete where.OR;
     } else {
-      // Just set keys? specific fields are implicit AND.
-      // but we need (A or B).
-      // So we use where.OR directly? No, where.OR is for top-level.
-      // If we have other top-level fields (like city), those are ANDed with where.OR.
-      // So `{ city: 'Dubai', OR: [ {area: X}, {district: X} ] }` works perfectly.
-      where.OR = areaOrDistrict;
+      // No generic search, just this area requirements
+      // " (Area OR District OR Location) "
+      // We can set top-level OR, but check if we have other fields?
+      // Safe bet is to use where.AND if we might add more ORs or if we want to be safe.
+      // But typically where.OR is unique.
+      // Let's use where.AND to be safe against other ORs being added later or before.
+      where.AND = [
+        ...(where.AND || []),
+        { OR: fuzzyArea }
+      ];
     }
   }
 
@@ -193,7 +197,14 @@ export async function getCachedProjects(filters = {}) {
 
   // REGION logic (supports Array OR String)
   if (regions && regions.length > 0) {
-    where.region = { in: regions, mode: 'insensitive' };
+    // Fix: Prisma `in` with `mode: 'insensitive'` is invalid.
+    // Use OR with contains for each region.
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: regions.map(r => ({ region: { contains: r, mode: "insensitive" } }))
+      }
+    ];
   } else if (region) {
     where.region = { contains: region, mode: "insensitive" };
   }
@@ -281,7 +292,6 @@ export async function getCachedProjects(filters = {}) {
 
   // If DB is completely empty, trigger initial sync once
   if (total === 0) {
-    const dbCount = await prisma.reellyProject.count();
     if (dbCount === 0) {
       console.log("📭 Database empty. Triggering initial Reelly sync…");
       await syncProjects();
@@ -294,6 +304,12 @@ export async function getCachedProjects(filters = {}) {
         didSync: true,
       };
     }
+  }
+
+  // Debug logging for Abu Dhabi / specific regions
+  if (region || (regions && regions.length > 0)) {
+    console.log(`🔎 Filtered count: ${total} | Region: ${region || regions} | Where keys: ${Object.keys(where)}`);
+    // console.dir(where, { depth: null }); // Uncomment if deep debug needed
   }
 
   /* ---------------- FETCH DATA ---------------- */
