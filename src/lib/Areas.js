@@ -17,7 +17,7 @@ export const DUBAI_AREAS = [
     title: "Dubai Hills Estate",
     image: "/dashboard/building.jpg",
     filters: {
-      search_query: "Dubai Hills Estate",
+      search_query: "Dubai Hills",
       region: "Dubai",
     },
   },
@@ -85,7 +85,7 @@ export const ABU_DHABI_AREAS = [
     title: "Saadiyat Island",
     image: "/dashboard/sadayat.jpg",
     filters: {
-      search_query: "Saadiyat Island",
+      search_query: "Al Saadiyat Island",
       region: "Abu Dhabi",
     },
   },

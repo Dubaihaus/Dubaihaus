@@ -25,7 +25,7 @@ const AREAS_CONFIG = [
   {
     title: 'Saadiyat Island',
     filters: {
-      search_query: 'Saadiyat Island',
+      search_query: 'Al Saadiyat Island',
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-sky-900/60 to-blue-900/60',
