@@ -4,15 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/slugify";
-
-/**
- * Map plain text content to read time in minutes
- */
-function calculateReadMinutes(content) {
-  if (!content) return null;
-  const words = content.trim().split(/\s+/).length;
-  return Math.max(1, Math.round(words / 200)); // ~200 wpm
-}
+import { findOrCreateCategory, findOrCreateTag, calculateReadMinutes } from "@/lib/blog-helpers";
 
 export async function createBlog(formData) {
   const title = formData.get("title")?.toString().trim() ?? "";
@@ -22,12 +14,10 @@ export async function createBlog(formData) {
   const rawSlug = formData.get("slug")?.toString().trim() || title;
   const slug = slugify(rawSlug);
 
-  const metaTitle =
-    formData.get("metaTitle")?.toString().trim() || title;
-  const metaDesc =
-    formData.get("metaDesc")?.toString().trim() || "";
+  const metaTitle = formData.get("metaTitle")?.toString().trim() || title;
+  const metaDesc = formData.get("metaDesc")?.toString().trim() || "";
 
-  const excerpt = content ? content.slice(0, 260) : null;
+  const excerpt = formData.get("excerpt")?.toString().trim() || (content ? content.slice(0, 300) : null);
   const readMinutes = calculateReadMinutes(content);
 
   // propertyIds comes from <select multiple name="propertyIds">
@@ -37,9 +27,9 @@ export async function createBlog(formData) {
   const publishedAtStr = formData.get("publishedAt");
   const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
 
-  // JSON fields
-  const categories = JSON.parse(formData.get("categories") || "[]"); // array of strings
-  const tags = JSON.parse(formData.get("tags") || "[]"); // array of strings
+  // JSON fields - now containing category/tag IDs or names
+  const categoryData = JSON.parse(formData.get("categories") || "[]"); // array of {id?, name}
+  const tagData = JSON.parse(formData.get("tags") || "[]"); // array of {id?, name}
   const mediaItems = JSON.parse(formData.get("media") || "[]"); // array of objects
 
   // Helper: Sync featuredImg if a HERO media exists
@@ -55,7 +45,29 @@ export async function createBlog(formData) {
     },
   });
 
-  // 2) Create blog with all relations
+  // 2) Resolve category IDs (find or create)
+  const categoryIds = [];
+  for (const cat of categoryData) {
+    if (cat.id) {
+      categoryIds.push(cat.id);
+    } else if (cat.name) {
+      const category = await findOrCreateCategory(cat.name);
+      categoryIds.push(category.id);
+    }
+  }
+
+  // 3) Resolve tag IDs (find or create)
+  const tagIds = [];
+  for (const tag of tagData) {
+    if (tag.id) {
+      tagIds.push(tag.id);
+    } else if (tag.name) {
+      const tagEntity = await findOrCreateTag(tag.name);
+      tagIds.push(tagEntity.id);
+    }
+  }
+
+  // 4) Create blog with all relations
   await prisma.blogPost.create({
     data: {
       title,
@@ -67,18 +79,23 @@ export async function createBlog(formData) {
       publishedAt,
       seo: { connect: { id: seo.id } },
 
-      // Relations
+      // Relations using new join tables
       featuredProperties: {
         create: propertyIds.map((propertyId, index) => ({
           property: { connect: { id: propertyId } },
           position: index,
         })),
       },
-      categories: {
-        create: categories.map(name => ({ name }))
+      categoryLinks: {
+        create: categoryIds.map((categoryId, index) => ({
+          category: { connect: { id: categoryId } },
+          position: index,
+        })),
       },
-      tags: {
-        create: tags.map(name => ({ name }))
+      tagLinks: {
+        create: tagIds.map((tagId) => ({
+          tag: { connect: { id: tagId } },
+        })),
       },
       media: {
         create: mediaItems.map(m => ({
@@ -93,7 +110,7 @@ export async function createBlog(formData) {
     },
   });
 
-  // 3) Revalidate pages
+  // 5) Revalidate pages
   revalidatePath("/blog");
   revalidatePath(`/blog/${slug}`);
   revalidatePath("/admin/blog");
@@ -109,12 +126,10 @@ export async function updateBlog(id, formData) {
   const rawSlug = formData.get("slug")?.toString().trim() || title;
   const slug = slugify(rawSlug);
 
-  const metaTitle =
-    formData.get("metaTitle")?.toString().trim() || title;
-  const metaDesc =
-    formData.get("metaDesc")?.toString().trim() || "";
+  const metaTitle = formData.get("metaTitle")?.toString().trim() || title;
+  const metaDesc = formData.get("metaDesc")?.toString().trim() || "";
 
-  const excerpt = content ? content.slice(0, 260) : null;
+  const excerpt = formData.get("excerpt")?.toString().trim() || (content ? content.slice(0, 300) : null);
   const readMinutes = calculateReadMinutes(content);
 
   const propertyIds = formData.getAll("propertyIds").map(String).filter(Boolean);
@@ -124,8 +139,8 @@ export async function updateBlog(id, formData) {
   const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
 
   // JSON fields
-  const categories = JSON.parse(formData.get("categories") || "[]");
-  const tags = JSON.parse(formData.get("tags") || "[]");
+  const categoryData = JSON.parse(formData.get("categories") || "[]");
+  const tagData = JSON.parse(formData.get("tags") || "[]");
   const mediaItems = JSON.parse(formData.get("media") || "[]");
 
   // Sync featuredImg
@@ -156,17 +171,42 @@ export async function updateBlog(id, formData) {
     seoId = seo.id;
   }
 
+  // Resolve category IDs
+  const categoryIds = [];
+  for (const cat of categoryData) {
+    if (cat.id) {
+      categoryIds.push(cat.id);
+    } else if (cat.name) {
+      const category = await findOrCreateCategory(cat.name);
+      categoryIds.push(category.id);
+    }
+  }
+
+  // Resolve tag IDs
+  const tagIds = [];
+  for (const tag of tagData) {
+    if (tag.id) {
+      tagIds.push(tag.id);
+    } else if (tag.name) {
+      const tagEntity = await findOrCreateTag(tag.name);
+      tagIds.push(tagEntity.id);
+    }
+  }
+
   // Replace related data (Delete All -> Create All pattern)
   // 1. Featured Properties
   await prisma.blogPostProperty.deleteMany({ where: { blogId: id } });
 
-  // 2. Categories & Tags
-  await prisma.blogCategory.deleteMany({ where: { blogId: id } });
-  await prisma.blogTag.deleteMany({ where: { blogId: id } });
+  // 2. Category Links
+  await prisma.blogPostCategory.deleteMany({ where: { blogId: id } });
 
-  // 3. Media (safe to replace since no external FKs usually point to Blog Media)
+  // 3. Tag Links
+  await prisma.blogPostTag.deleteMany({ where: { blogId: id } });
+
+  // 4. Media (safe to replace since no external FKs usually point to Blog Media)
   await prisma.media.deleteMany({ where: { blogId: id } });
 
+  // Update blog post
   await prisma.blogPost.update({
     where: { id },
     data: {
@@ -176,7 +216,7 @@ export async function updateBlog(id, formData) {
       featuredImg: finalFeaturedImg,
       readMinutes,
       status,
-      publishedAt, // Can be null now
+      publishedAt,
       seo: seoId ? { connect: { id: seoId } } : undefined,
 
       featuredProperties: {
@@ -185,11 +225,16 @@ export async function updateBlog(id, formData) {
           position: index,
         })),
       },
-      categories: {
-        create: categories.map(name => ({ name }))
+      categoryLinks: {
+        create: categoryIds.map((categoryId, index) => ({
+          category: { connect: { id: categoryId } },
+          position: index,
+        })),
       },
-      tags: {
-        create: tags.map(name => ({ name }))
+      tagLinks: {
+        create: tagIds.map((tagId) => ({
+          tag: { connect: { id: tagId } },
+        })),
       },
       media: {
         create: mediaItems.map(m => ({
@@ -219,14 +264,18 @@ export async function deleteBlog(id) {
 
   if (!blog) return;
 
-  await prisma.blogPostProperty.deleteMany({
-    where: { blogId: id },
-  });
+  // Delete join table records (cascaded automatically but being explicit)
+  await prisma.blogPostProperty.deleteMany({ where: { blogId: id } });
+  await prisma.blogPostCategory.deleteMany({ where: { blogId: id } });
+  await prisma.blogPostTag.deleteMany({ where: { blogId: id } });
+  await prisma.media.deleteMany({ where: { blogId: id } });
 
+  // Delete SEO
   if (blog.seoId) {
     await prisma.sEO.delete({ where: { id: blog.seoId } }).catch(() => { });
   }
 
+  // Delete blog post
   await prisma.blogPost.delete({ where: { id } });
 
   revalidatePath("/blog");

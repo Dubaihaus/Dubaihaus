@@ -12,7 +12,7 @@ import {
     Settings,
     LogOut,
     Building,
-    FileText 
+    FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils"; // Assuming cn utility exists, otherwise I'll use template literal or minimal utility
 
@@ -20,10 +20,17 @@ const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Properties", href: "/admin/properties", icon: Building2 },
     { name: "Reelly Projects", href: "/admin/reelly-projects", icon: Building },
+    {
+        name: "Blog",
+        icon: FileText,
+        items: [
+            { name: "All Posts", href: "/admin/blog" },
+            { name: "New Post", href: "/admin/blog/new" },
+            { name: "Categories", href: "/admin/blog/categories" },
+        ]
+    },
     { name: "SEO", href: "/admin/seo", icon: Search },
-     { name :"Blog",href: "/admin/blog", label: "Blog", icon: FileText },
     { name: "System Info", href: "/admin/system-info", icon: Settings },
-
 ];
 
 export default function AdminSidebar({ user }) {
@@ -37,6 +44,42 @@ export default function AdminSidebar({ user }) {
 
             <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 {navItems.map((item) => {
+                    // Handle items with subitems (expandable menu)
+                    if (item.items) {
+                        const isAnyChildActive = item.items.some(child =>
+                            pathname === child.href || pathname.startsWith(child.href + "/")
+                        );
+
+                        return (
+                            <div key={item.name}>
+                                <div className="flex items-center px-3 py-2 text-sm font-medium text-gray-700">
+                                    <item.icon className="mr-3 h-5 w-5 text-gray-400" />
+                                    {item.name}
+                                </div>
+                                <div className="ml-8 space-y-1">
+                                    {item.items.map((subItem) => {
+                                        const isActive = pathname === subItem.href ||
+                                            (subItem.href !== "/admin" && pathname.startsWith(subItem.href));
+
+                                        return (
+                                            <Link
+                                                key={subItem.href}
+                                                href={subItem.href}
+                                                className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${isActive
+                                                        ? "bg-indigo-50 text-indigo-600 font-medium"
+                                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                                    }`}
+                                            >
+                                                {subItem.name}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // Regular menu item
                     const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
 
                     return (
@@ -44,8 +87,8 @@ export default function AdminSidebar({ user }) {
                             key={item.href}
                             href={item.href}
                             className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                    ? "bg-indigo-50 text-indigo-600"
-                                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                ? "bg-indigo-50 text-indigo-600"
+                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                 }`}
                         >
                             <item.icon className={`mr-3 h-5 w-5 ${isActive ? "text-indigo-600" : "text-gray-400 group-hover:text-gray-500"}`} />

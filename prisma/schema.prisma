@@ -186,33 +186,73 @@ model BlogPost {
   status      BlogStatus          @default(DRAFT)
   publishedAt DateTime?           // null = draft
 
-  categories  BlogCategory[]
-  tags        BlogTag[]
-  media       Media[]
+  // NEW: Many-to-many relations via join tables
+  categoryLinks BlogPostCategory[]
+  tagLinks      BlogPostTag[]
+  media         Media[]
 
   seo         SEO?                @relation(fields: [seoId], references: [id])
   seoId       String?             @unique
 
-  // NEW: properties mentioned in this blog (many-to-many via join table)
+  // Properties mentioned in this blog (many-to-many via join table)
   featuredProperties BlogPostProperty[]
 
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
 
-
+// Global category model (reusable across posts)
 model BlogCategory {
-  id     String   @id @default(cuid())
-  name   String
-  blog   BlogPost @relation(fields: [blogId], references: [id])
-  blogId String
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Reverse relation to join table
+  posts       BlogPostCategory[]
 }
 
+// Join table for BlogPost <-> BlogCategory
+model BlogPostCategory {
+  id         String       @id @default(cuid())
+  blog       BlogPost     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blogId     String
+  category   BlogCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  position   Int          @default(0)
+  
+  @@unique([blogId, categoryId])
+  @@index([blogId])
+  @@index([categoryId])
+}
+
+// Global tag model (reusable across posts)
 model BlogTag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Reverse relation to join table
+  posts     BlogPostTag[]
+}
+
+// Join table for BlogPost <-> BlogTag
+model BlogPostTag {
   id     String   @id @default(cuid())
-  name   String
-  blog   BlogPost @relation(fields: [blogId], references: [id])
+  blog   BlogPost @relation(fields: [blogId], references: [id], onDelete: Cascade)
   blogId String
+  tag    BlogTag  @relation(fields: [tagId], references: [id])
+  tagId  String
+  
+  @@unique([blogId, tagId])
+  @@index([blogId])
+  @@index([tagId])
 }
 
 // --- SEO META ---

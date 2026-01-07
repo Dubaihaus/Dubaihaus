@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { getFeaturedCategories } from "@/lib/blog-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,14 @@ export default async function BlogPage({ searchParams }) {
   const { cat, tag, q } = searchParams || {};
 
   const where = { status: "PUBLISHED" };
-  if (cat) where.categories = { some: { name: cat } };
-  if (tag) where.tags = { some: { name: tag } };
+
+  // Use slug-based filtering for new schema
+  if (cat) {
+    where.categoryLinks = { some: { category: { slug: cat } } };
+  }
+  if (tag) {
+    where.tagLinks = { some: { tag: { slug: tag } } };
+  }
   if (q) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
@@ -34,19 +41,20 @@ export default async function BlogPage({ searchParams }) {
     ];
   }
 
-  const posts = await prisma.blogPost.findMany({
-    where,
-    orderBy: { publishedAt: "desc" },
-    include: { seo: true, categories: true, tags: true },
-  });
-
-  // Fetch top categories (naive grouping)
-  const allCats = await prisma.blogCategory.groupBy({
-    by: ["name"],
-    _count: { name: true },
-    orderBy: { _count: { name: "desc" } },
-    take: 8,
-  });
+  // Fetch posts and categories in parallel
+  const [posts, featuredCats] = await Promise.all([
+    prisma.blogPost.findMany({
+      where,
+      orderBy: { publishedAt: "desc" },
+      include: {
+        seo: true,
+        categoryLinks: { include: { category: true } },
+        tagLinks: { include: { tag: true } },
+        media: true,
+      },
+    }),
+    getFeaturedCategories(8),
+  ]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]">
@@ -95,11 +103,11 @@ export default async function BlogPage({ searchParams }) {
             >
               All
             </Link>
-            {allCats.map(c => (
+            {featuredCats.map(c => (
               <Link
-                key={c.name}
-                href={`/blog?cat=${encodeURIComponent(c.name)}`}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.name ? 'bg-[var(--color-brand-sky)] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+                key={c.id}
+                href={`/blog?cat=${encodeURIComponent(c.slug)}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.slug ? 'bg-[var(--color-brand-sky)] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
               >
                 {c.name}
               </Link>
@@ -146,10 +154,10 @@ export default async function BlogPage({ searchParams }) {
                         <span className="text-4xl">📝</span>
                       </div>
                     )}
-                    {/* Categoriy Badge */}
-                    {post.categories.length > 0 && (
+                    {/* Category Badge */}
+                    {post.categoryLinks?.length > 0 && (
                       <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
-                        {post.categories[0].name}
+                        {post.categoryLinks[0].category.name}
                       </span>
                     )}
                   </div>
@@ -179,8 +187,8 @@ export default async function BlogPage({ searchParams }) {
 
                     {/* Tags */}
                     <div className="mt-auto pt-4 flex flex-wrap gap-1">
-                      {post.tags.slice(0, 3).map(t => (
-                        <span key={t.name} className="px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[10px]">#{t.name}</span>
+                      {post.tagLinks?.slice(0, 3).map(tl => (
+                        <span key={tl.tag.id} className="px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[10px]">#{tl.tag.name}</span>
                       ))}
                     </div>
                   </div>

@@ -26,8 +26,12 @@ async function getPost(slug) {
     },
     include: {
       seo: true,
-      categories: true,
-      tags: true,
+      categoryLinks: {
+        include: { category: true },
+      },
+      tagLinks: {
+        include: { tag: true },
+      },
       media: true,
       featuredProperties: {
         orderBy: { position: "asc" },
@@ -107,9 +111,9 @@ export default async function BlogDetailPage({ params }) {
 
           {/* Categories */}
           <div className="flex gap-2">
-            {post.categories.map(c => (
-              <Link key={c.id} href={`/blog?cat=${encodeURIComponent(c.name)}`} className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-sky)] bg-sky-50 px-2 py-1 rounded-md hover:bg-sky-100">
-                {c.name}
+            {post.categoryLinks?.map(cl => (
+              <Link key={cl.id} href={`/blog?cat=${encodeURIComponent(cl.category.slug)}`} className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-sky)] bg-sky-50 px-2 py-1 rounded-md hover:bg-sky-100">
+                {cl.category.name}
               </Link>
             ))}
           </div>
@@ -148,13 +152,13 @@ export default async function BlogDetailPage({ params }) {
           <MarkdownContent content={post.content} />
 
           {/* Tags */}
-          {post.tags.length > 0 && (
+          {post.tagLinks?.length > 0 && (
             <div className="mt-10 pt-6 border-t border-slate-100 flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-500">Tags:</span>
               <div className="flex flex-wrap gap-2">
-                {post.tags.map(t => (
-                  <Link key={t.id} href={`/blog?tag=${encodeURIComponent(t.name)}`} className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition">
-                    #{t.name}
+                {post.tagLinks.map(tl => (
+                  <Link key={tl.id} href={`/blog?tag=${encodeURIComponent(tl.tag.slug)}`} className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition">
+                    #{tl.tag.name}
                   </Link>
                 ))}
               </div>
