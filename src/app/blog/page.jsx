@@ -73,9 +73,9 @@ export default async function BlogPage({ searchParams }) {
           <div className="flex flex-col md:flex-row justify-between items-end gap-6">
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
-                Practical guides for{" "}
+                Practical guides for buying and {" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]">
-                  buying and investing
+                  investing
                 </span>
               </h1>
               <p className="text-sm sm:text-base text-slate-600 max-w-2xl">

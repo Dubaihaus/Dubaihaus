@@ -1,9 +1,9 @@
 "use client";
 
 import { createBlog, updateBlog } from "@/app/(admin)/admin/blog/actions";
-import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
+import { useState, useEffect, useRef } from "react";import dynamic from "next/dynamic";
 import { Upload, Image as ImageIcon, X, Plus, GripVertical } from "lucide-react";
+import { commands } from "@uiw/react-md-editor";
 
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
@@ -58,6 +58,19 @@ export default function BlogForm({ initialData, properties = [], categories = []
     })) || []
   );
   const [uploading, setUploading] = useState(false);
+    // Keep track of caret/selection inside MDEditor textarea
+  const textareaRef = useRef(null);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+
+  const updateSelectionFromTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    setSelection({
+      start: el.selectionStart ?? 0,
+      end: el.selectionEnd ?? 0,
+    });
+  };
+
 
   // Auto-fill excerpt from content
   const handleAutoFillExcerpt = () => {
@@ -156,11 +169,85 @@ export default function BlogForm({ initialData, properties = [], categories = []
   };
 
   // Insert image markdown into editor
-  const insertImageToEditor = (url, alt = "") => {
-    const markdown = `![${alt}](${url})`;
-    setContent((prev) => prev + "\n\n" + markdown);
-  };
+  // const insertImageToEditor = (url, alt = "") => {
+  //   const markdown = `![${alt}](${url})`;
+  //   setContent((prev) => prev + "\n\n" + markdown);
+  // };
+// Insert image markdown into editor
+// const insertImageToEditor = (mediaItem) => {
+//   if (!mediaItem || !mediaItem.url) return;
 
+//   let url = mediaItem.url;
+
+//   // If it's not an absolute URL, normalise it for Next public folder
+//   if (!/^https?:\/\//i.test(url)) {
+//     // remove leading "public/" if someone ever stores it
+//     url = url.replace(/^public\//, "");
+//     // ensure it starts with a single leading slash
+//     if (!url.startsWith("/")) {
+//       url = "/" + url;
+//     }
+//   }
+
+//   const alt = (mediaItem.alt || "").trim() || "Image";
+//   const caption = (mediaItem.caption || "").trim();
+
+//   // Markdown with optional title (caption)
+//   const markdown = caption
+//     ? `![${alt}](${url} "${caption}")`
+//     : `![${alt}](${url})`;
+
+//   setContent((prev) => (prev ? prev + "\n\n" + markdown : markdown));
+// };
+// Insert image markdown into editor at current caret position
+const insertImageToEditor = (mediaItem) => {
+  if (!mediaItem || !mediaItem.url) return;
+
+  let url = mediaItem.url;
+
+  // Normalise URL for public folder if it's not absolute
+  if (!/^https?:\/\//i.test(url)) {
+    url = url.replace(/^public\//, "");
+    if (!url.startsWith("/")) url = "/" + url;
+  }
+
+  const alt = (mediaItem.alt || "").trim() || "Image";
+  const caption = (mediaItem.caption || "").trim();
+
+  const markdown = caption
+    ? `![${alt}](${url} "${caption}")`
+    : `![${alt}](${url})`;
+
+  setContent((prev) => {
+    const { start, end } = selection;
+    const safeStart = Math.max(0, Math.min(start, prev.length));
+    const safeEnd = Math.max(safeStart, Math.min(end, prev.length));
+
+    const before = prev.slice(0, safeStart);
+    const after = prev.slice(safeEnd);
+
+    // Optional: ensure nice spacing around the inserted block
+    const prefix =
+      before && !before.endsWith("\n\n")
+        ? (before.endsWith("\n") ? "" : "\n") + "\n"
+        : "";
+    const suffix = after && !after.startsWith("\n") ? "\n\n" : "";
+
+    const newText = before + prefix + markdown + suffix + after;
+
+    // Move caret to just after the inserted markdown
+    const newPos = (before + prefix + markdown).length;
+    setTimeout(() => {
+      const el = textareaRef.current;
+      if (el) {
+        el.selectionStart = el.selectionEnd = newPos;
+        el.focus();
+      }
+    }, 0);
+
+    return newText;
+  });
+}
   // Filtered categories for dropdown
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
@@ -172,6 +259,24 @@ export default function BlogForm({ initialData, properties = [], categories = []
       tagInput &&
       tag.name.toLowerCase().includes(tagInput.toLowerCase()) &&
       !selectedTags.find((st) => st.id === tag.id)
+  );
+const toolbarCommands = [
+  commands.bold,
+  commands.italic,
+  commands.strikethrough,
+  commands.hr,
+  commands.title,     // headings
+  commands.divider,
+  commands.link,
+  commands.quote,
+  commands.code,
+  commands.codeBlock,
+  commands.unorderedListCommand,
+  commands.orderedListCommand,
+  // 👈 no commands.image here on purpose
+];
+  const inlineMedia = media.filter(
+    (m) => !m.role || m.role === "INLINE"
   );
 
   return (
@@ -237,7 +342,7 @@ export default function BlogForm({ initialData, properties = [], categories = []
           </div>
 
           {/* Rich Markdown Editor */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Content (Markdown) *
             </label>
@@ -246,13 +351,72 @@ export default function BlogForm({ initialData, properties = [], categories = []
                 value={content}
                 onChange={(val) => setContent(val || "")}
                 height={500}
-                preview="edit"
+                preview="live"
+                  commands={toolbarCommands}
+  extraCommands={[]}
               />
             </div>
             <p className="mt-2 text-xs text-gray-500">
               Use the toolbar above or write markdown directly. Upload images below and insert them.
             </p>
+          </div> */}
+                    {/* Rich Markdown Editor */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Content (Markdown) *
+              </label>
+
+              {inlineMedia.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 hidden sm:inline">
+                    Insert image:
+                  </span>
+                  <select
+                    className="border rounded text-xs p-1 bg-white"
+                    defaultValue=""
+                    onChange={(e) => {
+                      const idx = e.target.value;
+                      if (!idx) return;
+                      const item = inlineMedia[Number(idx)];
+                      insertImageToEditor(item);
+                      e.target.value = ""; // reset after insert
+                    }}
+                  >
+                    <option value="">Inline images…</option>
+                    {inlineMedia.map((m, idx) => (
+                      <option key={m.url + idx} value={idx}>
+                        {m.caption || m.alt || m.url.split("/").pop()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div data-color-mode="light">
+              <MDEditor
+                value={content}
+                onChange={(val) => setContent(val || "")}
+                height={500}
+                preview="live"
+                commands={toolbarCommands}
+                extraCommands={[]}
+                 textareaProps={{
+                 ref: textareaRef,
+                 onClick: updateSelectionFromTextarea,
+                 onKeyUp: updateSelectionFromTextarea,
+                 onSelect: updateSelectionFromTextarea,
+               }}
+              />
+            </div>
+
+            <p className="mt-2 text-xs text-gray-500">
+              Use the toolbar above or write markdown directly. You can insert
+              images from the dropdown above or from the Media Manager below.
+            </p>
           </div>
+
 
           {/* Excerpt */}
           <div>
@@ -312,7 +476,8 @@ export default function BlogForm({ initialData, properties = [], categories = []
                     <img src={m.url} alt="preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => insertImageToEditor(m.url, m.alt)}
+                      onClick={() => insertImageToEditor(m)}
+                      // onClick={() => insertImageToEditor(m.url, m.alt)}
                       className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-medium"
                       title="Insert into editor"
                     >
