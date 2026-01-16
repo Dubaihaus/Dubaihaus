@@ -32,6 +32,9 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
+      //cloudinary
+      { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/dy3w8iw3h/**' },
+      //brave search images
       { protocol: "https", hostname: "imgs.search.brave.com" },
       { protocol: 'https', hostname: 'api.reelly.io', pathname: '/**' },
       { protocol: 'https', hostname: 'reelly-public.s3.amazonaws.com', pathname: '/**' },

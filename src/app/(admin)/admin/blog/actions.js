@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/slugify";
 import { findOrCreateCategory, findOrCreateTag, calculateReadMinutes } from "@/lib/blog-helpers";
+import cloudinary from "@/lib/cloudinary";
 
 export async function createBlog(formData) {
   const title = formData.get("title")?.toString().trim() ?? "";
@@ -100,6 +101,7 @@ export async function createBlog(formData) {
       media: {
         create: mediaItems.map(m => ({
           url: m.url,
+          publicId: m.publicId || null,
           type: "IMAGE", // default
           role: m.role || "INLINE",
           alt: m.alt,
@@ -147,15 +149,32 @@ export async function updateBlog(id, formData) {
   const hero = mediaItems.find(m => m.role === "HERO");
   const finalFeaturedImg = hero ? hero.url : featuredImg;
 
-  // Find existing blog including SEO
+  // Find existing blog including SEO and Media
   const existing = await prisma.blogPost.findUnique({
     where: { id },
-    include: { seo: true },
+    include: { seo: true, media: true },
   });
 
   if (!existing) {
     throw new Error("Blog post not found");
   }
+
+  // --- CLEANUP LOGIC ---
+  // Identify media that was present but is now missing (removed by user)
+  const incomingPublicIds = new Set(mediaItems.map(m => m.publicId).filter(Boolean));
+
+  // Find media in DB that have publicId but are NOT in incoming list
+  const mediaToDelete = existing.media.filter(m => m.publicId && !incomingPublicIds.has(m.publicId));
+
+  // Execute cleanup in background (non-blocking best effort)
+  if (mediaToDelete.length > 0) {
+    const publicIdsToDelete = mediaToDelete.map(m => m.publicId);
+    console.log("Cleaning up Cloudinary images:", publicIdsToDelete);
+   await cloudinary.api.delete_resources(publicIdsToDelete, { resource_type: "image" }).catch(err => {
+      console.error("Failed to cleanup Cloudinary images:", err);
+    });
+  }
+  // ---------------------
 
   // Update or create SEO
   let seoId = existing.seoId;
@@ -239,6 +258,7 @@ export async function updateBlog(id, formData) {
       media: {
         create: mediaItems.map(m => ({
           url: m.url,
+          publicId: m.publicId || null,
           type: "IMAGE",
           role: m.role || "INLINE",
           alt: m.alt,
@@ -259,26 +279,38 @@ export async function updateBlog(id, formData) {
 export async function deleteBlog(id) {
   const blog = await prisma.blogPost.findUnique({
     where: { id },
-    include: { seo: true },
+    include: { seo: true, media: true },
   });
 
   if (!blog) return;
 
-  // Delete join table records (cascaded automatically but being explicit)
+  // 1) Delete Cloudinary images
+  const splitMedia = (blog.media || []).reduce((acc, m) => {
+    if (m.publicId) acc.cloud.push(m.publicId);
+    return acc;
+  }, { cloud: [] });
+
+  if (splitMedia.cloud.length > 0) {
+    console.log("Deleting Cloudinary images for blog:", id, splitMedia.cloud);
+    cloudinary.api.delete_resources(splitMedia.cloud).catch(err => {
+      console.error("Failed to delete Cloudinary images:", err);
+    });
+  }
+
+  // 2) delete db rows
   await prisma.blogPostProperty.deleteMany({ where: { blogId: id } });
   await prisma.blogPostCategory.deleteMany({ where: { blogId: id } });
   await prisma.blogPostTag.deleteMany({ where: { blogId: id } });
   await prisma.media.deleteMany({ where: { blogId: id } });
 
-  // Delete SEO
   if (blog.seoId) {
     await prisma.sEO.delete({ where: { id: blog.seoId } }).catch(() => { });
   }
 
-  // Delete blog post
   await prisma.blogPost.delete({ where: { id } });
 
   revalidatePath("/blog");
   if (blog.seo?.slug) revalidatePath(`/blog/${blog.seo.slug}`);
   revalidatePath("/admin/blog");
 }
+

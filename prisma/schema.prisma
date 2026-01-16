@@ -301,6 +301,9 @@ model Media {
   blog       BlogPost? @relation(fields: [blogId], references: [id])
   blogId     String?
   createdAt  DateTime  @default(now())
+  
+  // Cloudinary Public ID for cleanup
+  publicId   String?
 }
 
 model Translation {
