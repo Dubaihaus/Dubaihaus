@@ -7,11 +7,11 @@ import { BLOG_POSTS } from "@/data/blogPosts";
 export const dynamic = "force-static";   // metadata route config
 export const revalidate = 86400;         // 24 hours (must be a literal)
 
-const BASE_URL = "https://dubaihaus.com";
+const BASE_URL = "https://dubaihaus.com/en";
 
 function makeStatic(path, priority = 0.7, freq = "weekly") {
   return {
-    url: `${BASE_URL}${path}`,
+    url: `${BASE_URL}${path === '/' ? '' : path}`,
     lastModified: new Date(),
     priority,
     changeFrequency: freq,

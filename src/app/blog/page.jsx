@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { getFeaturedCategories } from "@/lib/blog-helpers";
+import { getAllCategories } from "@/lib/blog-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +18,6 @@ export const metadata = {
 };
 
 export default async function BlogPage({ searchParams }) {
-  // Use await for searchParams (Next.js 15 requirement, good practice for future)
-  // But strictly this looks like Next.js 13/14 pattern where props are objects. 
-  // Safety check: if searchParams is a promise (Next 15), await it.  
-  // Assuming Next 14 based on usage elsewhere, but let's be safe if possible.
-  // Actually, standard destructuring works in 14.
   const { cat, tag, q } = searchParams || {};
 
   const where = { status: "PUBLISHED" };
@@ -41,8 +36,8 @@ export default async function BlogPage({ searchParams }) {
     ];
   }
 
-  // Fetch posts and categories in parallel
-  const [posts, featuredCats] = await Promise.all([
+  // Fetch posts + ALL categories in parallel
+  const [posts, allCats] = await Promise.all([
     prisma.blogPost.findMany({
       where,
       orderBy: { publishedAt: "desc" },
@@ -53,12 +48,14 @@ export default async function BlogPage({ searchParams }) {
         media: true,
       },
     }),
-    getFeaturedCategories(8),
+    getAllCategories(),
   ]);
 
-  return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)]">
+  // Optional: show category name in heading instead of slug
+  const selectedCategory = cat ? allCats.find((c) => c.slug === cat) : null;
 
+  return (
+    <main className="min-h-screen bg-white">
       {/* Hero */}
       <section className="relative w-full py-16 md:py-20 px-4 border-b border-sky-100/60">
         <div className="pointer-events-none absolute -top-10 -left-10 h-40 w-40 rounded-full bg-[var(--color-brand-sky)] blur-3xl opacity-30" />
@@ -79,7 +76,8 @@ export default async function BlogPage({ searchParams }) {
                 </span>
               </h1>
               <p className="text-sm sm:text-base text-slate-600 max-w-2xl">
-                Market analysis, community guides, and expert advice for Dubai Real Estate.
+                Market analysis, community guides, and expert advice for Dubai
+                Real Estate.
               </p>
             </div>
 
@@ -95,19 +93,28 @@ export default async function BlogPage({ searchParams }) {
             </form>
           </div>
 
-          {/* Categories Pill Bar */}
+          {/* Categories Pill Bar (NOW: ALL categories) */}
           <div className="flex flex-wrap gap-2 pt-4">
             <Link
               href="/blog"
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${!cat && !tag ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                !cat && !tag
+                  ? "bg-slate-800 text-white shadow-md"
+                  : "bg-white text-slate-600 hover:bg-slate-100"
+              }`}
             >
               All
             </Link>
-            {featuredCats.map(c => (
+
+            {allCats.map((c) => (
               <Link
                 key={c.id}
                 href={`/blog?cat=${encodeURIComponent(c.slug)}`}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.slug ? 'bg-[var(--color-brand-sky)] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                  cat === c.slug
+                    ? "bg-[var(--color-brand-sky)] text-white shadow-md"
+                    : "bg-white text-slate-600 hover:bg-slate-100"
+                }`}
               >
                 {c.name}
               </Link>
@@ -121,7 +128,13 @@ export default async function BlogPage({ searchParams }) {
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-              {q ? `Search results for "${q}"` : (cat ? `Category: ${cat}` : (tag ? `Tag: ${tag}` : "Latest articles"))}
+              {q
+                ? `Search results for "${q}"`
+                : cat
+                ? `Category: ${selectedCategory?.name || cat}`
+                : tag
+                ? `Tag: ${tag}`
+                : "Latest articles"}
             </h2>
             <p className="text-xs text-slate-500">
               {posts.length} article{posts.length !== 1 ? "s" : ""} found
@@ -130,8 +143,15 @@ export default async function BlogPage({ searchParams }) {
 
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
-              <p className="text-slate-500">No articles found matching your criteria.</p>
-              <Link href="/blog" className="text-[var(--color-brand-sky)] text-sm font-medium mt-2 inline-block hover:underline">Clear filters</Link>
+              <p className="text-slate-500">
+                No articles found matching your criteria.
+              </p>
+              <Link
+                href="/blog"
+                className="text-[var(--color-brand-sky)] text-sm font-medium mt-2 inline-block hover:underline"
+              >
+                Clear filters
+              </Link>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -154,6 +174,7 @@ export default async function BlogPage({ searchParams }) {
                         <span className="text-4xl">📝</span>
                       </div>
                     )}
+
                     {/* Category Badge */}
                     {post.categoryLinks?.length > 0 && (
                       <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm">
@@ -165,7 +186,10 @@ export default async function BlogPage({ searchParams }) {
                   <div className="p-5 flex flex-col gap-3 flex-1">
                     <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
                       {post.publishedAt
-                        ? new Date(post.publishedAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })
+                        ? new Date(post.publishedAt).toLocaleDateString(
+                            "en-GB",
+                            { day: "numeric", month: "short", year: "numeric" }
+                          )
                         : "Draft"}
                       {post.readMinutes && (
                         <>
@@ -187,8 +211,13 @@ export default async function BlogPage({ searchParams }) {
 
                     {/* Tags */}
                     <div className="mt-auto pt-4 flex flex-wrap gap-1">
-                      {post.tagLinks?.slice(0, 3).map(tl => (
-                        <span key={tl.tag.id} className="px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[10px]">#{tl.tag.name}</span>
+                      {post.tagLinks?.slice(0, 3).map((tl) => (
+                        <span
+                          key={tl.tag.id}
+                          className="px-1.5 py-0.5 bg-slate-50 text-slate-500 rounded text-[10px]"
+                        >
+                          #{tl.tag.name}
+                        </span>
                       ))}
                     </div>
                   </div>

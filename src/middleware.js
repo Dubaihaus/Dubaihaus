@@ -110,6 +110,14 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
+  // 0) Redirect www to non-www
+  const { host } = req.nextUrl;
+  if (host.startsWith('www.')) {
+    const url = req.nextUrl.clone();
+    url.hostname = host.replace('www.', '');
+    return NextResponse.redirect(url, 308); // 308 Permanent Redirect
+  }
+
   const segments = pathname.split('/'); // ["", "en", "off-plan"]
   const maybeLocale = segments[1];
   const isSupportedLocale = LOCALES.includes(maybeLocale);

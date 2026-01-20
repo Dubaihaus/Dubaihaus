@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import MarkdownContent from "@/components/blog/MarkdownContent";
 import PropertyCard from "@/components/PropertyCard";
+import GalleryPreviewGrid from "@/components/blog/GalleryPreviewGrid";
+import HeroImagePreview from "@/components/blog/HeroImagePreview";
 
 // Normalize property for card (simplified version of what's in FeaturedProperties)
 function normalizePropertyForCard(p) {
@@ -131,7 +133,7 @@ export default async function BlogDetailPage({ params }) {
         </div>
 
         {/* Heading */}
-        <header className="space-y-6 mb-10 text-center mx-auto max-w-2xl">
+        <header className="space-y-6 mb-10 text-center mx-auto max-w-7xl">
           <h1 className="text-3xl md:text-5xl font-bold text-slate-900 leading-tight">
             {safeTitle}
           </h1>
@@ -147,16 +149,8 @@ export default async function BlogDetailPage({ params }) {
         </header>
 
         {/* Hero image */}
-        {heroImage && (
-          <div className="mb-12 overflow-hidden rounded-[32px] border border-slate-200 shadow-[0_20px_40px_rgba(0,0,0,0.08)] bg-white relative aspect-[21/9]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroImage}
-              alt={safeTitle}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        )}
+  {heroImage && <HeroImagePreview url={heroImage} title={safeTitle} />}
+
 
         {/* Main Content */}
         <div className="bg-white rounded-[32px] p-6 md:p-12 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
@@ -183,32 +177,15 @@ export default async function BlogDetailPage({ params }) {
           )}
         </div>
 
-        {/* Gallery Section */}
+        {/* Gallery Section (UPDATED: now with Preview + full screen modal) */}
         {galleryImages.length > 0 && (
           <section className="mt-12">
             <h3 className="text-2xl font-bold text-slate-900 mb-6">
               Gallery
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {galleryImages.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/3] group shadow-sm hover:shadow-md transition"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={img.url}
-                    alt={img.alt || `Gallery image ${idx}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-                  {img.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2 backdrop-blur-sm transform translate-y-full group-hover:translate-y-0 transition">
-                      {img.caption}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+
+            {/* Client component handles hover + modal preview */}
+            <GalleryPreviewGrid images={galleryImages} />
           </section>
         )}
 

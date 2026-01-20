@@ -17,7 +17,7 @@ export const metadata = {
     "Dubai real estate platform",
   ],
   alternates: {
-    canonical: "https://dubaihaus.com/",
+    canonical: "https://dubaihaus.com/en",
   },
   openGraph: {
     title: "DubaiHaus: Off-Plan Properties in Dubai & Abu Dhabi",

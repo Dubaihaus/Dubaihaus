@@ -15,6 +15,10 @@ async function getMessages(locale) {
   }
 }
 
+export const metadata = {
+  metadataBase: new URL('https://dubaihaus.com'),
+};
+
 export default async function RootLayout({ children }) {
   const headersList = await headers();
   const headerLocale = headersList.get('x-next-locale');

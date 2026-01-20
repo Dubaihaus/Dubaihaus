@@ -2,6 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import InlineImagePreview from "@/components/blog/InlineImagePreview";
 
 export default function MarkdownContent({ content }) {
   const safeContent = content || "";
@@ -68,18 +69,12 @@ export default function MarkdownContent({ content }) {
 
           /* Horizontal rule */
           hr: ({ node, ...props }) => (
-            <hr
-              {...props}
-              className="my-8 border-t border-slate-200"
-            />
+            <hr {...props} className="my-8 border-t border-slate-200" />
           ),
 
           /* Strong text */
           strong: ({ node, ...props }) => (
-            <strong
-              {...props}
-              className="font-semibold text-slate-900"
-            />
+            <strong {...props} className="font-semibold text-slate-900" />
           ),
 
           /* Links */
@@ -90,16 +85,20 @@ export default function MarkdownContent({ content }) {
             />
           ),
 
-          /* Images – keeps your nice figure styling */
+          /* Images – NOW with Preview (no cropping in modal) */
           img: ({ node, ...props }) => {
+            const src = props.src || "";
+            const alt = props.alt || "Article image";
+
             return (
               <figure className="my-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  {...props}
+                {/* Use InlineImagePreview instead of raw img */}
+                <InlineImagePreview
+                  src={src}
+                  alt={alt}
                   className="w-full h-auto rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
-                  alt={props.alt || "Article image"}
                 />
+
                 {props.alt && (
                   <figcaption className="text-center text-sm text-slate-500 mt-3 italic">
                     {props.alt}
@@ -109,7 +108,7 @@ export default function MarkdownContent({ content }) {
             );
           },
 
-          /* Tables – keeps your previous table styling */
+          /* Tables */
           table: ({ node, ...props }) => (
             <div className="overflow-x-auto my-6 border border-slate-200 rounded-lg">
               <table
