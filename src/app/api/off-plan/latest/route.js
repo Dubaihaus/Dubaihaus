@@ -11,7 +11,7 @@ export async function GET(request) {
 
   const filters = {
     // ✅ Latest endpoint: only PRESALE projects
-    saleStatus: 'presale',
+    saleStatus: 'start of sales',
     status: 'presale', // fallback
 
     // Sort logic handled in service by default or override

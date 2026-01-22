@@ -233,6 +233,24 @@ function extractUnitTypes(rawTypicalUnits = []) {
     };
   });
 }
+// Add this helper near the top (optional)
+function extractDeveloper(project) {
+  const devObj = project?.developer_obj || project?.developerObj || null;
+
+  const name =
+    devObj?.name ||
+    (typeof project?.developer === "object" ? project.developer?.name : null) ||
+    (typeof project?.developer === "string" ? project.developer : null) ||
+    project?.developer_name ||
+    null;
+
+  const id =
+    devObj?.id ||
+    (typeof project?.developer === "number" ? project.developer : null) ||
+    null;
+
+  return { id, name };
+}
 
 export function normalizeProject(project) {
   if (!project) return null;

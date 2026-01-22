@@ -70,17 +70,17 @@ export default function Navbar() {
     { key: 'navbar.featuredProperties', href: '/featured-properties', type: 'normal' },
     { key: 'navbar.map', href: '/map', type: 'normal' },
     { key: 'navbar.faq', href: '/faq', type: 'normal' },
-    { key: 'navbar.blog', href: '#', type: 'blog' },
+    { key: 'navbar.blog', href: '/blog', type: 'blog' },
     { key: 'navbar.contact', href: '/contact', type: 'normal' }
   ];
 
-  const handleOtherLinkClick = (event, type) => {
-    if (type === 'blog') {
-      event.preventDefault();
-      setShowBlogPopup(true);
-    }
-    // "comingSoon" and "normal" just follow their href
-  };
+  // const handleOtherLinkClick = (event, type) => {
+  //   if (type === 'blog') {
+  //     event.preventDefault();
+  //     setShowBlogPopup(true);
+  //   }
+  //   // "comingSoon" and "normal" just follow their href
+  // };
 
   return (
     <>
@@ -105,7 +105,7 @@ export default function Navbar() {
               <Link
                 key={key}
                 href={href === '#' ? '#' : localeHref(href)}
-                onClick={(e) => handleOtherLinkClick(e, type)}
+                // onClick={(e) => handleOtherLinkClick(e, type)}
                 className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors"
               >
                 <TranslatedText translationKey={key} />
@@ -298,7 +298,7 @@ export default function Navbar() {
                 <Link
                   key={key}
                   href={href === '#' ? '#' : localeHref(href)}
-                  onClick={(e) => handleOtherLinkClick(e, type)}
+                  // onClick={(e) => handleOtherLinkClick(e, type)}
                   className="block border-b py-2 text-slate-700"
                 >
                   <TranslatedText translationKey={key} />
