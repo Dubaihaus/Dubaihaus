@@ -14,9 +14,8 @@ export default function HeroImagePreview({ url, title }) {
         <div
   className="
     mb-12 overflow-hidden rounded-[32px]
-    border border-slate-200
-    shadow-[0_20px_40px_rgba(0,0,0,0.08)]
-    bg-slate-100 relative group
+ 
+    bg-transparent relative group
     h-[260px] sm:h-[340px] md:h-[440px] lg:h-[520px]
   "
 >
@@ -28,7 +27,7 @@ export default function HeroImagePreview({ url, title }) {
         />
 
         {/* Preview button */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition">
+        <div className="absolute inset-0 ">
           <button
             type="button"
             onClick={() => setOpen(true)}

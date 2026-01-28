@@ -24,6 +24,52 @@ function shallowEqualObj(a = {}, b = {}) {
   }
   return true;
 }
+function isAbuDhabiProject(p) {
+  const city = (p?.locationObj?.city || p?.city || "").toString().toLowerCase();
+  const region = (p?.locationObj?.region || p?.region || "").toString().toLowerCase();
+  const loc = (p?.location || "").toString().toLowerCase();
+
+  // direct checks
+  if (city.includes("abu dhabi") || region.includes("abu dhabi") || loc.includes("abu dhabi")) {
+    return true;
+  }
+
+  // common Abu Dhabi communities (fallback)
+  const adAreas = [
+    "yas", "saadiyat", "reem", "al reem", "al raha", "masdar",
+    "khalifa city", "al maryah", "corniche", "hudayriat",
+    "al jubail", "ghantoot", "al reef"
+  ];
+
+  return adAreas.some((k) => loc.includes(k));
+}
+
+function pickHomeProjectsWithAbuDhabiQuota(results, limit = 9) {
+  if (!Array.isArray(results) || results.length <= limit) return results || [];
+
+  const ad = results.filter(isAbuDhabiProject);
+  if (ad.length === 0) return results.slice(0, limit);
+
+  const targetAdCount = ad.length >= 5 ? 5 : ad.length; // 1-4 => all, >=5 => 5
+
+  // choose top AD in the existing (latest) order
+  const chosenAd = ad.slice(0, targetAdCount);
+
+  const chosenIds = new Set(chosenAd.map((x) => String(x?.id)));
+
+  // fill rest with non-AD in original order
+  const restNeeded = Math.max(0, limit - chosenAd.length);
+  const chosenNonAd = results
+    .filter((x) => !isAbuDhabiProject(x))
+    .filter((x) => !chosenIds.has(String(x?.id)))
+    .slice(0, restNeeded);
+
+  chosenNonAd.forEach((x) => chosenIds.add(String(x?.id)));
+
+  // preserve original API ordering
+  return results.filter((x) => chosenIds.has(String(x?.id))).slice(0, limit);
+}
+
 
 export default function OffPlanClient({ limit, latest = false }) {
   const router = useRouter();
@@ -119,10 +165,23 @@ export default function OffPlanClient({ limit, latest = false }) {
       }
 
       const data = await res.json();
-      const results = data.results || [];
-      const visibleResults = limit ? results.slice(0, limit) : results;
+      // const results = data.results || [];
+      // const visibleResults = limit ? results.slice(0, limit) : results;
 
-      setProjects(visibleResults);
+      // setProjects(visibleResults);
+      const results = data.results || [];
+
+let visibleResults = results;
+
+// ✅ only apply Abu Dhabi quota on HOME embed (limit + latest)
+if (limit && latest) {
+  visibleResults = pickHomeProjectsWithAbuDhabiQuota(results, limit);
+} else {
+  visibleResults = limit ? results.slice(0, limit) : results;
+}
+
+setProjects(visibleResults);
+
 
       const total =
         (typeof data.total === 'number' && data.total) ||
