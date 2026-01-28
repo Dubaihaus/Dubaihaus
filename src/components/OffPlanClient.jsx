@@ -217,11 +217,10 @@ export default function OffPlanClient({ limit, latest = false }) {
         <Button
           key={p}
           variant={p === page ? 'default' : 'outline'}
-          className={`h-9 min-w-[2.25rem] text-sm ${
-            p === page
+          className={`h-9 min-w-[2.25rem] text-sm ${p === page
               ? 'text-white'
               : 'border-sky-500 text-sky-700 hover:bg-sky-50'
-          }`}
+            }`}
           style={p === page ? { backgroundColor: '#00C6FF' } : {}}
           onClick={() => setPage(p)}
         >

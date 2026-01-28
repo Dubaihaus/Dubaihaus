@@ -1,5 +1,5 @@
 // src/app/blog/[slug]/page.jsx
-import { prisma } from "@/lib/prisma";
+import { getCachedBlogPostBySlug } from "@/lib/blog-helpers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MarkdownContent from "@/components/blog/MarkdownContent";
@@ -20,31 +20,11 @@ function normalizePropertyForCard(p) {
   };
 }
 
+// Cache blog detail pages for 5 minutes
+export const revalidate = 300;
+
 async function getPost(slug) {
-  return prisma.blogPost.findFirst({
-    where: {
-      seo: { slug },
-      status: "PUBLISHED",
-    },
-    include: {
-      seo: true,
-      categoryLinks: {
-        include: { category: true },
-      },
-      tagLinks: {
-        include: { tag: true },
-      },
-      media: true,
-      featuredProperties: {
-        orderBy: { position: "asc" },
-        include: {
-          property: {
-            include: { images: true },
-          },
-        },
-      },
-    },
-  });
+  return getCachedBlogPostBySlug(slug);
 }
 
 export async function generateMetadata({ params }) {
@@ -82,10 +62,10 @@ export default async function BlogDetailPage({ params }) {
   const safeTitle = post.title || "Untitled article";
   const published = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
     : "";
   const readTime = post.readMinutes ? `${post.readMinutes} min read` : "";
 
@@ -149,7 +129,7 @@ export default async function BlogDetailPage({ params }) {
         </header>
 
         {/* Hero image */}
-  {heroImage && <HeroImagePreview url={heroImage} title={safeTitle} />}
+        {heroImage && <HeroImagePreview url={heroImage} title={safeTitle} />}
 
 
         {/* Main Content */}

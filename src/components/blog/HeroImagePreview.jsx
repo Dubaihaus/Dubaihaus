@@ -10,12 +10,21 @@ export default function HeroImagePreview({ url, title }) {
 
   return (
     <>
-      <div className="mb-12 overflow-hidden rounded-[32px] border border-slate-200 shadow-[0_20px_40px_rgba(0,0,0,0.08)] bg-white relative aspect-[21/9] group">
+      {/* <div className="mb-12 overflow-hidden rounded-[32px] border border-slate-200 shadow-[0_20px_40px_rgba(0,0,0,0.08)] bg-slate-100 relative aspect-[21/9] group"> */}
+        <div
+  className="
+    mb-12 overflow-hidden rounded-[32px]
+    border border-slate-200
+    shadow-[0_20px_40px_rgba(0,0,0,0.08)]
+    bg-slate-100 relative group
+    h-[260px] sm:h-[340px] md:h-[440px] lg:h-[520px]
+  "
+>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
           alt={title || "Hero image"}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
 
         {/* Preview button */}
@@ -46,7 +55,7 @@ export default function HeroImagePreview({ url, title }) {
         onClose={() => setOpen(false)}
         images={[{ url, alt: title || "Hero image" }]}
         activeIndex={0}
-        setActiveIndex={() => {}}
+        setActiveIndex={() => { }}
       />
     </>
   );

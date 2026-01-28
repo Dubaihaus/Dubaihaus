@@ -16,7 +16,7 @@ export async function GET(request) {
 
     // Sort logic handled in service by default or override
     sortBy: 'updatedAt',
-    sortOrder: 'desc',
+    sortOrder: 'ascending',
 
     // pagination
     page: parseInt(searchParams.get('page')) || 1,

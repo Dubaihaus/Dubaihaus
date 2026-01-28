@@ -1,9 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { getAllCategories } from "@/lib/blog-helpers";
-
-export const dynamic = "force-dynamic";
+import { getCachedBlogPosts, getCachedCategories } from "@/lib/blog-helpers";
 
 export const metadata = {
   title: "DubaiHaus Insights | Guides & Articles",
@@ -17,39 +15,67 @@ export const metadata = {
   },
 };
 
+// Conditional caching: dynamic for search, cached for filters
+export const dynamic = "auto";
+export const revalidate = 300; // 5 minutes for non-search pages
+
 export default async function BlogPage({ searchParams }) {
   const { cat, tag, q } = searchParams || {};
 
-  const where = { status: "PUBLISHED" };
+  let posts;
+  let allCats;
 
-  // Use slug-based filtering for new schema
-  if (cat) {
-    where.categoryLinks = { some: { category: { slug: cat } } };
-  }
-  if (tag) {
-    where.tagLinks = { some: { tag: { slug: tag } } };
-  }
+  // If there's a search query, fetch dynamically (no cache)
   if (q) {
-    where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { content: { contains: q, mode: "insensitive" } },
-    ];
-  }
+    const where = {
+      status: "PUBLISHED",
+      OR: [
+        { title: { contains: q, mode: "insensitive" } },
+        { content: { contains: q, mode: "insensitive" } },
+      ],
+    };
 
-  // Fetch posts + ALL categories in parallel
-  const [posts, allCats] = await Promise.all([
-    prisma.blogPost.findMany({
-      where,
-      orderBy: { publishedAt: "desc" },
-      include: {
-        seo: true,
-        categoryLinks: { include: { category: true } },
-        tagLinks: { include: { tag: true } },
-        media: true,
-      },
-    }),
-    getAllCategories(),
-  ]);
+    [posts, allCats] = await Promise.all([
+      prisma.blogPost.findMany({
+        where,
+        orderBy: { publishedAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          excerpt: true,
+          featuredImg: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+          readMinutes: true,
+          seo: {
+            select: { slug: true },
+          },
+          categoryLinks: {
+            select: {
+              category: {
+                select: { name: true, slug: true },
+              },
+            },
+          },
+          tagLinks: {
+            select: {
+              tag: {
+                select: { name: true, slug: true },
+              },
+            },
+          },
+        },
+      }),
+      getCachedCategories(),
+    ]);
+  } else {
+    // Use cached queries for better performance
+    [posts, allCats] = await Promise.all([
+      getCachedBlogPosts({ cat, tag }),
+      getCachedCategories(),
+    ]);
+  }
 
   // Optional: show category name in heading instead of slug
   const selectedCategory = cat ? allCats.find((c) => c.slug === cat) : null;
@@ -97,11 +123,10 @@ export default async function BlogPage({ searchParams }) {
           <div className="flex flex-wrap gap-2 pt-4">
             <Link
               href="/blog"
-              className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                !cat && !tag
+              className={`px-3 py-1 rounded-full text-xs font-medium transition ${!cat && !tag
                   ? "bg-slate-800 text-white shadow-md"
                   : "bg-white text-slate-600 hover:bg-slate-100"
-              }`}
+                }`}
             >
               All
             </Link>
@@ -110,11 +135,10 @@ export default async function BlogPage({ searchParams }) {
               <Link
                 key={c.id}
                 href={`/blog?cat=${encodeURIComponent(c.slug)}`}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                  cat === c.slug
+                className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.slug
                     ? "bg-[var(--color-brand-sky)] text-white shadow-md"
                     : "bg-white text-slate-600 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 {c.name}
               </Link>
@@ -131,10 +155,10 @@ export default async function BlogPage({ searchParams }) {
               {q
                 ? `Search results for "${q}"`
                 : cat
-                ? `Category: ${selectedCategory?.name || cat}`
-                : tag
-                ? `Tag: ${tag}`
-                : "Latest articles"}
+                  ? `Category: ${selectedCategory?.name || cat}`
+                  : tag
+                    ? `Tag: ${tag}`
+                    : "Latest articles"}
             </h2>
             <p className="text-xs text-slate-500">
               {posts.length} article{posts.length !== 1 ? "s" : ""} found
@@ -167,6 +191,8 @@ export default async function BlogPage({ searchParams }) {
                       <img
                         src={post.featuredImg}
                         alt={post.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-500 ease-out"
                       />
                     ) : (
@@ -185,12 +211,13 @@ export default async function BlogPage({ searchParams }) {
 
                   <div className="p-5 flex flex-col gap-3 flex-1">
                     <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-                      {post.publishedAt
-                        ? new Date(post.publishedAt).toLocaleDateString(
-                            "en-GB",
-                            { day: "numeric", month: "short", year: "numeric" }
-                          )
-                        : "Draft"}
+                      {new Date(
+                        post.publishedAt ?? post.createdAt ?? post.updatedAt
+                      ).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                       {post.readMinutes && (
                         <>
                           <span className="text-slate-300">•</span>

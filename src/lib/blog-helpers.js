@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
+import { unstable_cache } from "next/cache";
 
 /**
  * Calculate read time in minutes from content
@@ -142,3 +143,117 @@ export async function getFeaturedCategories(limit = 8) {
         },
     });
 }
+
+// ============================================================================
+// CACHED QUERY FUNCTIONS FOR PERFORMANCE
+// ============================================================================
+
+/**
+ * Get cached blog posts with optimized select for list page
+ * @param {object} options - Filter options { cat, tag }
+ * @returns {Promise<Array>} - List of blog posts
+ */
+export const getCachedBlogPosts = unstable_cache(
+    async ({ cat, tag } = {}) => {
+        const where = { status: "PUBLISHED" };
+
+        if (cat) {
+            where.categoryLinks = { some: { category: { slug: cat } } };
+        }
+        if (tag) {
+            where.tagLinks = { some: { tag: { slug: tag } } };
+        }
+
+        return prisma.blogPost.findMany({
+            where,
+            orderBy: { publishedAt: "desc" },
+            select: {
+                id: true,
+                title: true,
+                excerpt: true,
+                featuredImg: true,
+                publishedAt: true,
+                createdAt: true,
+                updatedAt: true,
+                readMinutes: true,
+                seo: {
+                    select: { slug: true },
+                },
+                categoryLinks: {
+                    select: {
+                        category: {
+                            select: { name: true, slug: true },
+                        },
+                    },
+                },
+                tagLinks: {
+                    select: {
+                        tag: {
+                            select: { name: true, slug: true },
+                        },
+                    },
+                },
+            },
+        });
+    },
+    ["blog-posts"],
+    {
+        revalidate: 300, // 5 minutes
+        tags: ["blog-posts"],
+    }
+);
+
+/**
+ * Get cached blog post by slug for detail page
+ * @param {string} slug - Blog post slug
+ * @returns {Promise<object|null>} - Blog post or null
+ */
+export const getCachedBlogPostBySlug = unstable_cache(
+    async (slug) => {
+        return prisma.blogPost.findFirst({
+            where: {
+                seo: { slug },
+                status: "PUBLISHED",
+            },
+            include: {
+                seo: true,
+                categoryLinks: {
+                    include: { category: true },
+                },
+                tagLinks: {
+                    include: { tag: true },
+                },
+                media: true,
+                featuredProperties: {
+                    orderBy: { position: "asc" },
+                    include: {
+                        property: {
+                            include: { images: true },
+                        },
+                    },
+                },
+            },
+        });
+    },
+    ["blog-post-by-slug"],
+    {
+        revalidate: 300, // 5 minutes
+        tags: ["blog-post"],
+    }
+);
+
+/**
+ * Get cached categories for public display
+ * @returns {Promise<Array>} - List of categories
+ */
+export const getCachedCategories = unstable_cache(
+    async () => {
+        return getAllCategories();
+    },
+    ["blog-categories"],
+    {
+        revalidate: 3600, // 1 hour
+        tags: ["blog-categories"],
+    }
+);
+
