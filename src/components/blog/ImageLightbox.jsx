@@ -59,24 +59,17 @@ export default function ImageLightbox({
         </button>
 
         {/* IMPORTANT: no crop */}
-        <div className="relative rounded-3xl border border-white/10 bg-black shadow-[0_30px_80px_rgba(0,0,0,0.45)] overflow-hidden">
-          <div className="w-full flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={active.url}
-              alt={active.alt || "Preview image"}
-              className="
-                block
-                max-w-[95vw]
-                max-h-[85vh]
-                w-auto
-                h-auto
-                object-contain
-                select-none
-              "
-              draggable={false}
-            />
-          </div>
+     <div className="relative rounded-3xl border border-white/10 bg-black shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+  <div className="w-full h-[85vh] flex items-center justify-center p-2">
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img
+      src={active.url}
+      alt={active.alt || "Preview image"}
+      className="max-w-full max-h-full w-auto h-auto object-contain select-none"
+      draggable={false}
+    />
+  </div>
+
 
           {(active.caption || active.alt) && (
             <div className="px-4 py-3 text-xs text-white/90 border-t border-white/10 bg-black/40">
