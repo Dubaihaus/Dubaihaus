@@ -71,10 +71,12 @@ function pickHomeProjectsWithAbuDhabiQuota(results, limit = 9) {
 }
 
 
-export default function OffPlanClient({ limit, latest = false }) {
+export default function OffPlanClient({ limit, latest = false, section, endpoint = '/api/off-plan', hideHeader = false }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('offPlan.client');
+  // ... (previous state code)
+
 
   // ✅ Build filters from URL (memoized so it updates when URL changes)
   const filtersFromUrl = useMemo(() => {
@@ -142,19 +144,34 @@ export default function OffPlanClient({ limit, latest = false }) {
     try {
       const paramsObj = { ...filters, currency };
 
-      if (latest) {
-        paramsObj.latest = 'true';
+      // If custom endpoint (e.g. homepage), we might not want pagination params if it's fixed
+      // but let's send them if it's the standard endpoint.
+      // For /api/home-projects, we just send limit/currency.
+
+      let finalUrl = endpoint;
+
+      if (endpoint === '/api/home-projects') {
+        const p = new URLSearchParams({ limit: pageSize, currency });
+        finalUrl = `${endpoint}?${p.toString()}`;
       } else {
-        paramsObj.page = page;
-        paramsObj.pageSize = pageSize;
+        if (section) {
+          paramsObj.section = section;
+        } else if (latest) {
+          paramsObj.latest = 'true';
+        } else {
+          paramsObj.page = page;
+          paramsObj.pageSize = pageSize;
+        }
+
+        Object.keys(paramsObj).forEach((k) => {
+          if (!paramsObj[k]) delete paramsObj[k];
+        });
+
+        const params = new URLSearchParams(paramsObj);
+        finalUrl = `${endpoint}?${params.toString()}`;
       }
 
-      Object.keys(paramsObj).forEach((k) => {
-        if (!paramsObj[k]) delete paramsObj[k];
-      });
-
-      const params = new URLSearchParams(paramsObj);
-      const res = await fetch(`/api/off-plan?${params.toString()}`);
+      const res = await fetch(finalUrl);
       if (!res.ok) {
         const text = await res.text();
         console.error('off-plan API error:', res.status, text.slice(0, 300));
@@ -171,16 +188,16 @@ export default function OffPlanClient({ limit, latest = false }) {
       // setProjects(visibleResults);
       const results = data.results || [];
 
-let visibleResults = results;
+      let visibleResults = results;
 
-// ✅ only apply Abu Dhabi quota on HOME embed (limit + latest)
-if (limit && latest) {
-  visibleResults = pickHomeProjectsWithAbuDhabiQuota(results, limit);
-} else {
-  visibleResults = limit ? results.slice(0, limit) : results;
-}
+      // ✅ only apply Abu Dhabi quota on HOME embed (limit + latest)
+      if (limit && latest) {
+        visibleResults = pickHomeProjectsWithAbuDhabiQuota(results, limit);
+      } else {
+        visibleResults = limit ? results.slice(0, limit) : results;
+      }
 
-setProjects(visibleResults);
+      setProjects(visibleResults);
 
 
       const total =
@@ -277,8 +294,8 @@ setProjects(visibleResults);
           key={p}
           variant={p === page ? 'default' : 'outline'}
           className={`h-9 min-w-[2.25rem] text-sm ${p === page
-              ? 'text-white'
-              : 'border-sky-500 text-sky-700 hover:bg-sky-50'
+            ? 'text-white'
+            : 'border-sky-500 text-sky-700 hover:bg-sky-50'
             }`}
           style={p === page ? { backgroundColor: '#00C6FF' } : {}}
           onClick={() => setPage(p)}

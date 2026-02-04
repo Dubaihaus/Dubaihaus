@@ -552,9 +552,8 @@
     }
   },
   "featuredProperties": {
-  "title": "Featured Properties",
-  "subtitle": "Handpicked selection of the best properties and projects.",
-  "empty": "No featured properties found."
-}
-
+    "title": "Featured Properties",
+    "subtitle": "Handpicked selection of the best properties and projects.",
+    "empty": "No featured properties found."
+  }
 }

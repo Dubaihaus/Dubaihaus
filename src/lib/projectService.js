@@ -275,7 +275,11 @@ export async function getCachedProjects(filters = {}) {
 
   // Sale status (note: Prisma doesn't support mode on equals)
   if (saleStatus) {
-    where.saleStatus = { equals: saleStatus };
+    if (Array.isArray(saleStatus)) {
+      where.saleStatus = { in: saleStatus };
+    } else {
+      where.saleStatus = { equals: saleStatus };
+    }
   }
 
   if (isFeatured !== undefined) where.isFeatured = isFeatured;

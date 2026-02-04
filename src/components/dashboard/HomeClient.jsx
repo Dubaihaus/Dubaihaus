@@ -31,16 +31,23 @@ export default function HomeClient({ filterOptions }) {
   return (
     <>
       <DashboardHeader filterOptions={filterOptions} />
-      
 
-     {/* 2. Filter panel: half-overlap hero, half on white */}
+
+      {/* 2. Filter panel: half-overlap hero, half on white */}
       <div className="relative z-30 -mt-12 sm:-mt-16 lg:-mt-20">
         <OffPlanFilterPanel filterOptions={filterOptions} />
       </div>
 
-      {/* 3. Push OffPlan section down so it doesn't touch the card */}
+      {/* 3. Homepage Sections (Single Section, API-First) */}
       <div className="mt-04 sm:mt-14 lg:mt-10">
-        <OffPlanClient limit={9} latest={true} />
+        <section>
+          {/* <div className="max-w-7xl mx-auto px-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">{tHome('latestLaunches.title') || 'Latest Launches'}</h2>
+            <p className="text-gray-600">{tHome('latestLaunches.subtitle') || 'New off-plan projects recently announced'}</p>
+          </div> */}
+          {/* Use dedicated API-first endpoint and hide internal header */}
+          <OffPlanClient limit={9} endpoint="/api/home-projects" hideHeader={true} />
+        </section>
       </div>
 
       <OffPlanPropertyTypesSection />

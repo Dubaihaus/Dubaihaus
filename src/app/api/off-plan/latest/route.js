@@ -10,13 +10,13 @@ export async function GET(request) {
   const currency = (searchParams.get('currency') || 'AED').toUpperCase();
 
   const filters = {
-    // ✅ Latest endpoint: only PRESALE projects
-    saleStatus: 'start of sales',
-    status: 'presale', // fallback
+    // ✅ Latest endpoint: Announced + Presale
+    saleStatus: ['announced', 'presale'],
+    // status: 'presale' removed to avoid conflict
 
     // Sort logic handled in service by default or override
     sortBy: 'updatedAt',
-    sortOrder: 'ascending',
+    sortOrder: 'desc',
 
     // pagination
     page: parseInt(searchParams.get('page')) || 1,
