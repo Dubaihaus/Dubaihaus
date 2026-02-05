@@ -19,7 +19,7 @@ export default function HomeClient({ filterOptions }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/off-plan?forMap=true&pageSize=200");
+        const res = await fetch("/api/map-projects");
         const data = await res.json();
         setMapProjects(Array.isArray(data?.results) ? data.results : []);
       } catch {

@@ -1,6 +1,7 @@
 import { getCachedProjects } from '@/lib/projectService';
 import { applyCurrencyToProjects } from '@/lib/currencyService';
 import { searchProperties } from '@/lib/reellyApi';
+import { hydrateProjectsBatch } from '@/lib/projectDataHydration';
 
 export const runtime = 'nodejs';
 
@@ -31,7 +32,7 @@ export async function GET(request) {
         // Set a timeout for the API call (e.g., 5 seconds)
         const apiPromise = Promise.all([announcedPromise, presalePromise]);
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Reelly API timeout')), 5000)
+            setTimeout(() => reject(new Error('Reelly API timeout')), 15000)
         );
 
         const [announcedData, presaleData] = await Promise.race([apiPromise, timeoutPromise]);
@@ -47,7 +48,14 @@ export async function GET(request) {
             combined.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
             // Take top N
-            const finalResults = combined.slice(0, limit);
+            let finalResults = combined.slice(0, limit);
+
+            // ✅ Hydrate property types and payment plans if missing
+            try {
+                finalResults = await hydrateProjectsBatch(finalResults, currency, 5);
+            } catch (hydrateError) {
+                console.warn('⚠️ Hydration failed, using original data:', hydrateError.message);
+            }
 
             // Construct response object
             let data = {

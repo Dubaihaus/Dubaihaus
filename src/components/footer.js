@@ -51,7 +51,7 @@ export default function Footer() {
 
   // Limits per-column
   const MAX_DUBAI_DEVS = 16;
-  const MAX_OTHERS = 8;
+  const MAX_OTHERS = 16;
 
   // Always keep arrays safe, even if API doesn't return a key yet
   const developers = data?.developers ?? []; // Dubai devs
@@ -102,7 +102,7 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               // single-column list
-              <ul className="space-y-1 text-sm">
+               <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                 {abuDhabiDevelopers.slice(0, MAX_OTHERS).map((d, idx) => (
                   <li key={`${d?.name || 'abu-dev'}-${idx}`}>
                     <SafeInternalLink

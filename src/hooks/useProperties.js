@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 async function fetchProperties(filters = {}) {
   const searchParams = new URLSearchParams();
-  
+
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       searchParams.append(key, String(value));
@@ -13,11 +13,11 @@ async function fetchProperties(filters = {}) {
   });
 
   const response = await fetch(`/api/off-plan?${searchParams.toString()}`);
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch properties');
   }
-  
+
   return response.json();
 }
 

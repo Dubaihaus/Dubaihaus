@@ -10,30 +10,11 @@ import { useMemo, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getHandoverLabel } from '../lib/FormatHandover';
 import { useTranslations } from 'next-intl';
+import { formatLocation, formatPaymentPlanShort } from '@/lib/formatters';
 
 /* ---------------- helpers ---------------- */
 
-function fmtLocation(locOrString, unknownLabel = 'Unknown location') {
-  // If object: safely build without numeric country ids
-  if (locOrString && typeof locOrString === 'object') {
-    const { sector, district, city, region, country } = locOrString;
-    const countryStr =
-      typeof country === 'string' && !/^\d+$/.test(country) ? country : null;
-    const parts = [sector, district, city, region, countryStr].filter(Boolean);
-    return parts.join(', ') || unknownLabel;
-  }
-
-  // If string: drop standalone numeric tokens like ", 219"
-  const s = String(locOrString || '').trim();
-  if (!s) return unknownLabel;
-  return (
-    s
-      .split(',')
-      .map((p) => p.trim())
-      .filter((p) => p && !/^\d+$/.test(p)) // remove numeric-only segments
-      .join(', ') || unknownLabel
-  );
-}
+// Removed fmtLocation - now using shared formatLocation from @/lib/formatters
 
 function TypeBadges({ types, brRange }) {
   const list =
@@ -85,8 +66,7 @@ function hasUsableSteps(plan) {
 
 /**
  * Build a short payment-plan label for the blue badge.
- * 1) Try to infer "80/20" from steps.
- * 2) Else use plan.name or fallback paymentPlanLabel.
+ * Now uses formatPaymentPlanShort from shared formatters
  */
 function getCardPaymentPlanLabel(property, paymentPlanLabel = "Payment plan") {
   const plans = Array.isArray(property?.paymentPlans) ? property.paymentPlans : [];
@@ -94,31 +74,8 @@ function getCardPaymentPlanLabel(property, paymentPlanLabel = "Payment plan") {
 
   const plan = plans[0];
 
-  // Steps may be directly on plan OR nested inside rawData (depending on mapping)
-  const steps = Array.isArray(plan?.steps)
-    ? plan.steps
-    : Array.isArray(plan?.rawData?.steps)
-      ? plan.rawData.steps
-      : [];
-
-  // ✅ Prefer showing numbers from steps (20/20/60, 50/50, etc.)
-  const percentages = steps
-    .map((s) => Number(s?.percentage ?? s?.percent))
-    .filter((n) => Number.isFinite(n) && n > 0)
-    .map((n) => Math.round(n));
-
-  if (percentages.length) {
-    const ratio = percentages.slice(0, 4).join("/"); // keep badge short
-    return `${ratio} ${paymentPlanLabel}`; // "50/50 Payment plan"
-  }
-
-  // Fallback: use plan.name only if it's not generic "Payment plan"
-  const name = String(plan?.name || plan?.title || "").trim();
-  if (name && name.toLowerCase() !== "payment plan" && name.toLowerCase() !== "payment plan payment plan") {
-    return name; // don't append "Payment plan" again
-  }
-
-  return paymentPlanLabel;
+  // Use the shared formatter
+  return formatPaymentPlanShort(plan, paymentPlanLabel);
 }
 
 
@@ -151,7 +108,7 @@ export default function PropertyCard({
   const shownCurrency =
     property.priceCurrency || property.price_currency || currency || 'AED';
 
-  const locationLabel = fmtLocation(
+  const locationLabel = formatLocation(
     property.locationObj || property.rawData?.location || property.location,
     t('location.unknown')
   );

@@ -67,7 +67,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Reem Island",
     image: "/dashboard/reem.webp",
     filters: {
-      search_query: "Al Reem Island",
+      search_query: "Al Reem Island,Marina Square",
       region: "Abu Dhabi",
     },
   },
@@ -117,15 +117,17 @@ export const ABU_DHABI_AREAS = [
     },
   },
   // NEW
+ 
   {
-    slug: "marina-square",
-    title: "Marina Square",
-    image: "/dashboard/abu-dhabi/marina-square.jpg", // use placeholder/building.jpg if you don’t have assets yet
-    filters: {
-      search_query: "Marina Square",
-      region: "Abu Dhabi",
-    },
+  slug: "al-maryah-island",
+  title: "Al Maryah Island",
+  image: "/dashboard/abu-dhabi/al-maryah-island.jpg", // use placeholder if missing
+  filters: {
+    search_query: "Al Maryah Island",
+    region: "Abu Dhabi",
   },
+},
+
   {
     slug: "fahid-island",
     title: "Fahid Island",

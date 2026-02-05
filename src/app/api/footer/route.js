@@ -23,7 +23,7 @@ const MAX_FOOTER_ITEMS = 8;
 // ✅ Special limit for Dubai developers
 const MAX_DUBAI_DEVELOPERS = 16;
 // ✅ Special limit for Abu Dhabi developers (kept at 8)
-const MAX_ABU_DHABI_DEVELOPERS = 8;
+const MAX_ABU_DHABI_DEVELOPERS = 16;
 
 /**
  * ✅ Featured developers (Dubai column)
@@ -51,6 +51,7 @@ const FEATURED_DEVELOPER_NAMES = [
  * ✅ Featured developers (Abu Dhabi column)
  */
 const FEATURED_ABU_DHABI_DEVELOPER_NAMES = [
+  // existing
   "Aldar",
   "Bloom",
   "Imkan",
@@ -59,7 +60,17 @@ const FEATURED_ABU_DHABI_DEVELOPER_NAMES = [
   "Eagle Hills",
   "Saas",
   "Ohana",
+  // requested additions
+  "Sobha",
+  "Ora Developer",
+  "Alain",
+  "Object1",
+  "Radiant",
+  "Taraf",
+  "Damac",
+  "Royal Development Company",
 ];
+
 
 // ✅ Featured Abu Dhabi areas (will be shown first)
 const FEATURED_ABU_DHABI_AREA_NAMES = [

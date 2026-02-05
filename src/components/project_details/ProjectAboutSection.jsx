@@ -10,16 +10,19 @@ function formatAED(n, cur = 'AED') {
   return n != null ? `${cur} ${Number(n).toLocaleString()}` : null;
 }
 
+import { stripMarkdownHeadings } from '@/lib/formatters';
+
 export default function ProjectAboutSection({ property }) {
   const p = property?.rawData ?? property ?? {};
 
   const title = p.name || property?.title || 'the Project';
-  const rawDesc =
+  const rawDesc = stripMarkdownHeadings(
     p.description ||
     p.overview ||
     p.short_description ||
     property?.description ||
-    '';
+    ''
+  );
 
   const isLikelyHtml = /<\/?[a-z][\s\S]*>/i.test(rawDesc || '');
   const [expanded, setExpanded] = useState(false);
