@@ -80,7 +80,7 @@ export default async function sitemap() {
         seen.add(id);
 
         acc.push({
-          url: `${BASE_URL}/off-plan/${id}`,
+          url: `${BASE_URL}/ui/project_details/${id}`,
           lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
           priority: 0.9,
           changeFrequency: "weekly",
