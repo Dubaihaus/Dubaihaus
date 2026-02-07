@@ -400,7 +400,7 @@ export default function OffPlanClient({ limit, latest = false, section, endpoint
                     key={p.id}
                     property={p}
                     currency={currency}
-                    selectedUnitType={filters.building_type || filters.unit_types || filters.unit_type}
+                    selectedUnitType={filters.search || filters.building_type || filters.unit_types || filters.unit_type}
                   />
                 ))}
               </div>

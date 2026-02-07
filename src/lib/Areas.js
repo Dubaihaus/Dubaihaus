@@ -148,7 +148,7 @@ export const ABU_DHABI_AREAS = [
   },
   {
     slug: "Ghadeer Al Tayr",
-    title: "Ghadeer Al Tayr",
+    title: "Ghantoot",
     image: "/dashboard/abu-dhabi/al-hudayriat-island.jpg",
     filters: {
       search: "Ghadeer Al Tayr"

@@ -89,25 +89,25 @@ export default function MegaMenu() {
       title: 'Apartments',
       image: '/dashboard/Apartments.jpeg',
       badge: 'FROM AED 700,000',
-      filters: { building_type: 'Apartment' },
+      filters: { search: 'Apartment' },
     },
     {
       title: 'Penthouses',
       image: '/dashboard/Penthhouse.jpeg',
       badge: 'FROM AED 2,000,000',
-      filters: { building_type: 'Penthouse' },
+      filters: { search: 'Penthouse' },
     },
     {
       title: 'Townhouses',
       image: '/dashboard/Townhouse.jpeg',
       badge: 'FROM AED 1,000,000',
-      filters: { building_type: 'Townhouse' },
+      filters: { search: 'Townhouse' },
     },
     {
       title: 'Villas',
       image: '/dashboard/villas.jpg',
       badge: 'FROM AED 1,500,000',
-      filters: { building_type: 'Villa' },
+      filters: { search: 'Villa' },
     },
   ];
 

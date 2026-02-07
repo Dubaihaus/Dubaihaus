@@ -229,28 +229,28 @@ export default function Navbar() {
                   label={t('navbar.properties')}
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?unit_types=Apartment')}
+                  href={localeHref('/off-plan?search=Apartment')}
                   label={
                     t('offPlan.propertyTypes.apartments.title') ??
                     'Apartments'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?unit_types=Penthouse')}
+                  href={localeHref('/off-plan?search=Penthouse')}
                   label={
                     t('offPlan.propertyTypes.penthouses.title') ??
                     'Penthouses'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?unit_types=Townhouse')}
+                  href={localeHref('/off-plan?search=Townhouse')}
                   label={
                     t('offPlan.propertyTypes.townhouses.title') ??
                     'Townhouses'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?unit_types=Villa')}
+                  href={localeHref('/off-plan?search=Villa')}
                   label={
                     t('offPlan.propertyTypes.villas.title') ??
                     'Villas'
