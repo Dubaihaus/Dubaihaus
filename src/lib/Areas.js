@@ -147,11 +147,11 @@ export const ABU_DHABI_AREAS = [
     },
   },
   {
-    slug: "al-hudayriat-island",
-    title: "Al Hudayriat Island",
+    slug: "Ghadeer Al Tayr",
+    title: "Ghadeer Al Tayr",
     image: "/dashboard/abu-dhabi/al-hudayriat-island.jpg",
     filters: {
-      search_query: "Al Hudayriat Island, Al Hudayriat"
+      search: "Ghadeer Al Tayr"
     },
   },
   {
