@@ -41,8 +41,8 @@ export default function MapMarker({ project, onMarkerClick, isActive }) {
           {/* main bubble */}
           <div
             className={`relative w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${isActive
-                ? 'bg-blue-600 scale-125 ring-2 ring-blue-400/50'
-                : 'bg-red-500 hover:bg-red-600'
+              ? 'bg-blue-600 scale-125 ring-2 ring-blue-400/50'
+              : 'bg-red-500 hover:bg-red-600'
               }`}
           >
             {/* glossy dot */}
@@ -66,6 +66,20 @@ export default function MapMarker({ project, onMarkerClick, isActive }) {
       {isHovered && !isActive && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-8 pointer-events-none z-50">
           <div className="bg-white rounded-lg shadow-xl border border-gray-200 px-3 py-2 text-sm whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+            {/* Image Thumbnail */}
+            {(project.coverPhoto || project.featured_image || project.cover || project.main_image || project?.media?.photos?.[0] || project?.cover_image?.url || project?.rawData?.cover_image?.url || project?.images?.[0]) && (
+              <div className="mb-2 w-full h-28 min-w-[150px] overflow-hidden rounded-md bg-gray-100">
+                <img
+                  src={project.coverPhoto || project.featured_image || project.cover || project.main_image || project?.media?.photos?.[0] || project?.cover_image?.url || project?.rawData?.cover_image?.url || project?.images?.[0]}
+                  alt={project.name || project.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
             <div className="font-semibold text-gray-900 mb-1">
               {project.name || project.title}
             </div>

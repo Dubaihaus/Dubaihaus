@@ -36,6 +36,7 @@ export async function GET(request) {
                     currency: p.priceCurrency || currency,
                     slug: p.id, // For routing
                     propertyTypes: p.propertyTypes || [],
+                    coverPhoto: p.coverPhoto || p.coverImage || null,
                     source: p.source || 'REELLY',
                 }));
 
@@ -79,6 +80,7 @@ export async function GET(request) {
                 currency: p.priceCurrency || currency,
                 slug: p.id,
                 propertyTypes: p.propertyTypes || [],
+                coverPhoto: p.coverPhoto || p.coverImage || null,
                 source: p.source || 'DB',
             }));
 

@@ -117,16 +117,16 @@ export const ABU_DHABI_AREAS = [
     },
   },
   // NEW
- 
+
   {
-  slug: "al-maryah-island",
-  title: "Al Maryah Island",
-  image: "/dashboard/abu-dhabi/al-maryah-island.jpg", // use placeholder if missing
-  filters: {
-    search_query: "Al Maryah Island",
-    region: "Abu Dhabi",
+    slug: "al-maryah-island",
+    title: "Al Maryah Island",
+    image: "/dashboard/abu-dhabi/al-maryah-island.jpg", // use placeholder if missing
+    filters: {
+      search_query: "Al Maryah Island",
+      region: "Abu Dhabi",
+    },
   },
-},
 
   {
     slug: "fahid-island",
@@ -143,6 +143,33 @@ export const ABU_DHABI_AREAS = [
     image: "/dashboard/abu-dhabi/ramhan-island.jpg",
     filters: {
       search_query: "Ramhan Island",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "Al Barsha",
+    title: "Al Barsha",
+    image: "/dashboard/abu-dhabi/al-barsha.jpg",
+    filters: {
+      search: "Al Barsha"
+     
+    },
+  },
+  {
+    slug: "al-bahya",
+    title: "Al Bahya",
+    image: "/dashboard/abu-dhabi/al-bahya.jpg",
+    filters: {
+      search_query: "Al Bahya",
+      region: "Abu Dhabi",
+    },
+  },
+  {
+    slug: "al-shamkhah",
+    title: "Al Shamkhah",
+    image: "/dashboard/abu-dhabi/al-shamkhah.jpg",
+    filters: {
+      search_query: "Al Shamkhah",
       region: "Abu Dhabi",
     },
   },
