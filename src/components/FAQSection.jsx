@@ -42,52 +42,47 @@ const accordionVariants = {
   },
 };
 
-/** Keys for all FAQ items, texts come from JSON */
-const FAQ_KEYS = [
-  "q1",
-  "q2",
-  "q3",
-  "q4",
-  "q5",
-  "q6",
-  "q7",
-  "q8",
-  "q9",
-  "q10",
-  "q11",
-  "q12",
-  "q13",
-  "q14",
-  "q15",
-  "q16",
-  "q17",
-  "q18",
-  "q19",
-  "q20",
-  "q21",
-  "q22",
-  "q23",
+/** Keys for Dubai FAQ items */
+const DUBAI_KEYS = [
+  "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10",
+  "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20",
+  "q21", "q22", "q23"
+];
+
+/** Keys for Abu Dhabi FAQ items */
+const ABU_DHABI_KEYS = [
+  "q_ad_1", "q_ad_2", "q_ad_3", "q_ad_4", "q_ad_5",
+  "q_ad_6", "q_ad_7", "q_ad_8", "q_ad_9", "q_ad_10"
 ];
 
 export default function FAQSection() {
   const t = useTranslations();
   const [openIndex, setOpenIndex] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const [activeTab, setActiveTab] = useState("dubai"); // "dubai" | "abudhabi"
+
+  const currentKeys = activeTab === "dubai" ? DUBAI_KEYS : ABU_DHABI_KEYS;
 
   const faqs = useMemo(
     () =>
-      FAQ_KEYS.map((key) => ({
+      currentKeys.map((key) => ({
         key,
         question: t(`faq.items.${key}.question`),
         answer: t(`faq.items.${key}.answer`),
       })),
-    [t]
+    [t, currentKeys]
   );
 
   const visibleFaqs = showAll ? faqs : faqs.slice(0, BASE_FAQS);
 
   const handleToggle = (index) => {
     setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setOpenIndex(null);
+    setShowAll(false);
   };
 
   return (
@@ -103,7 +98,7 @@ export default function FAQSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-16 text-center"
+          className="mb-12 text-center"
         >
           <motion.p
             initial={{ opacity: 0, scale: 0.8 }}
@@ -123,7 +118,7 @@ export default function FAQSection() {
           >
             {t("faq.title")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">
-              {t("faq.highlight")}
+              {activeTab === 'dubai' ? 'Dubai' : 'Abu Dhabi'} Real Estate
             </span>
           </motion.h2>
           <motion.p
@@ -135,10 +130,41 @@ export default function FAQSection() {
           >
             {t("faq.subtitle")}
           </motion.p>
+
+          {/* Region Tabs */}
+          <div className="mt-8 inline-flex p-1 bg-slate-100 rounded-full relative">
+            <button
+              onClick={() => handleTabChange("dubai")}
+              className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "dubai" ? "text-white" : "text-slate-600 hover:text-slate-900"
+                }`}
+            >
+              Dubai
+              {activeTab === "dubai" && (
+                <motion.div
+                  layoutId="activeTabBg"
+                  className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
+                />
+              )}
+            </button>
+            <button
+              onClick={() => handleTabChange("abudhabi")}
+              className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "abudhabi" ? "text-white" : "text-slate-600 hover:text-slate-900"
+                }`}
+            >
+              Abu Dhabi
+              {activeTab === "abudhabi" && (
+                <motion.div
+                  layoutId="activeTabBg"
+                  className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
+                />
+              )}
+            </button>
+          </div>
         </motion.div>
 
         {/* FAQ List */}
         <motion.div
+          key={activeTab}
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"

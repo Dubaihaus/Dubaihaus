@@ -24,6 +24,20 @@ function normalizeManualProperty(p) {
 }
 
 function normalizeReellyProject(p) {
+  let city = p.city;
+
+  if (!city) {
+    const loc = (p.locationString || "").toLowerCase();
+    const area = (p.area || "").toLowerCase();
+    const region = (p.region || "").toLowerCase();
+
+    if (loc.includes("abu dhabi") || area.includes("abu dhabi") || region.includes("abu dhabi")) {
+      city = "Abu Dhabi";
+    } else {
+      city = "Dubai";
+    }
+  }
+
   return {
     id: p.id,
     title: p.title,
@@ -40,7 +54,7 @@ function normalizeReellyProject(p) {
           : null,
     developer: p.developerName || null,
     handoverDate: p.handoverDate || p.completionDate || null,
-    city: p.city || "Dubai",
+    city: city,
     source: "REELLY",
   };
 }

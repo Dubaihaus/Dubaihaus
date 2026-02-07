@@ -89,56 +89,29 @@ export default function MegaMenu() {
       title: 'Apartments',
       image: '/dashboard/Apartments.jpeg',
       badge: 'FROM AED 700,000',
-      filters: { unit_types: 'Apartment' },
+      filters: { building_type: 'Apartment' },
     },
     {
       title: 'Penthouses',
       image: '/dashboard/Penthhouse.jpeg',
       badge: 'FROM AED 2,000,000',
-      filters: { unit_types: 'Penthouse' },
+      filters: { building_type: 'Penthouse' },
     },
     {
       title: 'Townhouses',
       image: '/dashboard/Townhouse.jpeg',
       badge: 'FROM AED 1,000,000',
-      filters: { unit_types: 'Townhouse' },
+      filters: { building_type: 'Townhouse' },
     },
     {
       title: 'Villas',
       image: '/dashboard/villas.jpg',
       badge: 'FROM AED 1,500,000',
-      filters: { unit_types: 'Villa' },
+      filters: { building_type: 'Villa' },
     },
   ];
 
-  const pills = [
-    {
-      label: 'Beachfront Properties',
-      Icon: FaUmbrellaBeach,
-      filters: { beachfront: 'true' },
-    },
-    { label: 'Waterfront Properties', Icon: FaWater, filters: { waterfront: 'true' } },
-    { label: 'Dubai Luxury Living', Icon: FaCrown, filters: { luxury: 'true' } },
-    { label: 'Green Nature Living', Icon: FaLeaf, filters: { green_living: 'true' } },
-    { label: 'Near Golf Course', Icon: FaGolfBall, filters: { near_golf: 'true' } },
-    {
-      label: 'Properties Below AED 1,000,000',
-      Icon: FaDollarSign,
-      filters: { price_max: '1000000' },
-    },
-    {
-      label: 'Properties Above AED 1,000,000',
-      Icon: FaDollarSign,
-      filters: { price_min: '1000000' },
-    },
-    { label: 'Land Plots', Icon: FaLandmark, filters: { unit_types: 'Plot' } },
-    { label: 'Buildings', Icon: FaBuilding, filters: { unit_types: 'Building' } },
-    {
-      label: 'Branded Residences',
-      Icon: FaCrown,
-      filters: { branded: 'true' },
-    },
-  ];
+  {/* Pills section removed as per audit (inconsistent filters) */ }
 
   return (
     <div
@@ -208,20 +181,7 @@ export default function MegaMenu() {
               ))}
             </div>
 
-            {/* Pills */}
-            <div className="mt-5 flex flex-wrap gap-3">
-              {pills.map(({ label, Icon, filters }) => (
-                <Link
-                  key={label}
-                  href={toHref(filters)}
-                  className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs bg-white hover:border-sky-500 hover:text-sky-600 transition"
-                  onClick={() => setOpen(false)}
-                >
-                  <Icon className="text-sky-600" />
-                  <span>{label}</span>
-                </Link>
-              ))}
-            </div>
+
           </div>
         </div>,
         document.body

@@ -376,6 +376,46 @@
       "q23": {
         "question": "Wie hoch ist die Mindestinvestition in Dubai?",
         "answer": "Der Mindestbetrag ändert sich mit der Zeit, aber es gibt Studios und kleinere Einheiten in aufstrebenden Communities, die vergleichsweise niedrige Einstiegspreise für Investoren bieten."
+      },
+      "q_ad_1": {
+        "question": "Können Ausländer Immobilien in Abu Dhabi kaufen?",
+        "answer": "Ja, seit 2019 erlauben Änderungen des Immobilienrechts Ausländern den Besitz von Eigentum in ausgewiesenen Investitionszonen in Abu Dhabi, wie Yas Island, Saadiyat Island, Al Reem Island und anderen."
+      },
+      "q_ad_2": {
+        "question": "Welches sind die ausgewiesenen Investitionszonen in Abu Dhabi?",
+        "answer": "Wichtige Investitionszonen, in denen Ausländer Eigentum erwerben können, sind Yas Island, Saadiyat Island, Al Reem Island, Al Maryah Island, Al Raha Beach und Ghantoot."
+      },
+      "q_ad_3": {
+        "question": "Ist der Kauf von Immobilien in Abu Dhabi eine gute Investition?",
+        "answer": "Abu Dhabi bietet hohe Mietrenditen (oft 6-8%), eine stabile Wirtschaft und einen wachsenden Tourismus- und Kultursektor. Die Preise pro Quadratfuß sind im Allgemeinen niedriger als in Dubai und bieten Potenzial für Wertsteigerung."
+      },
+      "q_ad_4": {
+        "question": "Welche zusätzlichen Kosten fallen beim Kauf in Abu Dhabi an?",
+        "answer": "Käufer zahlen in der Regel eine Übertragungsgebühr von 2% an die Gemeinde (weniger als die 4% in Dubai), eine Registrierungsgebühr und mögliche Agenturgebühren (normalerweise 2%). Entwickler haben oft spezielle Angebote, bei denen einige Gebühren entfallen."
+      },
+      "q_ad_5": {
+        "question": "Ref: Golden Visa durch Immobilien in Abu Dhabi?",
+        "answer": "Ja, eine Investition von mindestens 2 Millionen AED in Immobilien in Abu Dhabi ermöglicht die Beantragung eines 10-jährigen Golden Visa, ähnlich den föderalen Regeln der VAE."
+      },
+      "q_ad_6": {
+        "question": "Sind Immobilien in Abu Dhabi günstiger als in Dubai?",
+        "answer": "Im Allgemeinen ja. Während luxuriöse Immobilien am Wasser auf Saadiyat teuer sein können, ist der durchschnittliche Preis pro Quadratfuß in Abu Dhabi oft wettbewerbsfähiger als in vergleichbaren erstklassigen Gegenden in Dubai."
+      },
+      "q_ad_7": {
+        "question": "Kann ich meine Immobilie in Abu Dhabi vermieten?",
+        "answer": "Absolut. Abu Dhabi hat einen starken Mietmarkt, der von Fachkräften und Familien getragen wird. Sowohl Langzeit- als auch Kurzzeitvermietungen sind praktikable Optionen."
+      },
+      "q_ad_8": {
+        "question": "Wie läuft der Kauf von Off-Plan-Immobilien in Abu Dhabi ab?",
+        "answer": "Der Prozess ist ähnlich wie in Dubai: Einheit auswählen, Reservierungsvereinbarung unterzeichnen, Anzahlung leisten (meist 5-10%) und dem Zahlungsplan folgen. Das Projekt muss bei der Gemeinde registriert sein."
+      },
+      "q_ad_9": {
+        "question": "Gibt es Servicegebühren in Abu Dhabi?",
+        "answer": "Ja, Eigentümer zahlen jährliche Servicegebühren für die Instandhaltung der Gemeinschaftsbereiche. Diese Sätze variieren je nach Gemeinde und Entwickler, sind aber im Allgemeinen reguliert."
+      },
+      "q_ad_10": {
+        "question": "Muss ich in Abu Dhabi sein, um zu kaufen?",
+        "answer": "Nein, viele Transaktionen können aus der Ferne mit Hilfe einer Vollmacht oder digitaler Signaturen durchgeführt werden, insbesondere bei Off-Plan-Käufen von großen Entwicklern wie Aldar."
       }
     },
     "meta": {
@@ -552,9 +592,8 @@
     }
   },
   "featuredProperties": {
-  "title": "Ausgewählte Immobilien",
-  "subtitle": "Handverlesene Auswahl der besten Immobilien und Projekte.",
-  "empty": "Keine ausgewählten Immobilien gefunden."
-}
-
+    "title": "Ausgewählte Immobilien",
+    "subtitle": "Handverlesene Auswahl der besten Immobilien und Projekte.",
+    "empty": "Keine ausgewählten Immobilien gefunden."
+  }
 }

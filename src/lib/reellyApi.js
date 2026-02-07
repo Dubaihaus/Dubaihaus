@@ -102,8 +102,8 @@ export async function listRegions() {
 // ---------- Developers ----------
 export async function listDevelopers({ limit = 50, offset = 0 } = {}) {
   const now = Date.now();
-  if (now - _developersCache.at < DEVELOPERS_TTL_MS && _developersCache.data?.length) {
-    return _developersCache.data;
+  if (now - _developersCache.at < DEVELOPERS_TTL_MS && _developersCache.data?.length >= limit) {
+    return _developersCache.data.slice(0, limit);
   }
 
   const qs = new URLSearchParams({

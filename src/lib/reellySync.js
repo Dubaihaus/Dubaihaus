@@ -106,7 +106,8 @@ export async function syncProjects() {
 
     // 1. Fetch all projects (iterates pages)
     const result = await searchAllProjects({
-      pageSize: 300,
+      pageSize: 500,
+      maxPages: 10,  // safety cap; 5000 projects
       pricedOnly: false, // get everything
     });
 
@@ -123,24 +124,13 @@ export async function syncProjects() {
     for (const base of allProjects) {
       let p = base;
 
-      // 🔹 1) Try to fetch full project details (payment_plans, unit types, etc.)
-      try {
-        const detail = await getPropertyById(base.id);
+      // Removed redundant getPropertyById call. 
+      // searchAllProjects already uses includeAllData: true (expand=payment_plans,etc)
+      // so base should have paymentPlans and unitTypes normalized.
 
-        if (detail) {
-          p = {
-            // keep anything we already had
-            ...base,
-            ...detail,
-            // but be explicit about these:
-            paymentPlans: detail.paymentPlans || base.paymentPlans || [],
-            unitTypes: detail.unitTypes || base.unitTypes || [],
-          };
-        }
-      } catch (err) {
-        console.warn(`⚠️ Failed to fetch detail for project ${base.id}`, err);
-        // fall back to base listing object
-      }
+      // Ensure we have arrays even if null properties
+      p.paymentPlans = p.paymentPlans || [];
+      p.unitTypes = p.unitTypes || [];
 
       const data = mapProjectToPrisma(p);
 

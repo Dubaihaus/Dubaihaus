@@ -147,12 +147,11 @@ export const ABU_DHABI_AREAS = [
     },
   },
   {
-    slug: "Al Barsha",
-    title: "Al Barsha",
-    image: "/dashboard/abu-dhabi/al-barsha.jpg",
+    slug: "al-hudayriat-island",
+    title: "Al Hudayriat Island",
+    image: "/dashboard/abu-dhabi/al-hudayriat-island.jpg",
     filters: {
-      search: "Al Barsha"
-     
+      search_query: "Al Hudayriat Island, Al Hudayriat"
     },
   },
   {

@@ -3,6 +3,7 @@
 
 import { listDevelopers, searchAllProjects } from "@/lib/reellyApi";
 import { BLOG_POSTS } from "@/data/blogPosts";
+import { AREAS } from "@/lib/Areas"; // Import all areas (Dubai + Abu Dhabi)
 
 export const dynamic = "force-static";   // metadata route config
 export const revalidate = 86400;         // 24 hours (must be a literal)
@@ -48,10 +49,24 @@ export default async function sitemap() {
     console.error("Sitemap: Blog posts error", e);
   }
 
-  /* 3) Developer profiles /developers/[id] */
+  /* 3) Areas /areas/[slug] */
+  let areaPages = [];
+  try {
+    const allAreas = [...(DUBAI_AREAS || []), ...(ABU_DHABI_AREAS || [])];
+    areaPages = allAreas.map((area) => ({
+      url: `${BASE_URL}/areas/${area.slug}`,
+      lastModified: now,
+      priority: 0.8,
+      changeFrequency: "weekly",
+    }));
+  } catch (e) {
+    console.error("Sitemap: Areas error", e);
+  }
+
+  /* 4) Developer profiles /developers/[id] */
   let developerPages = [];
   try {
-    const devs = await listDevelopers({ limit: 300, offset: 0 });
+    const devs = await listDevelopers({ limit: 500, offset: 0 });
     developerPages = (devs || []).map((d) => ({
       url: `${BASE_URL}/developers/${d.id}`,
       lastModified: now,
@@ -62,13 +77,14 @@ export default async function sitemap() {
     console.error("Sitemap: Developer error", e);
   }
 
-  /* 4) Off-plan detail pages /off-plan/[id] */
+  /* 5) Off-plan detail pages /off-plan/[id] */
   let offplanPages = [];
   try {
     const allProjects = await searchAllProjects({
       pageSize: 200,
-      maxPages: 5,       // up to 1000 projects
-      pricedOnly: true,
+      maxPages: 25,       // up to 5000 projects
+      pricedOnly: false,  // include "Coming Soon" / unpriced
+      ordering: "-updated_at"
     });
 
     const seen = new Set();
@@ -91,10 +107,12 @@ export default async function sitemap() {
     console.error("Sitemap: Off-plan error", e);
   }
 
-  /* 5) Merge + dedupe by URL */
+
+  /* Merge + dedupe by URL */
   const allEntries = [
     ...staticPages,
     ...blogPages,
+    ...areaPages,
     ...developerPages,
     ...offplanPages,
   ];
