@@ -3,7 +3,7 @@
 
 import { listDevelopers, searchAllProjects } from "@/lib/reellyApi";
 import { BLOG_POSTS } from "@/data/blogPosts";
-import { AREAS } from "@/lib/Areas"; // Import all areas (Dubai + Abu Dhabi)
+import { DUBAI_AREAS, ABU_DHABI_AREAS } from "@/lib/Areas";
 
 export const dynamic = "force-static";   // metadata route config
 export const revalidate = 86400;         // 24 hours (must be a literal)
