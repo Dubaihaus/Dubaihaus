@@ -15,7 +15,8 @@ const EXCLUDED_AREAS = new Set([
 
 /** Abu Dhabi areas already shown somewhere else – if you want to exclude them, fill this set */
 const EXCLUDED_ABU_DHABI_AREAS = new Set(
-  // (ABU_DHABI_AREAS || []).map((a) => a.title?.trim())
+   "Abu Dhabi Industrial City",
+  "Marina Square",
 );
 
 // ✅ General max items for most footer columns
@@ -75,13 +76,14 @@ const FEATURED_ABU_DHABI_DEVELOPER_NAMES = [
 // ✅ Featured Abu Dhabi areas (will be shown first)
 const FEATURED_ABU_DHABI_AREA_NAMES = [
   "Al Reem Island",
-  "Marina Square",
+  "Al Bahya",
   "Ramhan Island",
   "Fahid Island",
   "Zayed City",
   "Al Reem Island",
   "Yas Island",
   "Saadiyat Island",
+  
 ];
 
 // ✅ Featured Dubai areas (Popular Areas in Dubai column)
@@ -235,16 +237,14 @@ export async function GET() {
           return { name, href };
         }) || [];
 
-    const abuDhabiAreas = mergeFeaturedWithApi({
-      featuredNames: FEATURED_ABU_DHABI_AREA_NAMES,
-      apiItems: abuDhabiAreasFromApi,
-      buildHrefFromName: (name) =>
-        qsHref("/off-plan", {
-          search_query: name || "Abu Dhabi",
-          region: "Abu Dhabi",
-        }),
-      limit: MAX_FOOTER_ITEMS,
-    });
+const abuDhabiAreas = FEATURED_ABU_DHABI_AREA_NAMES.slice(0, MAX_FOOTER_ITEMS).map((name) => ({
+  name,
+  href: qsHref("/off-plan", {
+    search_query: name || "Abu Dhabi",
+    region: "Abu Dhabi",
+  }),
+}));
+
 
     /* ---------------- Useful Links (internal routes) ---------------- */
     const usefulLinks = [

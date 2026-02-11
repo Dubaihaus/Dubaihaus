@@ -1,4 +1,6 @@
+// src/components/project_details/AmenitiesSection.jsx
 'use client';
+
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { CheckCircle } from 'lucide-react';
@@ -41,23 +43,122 @@ function parseImageUrl(imageUrlJson) {
 
 /** Escape text for safe use inside a RegExp constructor */
 function escapeRegExp(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/* -------------------------------------------------------------------------- */
+/* NEW: robust markdown-ish section extraction + removal + truncation utilities */
+/* -------------------------------------------------------------------------- */
+
+/** Collapse whitespace nicely */
+function normalizeText(s) {
+  return String(s || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /**
- * Extract a markdown-like section that starts with "##### <heading>"
- * and ends at the next "##### ..." or the end of the string.
+ * Remove markdown sections that start with ###/####/##### <heading>
+ * and end at the next heading or end of string.
+ */
+function removeMdSections(md, headings = []) {
+  if (!md || typeof md !== 'string') return '';
+  let out = md;
+
+  for (const h of headings) {
+    const pattern = new RegExp(
+      `^#{3,6}\\s*${escapeRegExp(h)}\\b[\\s\\S]*?(?=^#{3,6}\\s|\\s*$)`,
+      'gim'
+    );
+    out = out.replace(pattern, '');
+  }
+
+  return out;
+}
+
+/** Remove standalone markdown heading lines (### Title, #### Title, etc.) */
+function stripHeadingLines(md) {
+  return String(md || '').replace(/^#{1,6}\s+.*$/gm, '');
+}
+
+/** Remove other common markdown noise we see in API blobs */
+function stripMarkdownNoise(md) {
+  return String(md || '')
+    .replace(/^\s*[-*]\s+/gm, '') // bullet markers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // bold
+    .replace(/_(.*?)_/g, '$1') // italics
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1') // links
+    .replace(/`{1,3}([\s\S]*?)`{1,3}/g, '$1'); // inline/fenced code-ish
+}
+
+/**
+ * Extract a markdown-like section that starts with ###..###### <heading>
+ * and ends at next heading or end.
  */
 function extractMdSection(md, heading) {
   if (!md || typeof md !== 'string') return null;
+
   const pattern = new RegExp(
-    `#####\\s*${escapeRegExp(heading)}\\b(.*?)(?=#####|\\s*$)`,
-    'is' // case-insensitive, dotall
+    `^#{3,6}\\s*${escapeRegExp(heading)}\\b([\\s\\S]*?)(?=^#{3,6}\\s|\\s*$)`,
+    'gim'
   );
-  const m = md.match(pattern);
+
+  const m = pattern.exec(md);
   if (!m) return null;
-  const cleaned = m[1].trim().replace(/^#+\s*/g, '');
+
+  const cleaned = normalizeText(stripMarkdownNoise(stripHeadingLines(m[1])));
   return cleaned || null;
+}
+
+/**
+ * Final: pick best amenity description and ensure location/history blocks are removed
+ * so they never leak into Amenities section.
+ */
+function buildAmenitiesParagraph(overviewSource) {
+  const src = String(overviewSource || '');
+
+  // 1) Try best-match sections first (amenity-related)
+  const preferredHeadings = [
+    'Finishing and materials',
+    'Finishing & materials',
+    'Amenities',
+    'Amenities and facilities',
+    'Facilities',
+    'Features',
+    'Project features',
+    'Signature features',
+  ];
+
+  for (const h of preferredHeadings) {
+    const found = extractMdSection(src, h);
+    if (found) return found;
+  }
+
+  // 2) If we couldn’t extract, sanitize the whole blob and REMOVE location/history blocks
+  const withoutBadSections = removeMdSections(src, [
+    'Location description',
+    'Location',
+    'Project history',
+    'Neighborhood',
+    'Area',
+    'About the Project',
+    'Project general facts',
+  ]);
+
+  const cleaned = normalizeText(stripMarkdownNoise(stripHeadingLines(withoutBadSections)));
+  return cleaned;
+}
+
+/** Truncate to N chars, avoid cutting mid-word */
+function truncateText(s, limit = 500) {
+  const txt = String(s || '').trim();
+  if (txt.length <= limit) return txt;
+
+  const cut = txt.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 120 ? cut.slice(0, lastSpace) : cut).trim() + '…';
 }
 
 export default function AmenitiesSection({ property }) {
@@ -85,10 +186,10 @@ export default function AmenitiesSection({ property }) {
   const galleryFallback = Array.isArray(property?.media?.photos)
     ? property.media.photos
     : [
-        ...(property?.rawData?.architecture || []).map(x => x?.url).filter(Boolean),
-        ...(property?.rawData?.interior || []).map(x => x?.url).filter(Boolean),
-        ...(property?.rawData?.lobby || []).map(x => x?.url).filter(Boolean),
-        property?.rawData?.cover_image?.url
+        ...(property?.rawData?.architecture || []).map((x) => x?.url).filter(Boolean),
+        ...(property?.rawData?.interior || []).map((x) => x?.url).filter(Boolean),
+        ...(property?.rawData?.lobby || []).map((x) => x?.url).filter(Boolean),
+        property?.rawData?.cover_image?.url,
       ].filter(Boolean);
 
   const carouselImages = amenities.map((a) => a.img).filter(Boolean);
@@ -100,7 +201,11 @@ export default function AmenitiesSection({ property }) {
   const next = () => setIdx((i) => (i + 1) % images.length);
   const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
 
-  // -------- NEW: show only the "Finishing and materials" section from API overview/description
+  /* -------------------------------------------------------------------------- */
+  /* NEW: Amenities paragraph that never shows location/history sections         */
+  /* + See more / See less toggle with a 500 char preview                        */
+  /* -------------------------------------------------------------------------- */
+
   const overviewSource =
     property?.rawData?.description ||
     property?.rawData?.overview ||
@@ -108,17 +213,24 @@ export default function AmenitiesSection({ property }) {
     property?.description ||
     '';
 
-  const finishingAndMaterials =
-    extractMdSection(overviewSource, 'Finishing and materials') ||
-    null; // if missing, we'll fall back below
+  const cleanedAmenitiesText = buildAmenitiesParagraph(overviewSource);
 
-  // Fallback text (only if the section isn't available)
+  // Fallback text (only if cleaned content isn't available/meaningful)
   const fallbackText =
-    typeof property?.description === 'string' && property.description.trim()
-      ? property.description
-      : 'Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities.';
+    'Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities.';
 
-  const paragraphText = finishingAndMaterials || fallbackText;
+  const paragraphFull =
+    cleanedAmenitiesText && cleanedAmenitiesText.length > 40 ? cleanedAmenitiesText : fallbackText;
+
+  const PREVIEW_LIMIT = 500;
+  const [expanded, setExpanded] = useState(false);
+
+  const paragraphPreview = useMemo(
+    () => truncateText(paragraphFull, PREVIEW_LIMIT),
+    [paragraphFull]
+  );
+
+  const shouldShowToggle = paragraphFull.length > paragraphPreview.length;
 
   return (
     <section className="bg-gray-50 py-12" dir="ltr">
@@ -189,7 +301,17 @@ export default function AmenitiesSection({ property }) {
             </h2>
 
             <p className="text-gray-600 mt-3">
-              {paragraphText}
+              {expanded ? paragraphFull : paragraphPreview}
+
+              {shouldShowToggle && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="ml-2 text-sm font-semibold text-sky-600 hover:text-sky-700 underline underline-offset-2"
+                >
+                  {expanded ? 'See less' : 'See more'}
+                </button>
+              )}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">

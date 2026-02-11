@@ -51,15 +51,18 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
   }
 
   // ✅ IMPORTANT: DB has developerName, not developerId
+  const PAGE_SIZE = 20;
   const properties = await getCachedProjects({
     page,
-    pageSize: 12,
+    pageSize: PAGE_SIZE,
     developer: developer.name, // match by name (contains, insensitive)
     sortBy: "updatedAt",
     sortOrder: "desc",
   });
 
   const items = properties?.results || [];
+  const total = properties?.total ?? items.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)] text-slate-900">
@@ -123,10 +126,15 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
           <span>
             Found{" "}
             <span className="font-semibold text-[var(--color-brand-sky)]">
-              {properties?.total ?? items.length}
+              {total}
             </span>{" "}
-            {items.length === 1 ? "property" : "properties"}
+            {total === 1 ? "property" : "properties"}
           </span>
+          {totalPages > 1 && (
+            <span>
+              Page {page} of {totalPages}
+            </span>
+          )}
         </div>
 
         {items.length === 0 ? (
@@ -144,6 +152,51 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
               />
             ))}
           </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Pagination">
+            {page > 1 && (
+              <Link
+                href={`/developers/${developerId}?page=${page - 1}`}
+                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:border-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)] transition"
+              >
+                ← Previous
+              </Link>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+              .reduce((acc, p, i, arr) => {
+                if (i > 0 && p - arr[i - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((item, i) =>
+                item === '...' ? (
+                  <span key={`ellipsis-${i}`} className="px-2 text-xs text-slate-400">…</span>
+                ) : (
+                  <Link
+                    key={item}
+                    href={`/developers/${developerId}?page=${item}`}
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition ${item === page
+                        ? 'bg-[var(--color-brand-sky)] text-white shadow-sm'
+                        : 'border border-slate-200 bg-white text-slate-700 hover:border-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]'
+                      }`}
+                  >
+                    {item}
+                  </Link>
+                )
+              )}
+            {page < totalPages && (
+              <Link
+                href={`/developers/${developerId}?page=${page + 1}`}
+                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:border-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)] transition"
+              >
+                Next →
+              </Link>
+            )}
+          </nav>
         )}
       </section>
     </main>
