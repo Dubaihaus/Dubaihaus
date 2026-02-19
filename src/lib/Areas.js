@@ -77,7 +77,7 @@ export const ABU_DHABI_AREAS = [
     image: "/dashboard/yas.webp",
     filters: {
       search_query: "Yas Island",
-      region: "Abu Dhai",
+      region: "Abu Dhabi",
     },
   },
   {
