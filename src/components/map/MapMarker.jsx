@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-export default function MapMarker({ project, onMarkerClick, isActive }) {
+export default function MapMarker({ project, onMarkerClick, onHoverChange, isActive }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = (e) => {
@@ -13,10 +13,12 @@ export default function MapMarker({ project, onMarkerClick, isActive }) {
 
   const handleMouseEnter = () => {
     setIsHovered(true);
+    onHoverChange?.(true);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    onHoverChange?.(false);
   };
 
   const price = project.minPrice || project.price_from || project.price;
@@ -62,7 +64,8 @@ export default function MapMarker({ project, onMarkerClick, isActive }) {
         </div>
       </button>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip — z-50 is sufficient here because the Marker wrapper
+           itself is elevated to z-9999 by PropertiesMap when isHovered */}
       {isHovered && !isActive && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-8 pointer-events-none z-50">
           <div className="bg-white rounded-lg shadow-xl border border-gray-200 px-3 py-2 text-sm whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">

@@ -31,16 +31,16 @@ const AREAS_CONFIG = [
     gradient: 'bg-gradient-to-r from-sky-900/60 to-blue-900/60',
     fallbackImg: '/dashboard/saadiyat.jpg',
   },
-  
-    {
-      title: 'Jumeirah Village Circle (JVC)',
-      filters: {
-        search_query: 'Jumeirah Village Circle',
-        region: 'Dubai',
-      },
-      gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
-      fallbackImg: '/dashboard/palm1.jpg',
+
+  {
+    title: 'Jumeirah Village Circle (JVC)',
+    filters: {
+      search_query: 'Jumeirah Village Circle',
+      region: 'Dubai',
     },
+    gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
+    fallbackImg: '/dashboard/palm1.jpg',
+  },
   {
     title: 'Yas Island',
     filters: {
@@ -50,17 +50,17 @@ const AREAS_CONFIG = [
     gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
     fallbackImg: '/dashboard/yas.webp',
   },
-  
-    // --- Dubai ---
-    {
-      title: 'Business Bay',
-      filters: {
-        search_query: 'Business Bay',
-        region: 'Dubai',
-      },
-      gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
-      fallbackImg: '/dashboard/BusinessBay.webp',
+
+  // --- Dubai ---
+  {
+    title: 'Business Bay',
+    filters: {
+      search_query: 'Business Bay',
+      region: 'Dubai',
     },
+    gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
+    fallbackImg: '/dashboard/BusinessBay.webp',
+  },
   {
     title: 'Al Reem Island',
     filters: {
@@ -296,9 +296,8 @@ export default function DashboardHeader() {
         {slides.map((slide, idx) => (
           <div
             key={`${slide.areaTitle}-${idx}`}
-            className={`absolute inset-0 transition-all duration-1000 ${
-              idx === current ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-            }`}
+            className={`absolute inset-0 transition-all duration-1000 ${idx === current ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+              }`}
             style={{
               transition:
                 'opacity 1s ease-in-out, transform 6s ease-in-out',
@@ -329,7 +328,7 @@ export default function DashboardHeader() {
 
             {active.hasProject ? (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                
+
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
@@ -386,7 +385,7 @@ export default function DashboardHeader() {
                 prefetch
               >
                 {t('secondaryCtaPrefix', {
-                  areaShort: active.areaTitle.split(' ')[0],
+                  areaShort: active.areaTitle.replace(/\s*\(.*?\)\s*$/, '').trim(),
                 })}
               </Link>
             </div>
@@ -409,11 +408,10 @@ export default function DashboardHeader() {
               <button
                 key={idx}
                 onClick={() => goTo(idx)}
-                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                  idx === current
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${idx === current
                     ? 'bg-white scale-110 sm:scale-125 shadow-lg'
                     : 'bg-white/50 hover:bg-white/70 hover:scale-105'
-                }`}
+                  }`}
                 aria-label={t('dotAriaLabel', { areaTitle: slide.areaTitle })}
               />
             ))}

@@ -166,7 +166,10 @@ export const getCachedBlogPosts = unstable_cache(
 
         return prisma.blogPost.findMany({
             where,
-            orderBy: { publishedAt: "desc" },
+            orderBy: [
+                { publishedAt: "desc" },
+                { createdAt: "desc" },
+            ],
             select: {
                 id: true,
                 title: true,
@@ -196,7 +199,8 @@ export const getCachedBlogPosts = unstable_cache(
             },
         });
     },
-    ["blog-posts"],
+    // Include cat + tag so each filter combination has its own cache entry
+    (opts) => ["blog-posts", opts?.cat ?? "", opts?.tag ?? ""],
     {
         revalidate: 300, // 5 minutes
         tags: ["blog-posts"],

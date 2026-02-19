@@ -17,7 +17,7 @@ export async function GET(request) {
     try {
         const data = await searchAllProjects({
             pageSize: 200,
-            maxPages: 6,        // 1200 projects max
+            maxPages: 8,        // 1600 projects max
             pricedOnly: false,  // Include all, even unpriiced
             currency,
         });
@@ -62,7 +62,7 @@ export async function GET(request) {
     try {
         const data = await getCachedProjects({
             page: 1,
-            pageSize: 1200,
+            pageSize: 1500,
             // No sale_status filter - get all
             sortBy: 'updatedAt',
             sortOrder: 'desc',

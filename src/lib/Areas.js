@@ -85,7 +85,7 @@ export const ABU_DHABI_AREAS = [
     title: "Saadiyat Island",
     image: "/dashboard/sadayat.jpg",
     filters: {
-      search_query: "Al Saadiyat Island",
+      search: "Al Saadiyat Island",
       region: "Abu Dhabi",
     },
   },

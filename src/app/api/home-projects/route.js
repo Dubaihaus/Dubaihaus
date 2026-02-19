@@ -10,9 +10,9 @@ export async function GET(request) {
     const currency = (searchParams.get('currency') || 'AED').toUpperCase();
     const limit = parseInt(searchParams.get('limit')) || 9;
 
-    // 1. Try Reelly API first (Latest Launches = announced + presale)
+    // 1. Try Reelly API first (Latest Launches = announced + presale + on_sale)
     try {
-        // Reelly API doesn't support array for sale_status, so we fetch both in parallel
+        // Reelly API doesn't support array for sale_status, so we fetch all statuses in parallel
         const announcedPromise = searchProperties({
             page: 1,
             pageSize: limit,
@@ -29,18 +29,27 @@ export async function GET(request) {
             currency
         });
 
-        // Set a timeout for the API call (e.g., 5 seconds)
-        const apiPromise = Promise.all([announcedPromise, presalePromise]);
+        const onSalePromise = searchProperties({
+            page: 1,
+            pageSize: limit,
+            sale_status: 'on_sale',
+            ordering: '-updated_at',
+            currency
+        });
+
+        // Set a timeout for the API call
+        const apiPromise = Promise.all([announcedPromise, presalePromise, onSalePromise]);
         const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Reelly API timeout')), 15000)
         );
 
-        const [announcedData, presaleData] = await Promise.race([apiPromise, timeoutPromise]);
+        const [announcedData, presaleData, onSaleData] = await Promise.race([apiPromise, timeoutPromise]);
 
-        // Merge results
+        // Merge results from all three statuses
         const combined = [
             ...(announcedData?.results || []),
-            ...(presaleData?.results || [])
+            ...(presaleData?.results || []),
+            ...(onSaleData?.results || [])
         ];
 
         if (combined.length > 0) {
@@ -84,7 +93,7 @@ export async function GET(request) {
         const dbFilters = {
             page: 1,
             pageSize: limit,
-            saleStatus: ['announced', 'presale'],
+            saleStatus: ['announced', 'presale', 'on_sale'],
             sortBy: 'updatedAt',
             sortOrder: 'desc',
         };

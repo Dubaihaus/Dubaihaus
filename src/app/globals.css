@@ -318,3 +318,25 @@
   border-radius: 9999px;
   overflow: hidden;
 }
+/* Mapbox popup must be above markers (markers use transform which creates stacking contexts) */
+/* --- Map popup must be above markers (reliable fix) --- */
+.map-popup-open .mapboxgl-popup {
+  z-index: 999999 !important;
+}
+
+.map-popup-open .mapboxgl-popup-content {
+  position: relative;
+  z-index: 999999 !important;
+}
+
+/* Force markers below popup when popup is open */
+.map-popup-open .mapboxgl-marker {
+  z-index: 1 !important;
+}
+
+/* Optional: marker hover tooltips should not appear above popup */
+.map-popup-open .mapboxgl-marker [class*="z-50"],
+.map-popup-open .mapboxgl-marker [class*="z-[50"] {
+  z-index: 1 !important;
+}
+

@@ -18,14 +18,14 @@ import {
   FaArrowRight,
 } from 'react-icons/fa';
 
-// Small helper: turns {k:v} into "?k=v&..."
+// Small helper: turns {type:v} into "/off-plan/search?type=v"
 const toHref = (filters = {}) => {
   const params = new URLSearchParams(
     Object.entries(filters).filter(
       ([, v]) => v !== undefined && v !== null && v !== ''
     )
   ).toString();
-  return `/off-plan${params ? `?${params}` : ''}`;
+  return `/off-plan/search${params ? `?${params}` : ''}`;
 };
 
 import { usePathname } from 'next/navigation';
@@ -89,25 +89,25 @@ export default function MegaMenu() {
       title: 'Apartments',
       image: '/dashboard/Apartments.jpeg',
       badge: 'FROM AED 700,000',
-      filters: { search: 'Apartment' },
+      filters: { type: 'Apartment' },
     },
     {
       title: 'Penthouses',
       image: '/dashboard/Penthhouse.jpeg',
       badge: 'FROM AED 2,000,000',
-      filters: { search: 'Penthouse' },
+      filters: { type: 'Penthouse' },
     },
     {
       title: 'Townhouses',
       image: '/dashboard/Townhouse.jpeg',
       badge: 'FROM AED 1,000,000',
-      filters: { search: 'Townhouse' },
+      filters: { type: 'Townhouse' },
     },
     {
       title: 'Villas',
       image: '/dashboard/villas.jpg',
       badge: 'FROM AED 1,500,000',
-      filters: { search: 'Villa' },
+      filters: { type: 'Villa' },
     },
   ];
 

@@ -225,32 +225,32 @@ export default function Navbar() {
             {mobilePropsOpen && (
               <div className="space-y-1 border-b pb-2 pl-3">
                 <MobileSubLink
-                  href={localeHref('/off-plan')}
+                  href={localeHref('/off-plan/search')}
                   label={t('navbar.properties')}
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?search=Apartment')}
+                  href={localeHref('/off-plan/search?type=Apartment')}
                   label={
                     t('offPlan.propertyTypes.apartments.title') ??
                     'Apartments'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?search=Penthouse')}
+                  href={localeHref('/off-plan/search?type=Penthouse')}
                   label={
                     t('offPlan.propertyTypes.penthouses.title') ??
                     'Penthouses'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?search=Townhouse')}
+                  href={localeHref('/off-plan/search?type=Townhouse')}
                   label={
                     t('offPlan.propertyTypes.townhouses.title') ??
                     'Townhouses'
                   }
                 />
                 <MobileSubLink
-                  href={localeHref('/off-plan?search=Villa')}
+                  href={localeHref('/off-plan/search?type=Villa')}
                   label={
                     t('offPlan.propertyTypes.villas.title') ??
                     'Villas'

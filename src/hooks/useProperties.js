@@ -33,7 +33,7 @@ export function useProperties(filters = {}, options = {}) {
 export function useAreaProperties(areaSlug, filters = {}, options = {}) {
   const areaFilters = {
     page: 1,
-    pageSize: 6,
+    pageSize: 20,
     pricedOnly: false,
     ...filters,
   };

@@ -72,6 +72,7 @@ export default function PropertiesMap({
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const tStatus = useTranslations('map.status');
   const [activeProject, setActiveProject] = useState(null);
+  const [hoveredId, setHoveredId] = useState(null);
 
   // Convert projects to markers
   const markers = useMemo(() => {
@@ -121,6 +122,11 @@ export default function PropertiesMap({
     setActiveProject(null);
   }, []);
 
+  // Hover tracking: only raise z-index when no popup is open
+  const handleHoverChange = useCallback((projectId, isHovered) => {
+    setHoveredId(isHovered ? projectId : null);
+  }, []);
+
   if (!token) {
     return (
       <div className="w-full h-full rounded-xl border border-gray-200 flex items-center justify-center bg-gray-50">
@@ -135,7 +141,7 @@ export default function PropertiesMap({
   }
 
   return (
-    <div className="w-full h-full relative">
+    <div className={`w-full h-full relative ${activeProject ? 'map-popup-open' : ''}`}>
       {/* Loading indicator for markers */}
       {markersLoading && <MarkersLoading />}
 
@@ -155,17 +161,29 @@ export default function PropertiesMap({
 
           {/* Markers */}
           {showMarkers &&
-            markers.map(({ p, pt }) => (
-              <Suspense key={p.id} fallback={null}>
-                <Marker longitude={pt.lng} latitude={pt.lat} anchor="bottom">
-                  <MapMarker
-                    project={p}
-                    onMarkerClick={handleMarkerClick}
-                    isActive={activeProject?.id === p.id}
-                  />
-                </Marker>
-              </Suspense>
-            ))}
+            markers.map(({ p, pt }) => {
+              // Raise this marker's Mapbox wrapper above all others when hovered
+              // (and only when no click popup is open, to avoid competing with it)
+              const isHov = hoveredId === p.id;
+              const markerZIndex = isHov && !activeProject ? 9999 : 'auto';
+              return (
+                <Suspense key={p.id} fallback={null}>
+                  <Marker
+                    longitude={pt.lng}
+                    latitude={pt.lat}
+                    anchor="bottom"
+                    style={{ zIndex: markerZIndex }}
+                  >
+                    <MapMarker
+                      project={p}
+                      onMarkerClick={handleMarkerClick}
+                      onHoverChange={(isHovered) => handleHoverChange(p.id, isHovered)}
+                      isActive={activeProject?.id === p.id}
+                    />
+                  </Marker>
+                </Suspense>
+              );
+            })}
 
           {/* Popup */}
           {activeProject && (
@@ -177,6 +195,7 @@ export default function PropertiesMap({
                 closeOnClick={false}
                 onClose={handlePopupClose}
                 closeButton={false}
+                style={{ zIndex: 9999 }}
               >
                 <MapPopup
                   project={activeProject}
