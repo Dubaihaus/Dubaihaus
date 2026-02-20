@@ -212,12 +212,12 @@ export default async function BlogPage({ searchParams }) {
                   <div className="p-5 flex flex-col gap-3 flex-1">
                     <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
                       {new Date(
-                        post.publishedAt ?? post.createdAt ?? post.updatedAt
-                      ).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+  post.publishedAt ?? post.createdAt
+).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+})}
                       {post.readMinutes && (
                         <>
                           <span className="text-slate-300">•</span>

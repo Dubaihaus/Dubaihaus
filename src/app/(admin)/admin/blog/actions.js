@@ -24,9 +24,15 @@ export async function createBlog(formData) {
   // propertyIds comes from <select multiple name="propertyIds">
   const propertyIds = formData.getAll("propertyIds").map(String).filter(Boolean);
 
-  const status = formData.get("status") || "DRAFT";
-  const publishedAtStr = formData.get("publishedAt");
-  const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
+ const status = (formData.get("status") || "DRAFT").toString();
+const publishedAtStr = formData.get("publishedAt")?.toString().trim() || "";
+
+// ✅ If user publishes without setting time, set now.
+// ✅ If draft, always null.
+const publishedAt =
+  status === "PUBLISHED"
+    ? (publishedAtStr ? new Date(publishedAtStr) : new Date())
+    : null;
 
   // JSON fields - now containing category/tag IDs or names
   const categoryData = JSON.parse(formData.get("categories") || "[]"); // array of {id?, name}
@@ -136,10 +142,25 @@ export async function updateBlog(id, formData) {
 
   const propertyIds = formData.getAll("propertyIds").map(String).filter(Boolean);
 
-  const status = formData.get("status") || "DRAFT";
-  const publishedAtStr = formData.get("publishedAt");
-  const publishedAt = publishedAtStr ? new Date(publishedAtStr) : null;
+const status = (formData.get("status") || "DRAFT").toString();
+const publishedAtStr = formData.get("publishedAt")?.toString().trim() || "";
 
+// publishing right now?
+const isPublishingNow =
+  existing.status !== "PUBLISHED" && status === "PUBLISHED";
+
+// ✅ Preserve old publishedAt unless explicitly changed
+let publishedAt = existing.publishedAt;
+
+if (status === "DRAFT") {
+  publishedAt = null;
+} else if (isPublishingNow) {
+  // Publishing for first time: set now unless user chose a schedule time
+  publishedAt = publishedAtStr ? new Date(publishedAtStr) : new Date();
+} else {
+  // Already published: only update date if user provided one
+  if (publishedAtStr) publishedAt = new Date(publishedAtStr);
+}
   // JSON fields
   const categoryData = JSON.parse(formData.get("categories") || "[]");
   const tagData = JSON.parse(formData.get("tags") || "[]");

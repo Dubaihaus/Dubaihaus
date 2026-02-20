@@ -166,10 +166,11 @@ export const getCachedBlogPosts = unstable_cache(
 
         return prisma.blogPost.findMany({
             where,
-            orderBy: [
-                { publishedAt: "desc" },
-                { createdAt: "desc" },
-            ],
+         orderBy: [
+  { publishedAt: "desc" },
+  { createdAt: "desc" },
+  { id: "desc" },
+],
             select: {
                 id: true,
                 title: true,
@@ -213,37 +214,30 @@ export const getCachedBlogPosts = unstable_cache(
  * @returns {Promise<object|null>} - Blog post or null
  */
 export const getCachedBlogPostBySlug = unstable_cache(
-    async (slug) => {
-        return prisma.blogPost.findFirst({
-            where: {
-                seo: { slug },
-                status: "PUBLISHED",
-            },
-            include: {
-                seo: true,
-                categoryLinks: {
-                    include: { category: true },
-                },
-                tagLinks: {
-                    include: { tag: true },
-                },
-                media: true,
-                featuredProperties: {
-                    orderBy: { position: "asc" },
-                    include: {
-                        property: {
-                            include: { images: true },
-                        },
-                    },
-                },
-            },
-        });
-    },
-    ["blog-post-by-slug"],
-    {
-        revalidate: 300, // 5 minutes
-        tags: ["blog-post"],
-    }
+  async (slug) => {
+    return prisma.blogPost.findFirst({
+      where: {
+        seo: { slug },
+        status: "PUBLISHED",
+      },
+      include: {
+        seo: true,
+        categoryLinks: { include: { category: true } },
+        tagLinks: { include: { tag: true } },
+        media: true,
+        featuredProperties: {
+          orderBy: { position: "asc" },
+          include: { property: { include: { images: true } } },
+        },
+      },
+    });
+  },
+  // ✅ IMPORTANT: key must include slug
+  (slug) => ["blog-post-by-slug", slug],
+  {
+    revalidate: 300,
+    tags: ["blog-post", "blog-posts"],
+  }
 );
 
 /**
