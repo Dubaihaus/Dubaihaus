@@ -66,8 +66,9 @@ export default function Navbar() {
 
   // Blog popup & "coming soon" logic
   const OTHER_LINKS = [
-    { key: 'navbar.comingSoon', href: '/off-plan?isComingSoon=true', type: 'comingSoon' },
+    { key: 'navbar.comingSoon', href: '/off-plan?sale_status=presale', type: 'comingSoon' },
     { key: 'navbar.featuredProperties', href: '/featured-properties', type: 'normal' },
+    { key: 'navbar.onSaleProjects', href: '/off-plan?sale_status=start_of_sales', type: 'normal' },
     { key: 'navbar.map', href: '/map', type: 'normal' },
     { key: 'navbar.faq', href: '/faq', type: 'normal' },
     { key: 'navbar.blog', href: '/blog', type: 'blog' },

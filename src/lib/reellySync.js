@@ -135,62 +135,66 @@ export async function syncProjects() {
       const data = mapProjectToPrisma(p);
 
       try {
-        await prisma.reellyProject.upsert({
-          where: { id: p.id },
-          update: {
-            ...data,
-            // reset relations before re-inserting
-            paymentPlans: { deleteMany: {} },
-            propertyTypes: { deleteMany: {} },
-          },
-          create: data,
-        });
-
-        // 🔹 2) Store payment plans (from DETAIL)
-        if (Array.isArray(p.paymentPlans) && p.paymentPlans.length > 0) {
-          await prisma.reellyProjectPaymentPlan.createMany({
-            data: p.paymentPlans.map((plan) => ({
-              projectId: p.id,
-              name: plan.name || plan.title || 'Payment Plan',
-              rawData: plan, // JSON – includes steps, etc.
-            })),
+        await prisma.$transaction(async (tx) => {
+          // Upsert project WITHOUT deleting relations
+          await tx.reellyProject.upsert({
+            where: { id: p.id },
+            update: data,
+            create: data,
           });
-        }
 
-        // 🔹 3) Store property types / unit types (from DETAIL)
-        if (Array.isArray(p.unitTypes) && p.unitTypes.length > 0) {
-          await prisma.reellyProjectPropertyType.createMany({
-            data: p.unitTypes.map((u) => {
-              const type =
-                u.unitCategory ||
-                u.unitType ||
-                u.unit_category ||
-                u.unit_type ||
-                u.name ||
-                'Unit';
+          // 🔹 2) Store payment plans (from DETAIL)
+          if (Array.isArray(p.paymentPlans) && p.paymentPlans.length > 0) {
+            // Only drop relations if we are successfully inserting new ones
+            await tx.reellyProjectPaymentPlan.deleteMany({
+              where: { projectId: p.id }
+            });
 
-              const priceFrom =
-                u.priceFromAED ??
-                u.price_from_aed ??
-                u.price_from ??
-                null;
-
-              const sizeFrom =
-                u.sizeFromM2 ??
-                u.size_from_m2 ??
-                u.area_from_m2 ??
-                null;
-
-              return {
+            await tx.reellyProjectPaymentPlan.createMany({
+              data: p.paymentPlans.map((plan) => ({
                 projectId: p.id,
-                type,
-                priceFrom,
-                sizeFrom,
-                rawData: u,
-              };
-            }),
-          });
-        }
+                name: plan.name || plan.title || 'Payment Plan',
+                rawData: plan, // JSON – includes steps, etc.
+              })),
+              skipDuplicates: true,
+            });
+          }
+
+          // 🔹 3) Store property types / unit types (from DETAIL)
+          if (Array.isArray(p.unitTypes) && p.unitTypes.length > 0) {
+            // Only drop relations if we are successfully inserting new ones
+            await tx.reellyProjectPropertyType.deleteMany({
+              where: { projectId: p.id }
+            });
+
+            await tx.reellyProjectPropertyType.createMany({
+              data: p.unitTypes.map((u) => {
+                const type =
+                  u.unitCategory ||
+                  u.unitType ||
+                  u.unit_category ||
+                  u.unit_type ||
+                  u.name ||
+                  'Unit';
+
+                const priceFrom =
+                  Number(u.priceFromAED ?? u.price_from_aed ?? u.price_from) || null;
+
+                const sizeFrom =
+                  Number(u.sizeFromM2 ?? u.size_from_m2 ?? u.area_from_m2) || null;
+
+                return {
+                  projectId: p.id,
+                  type,
+                  priceFrom,
+                  sizeFrom,
+                  rawData: u,
+                };
+              }),
+              skipDuplicates: true,
+            });
+          }
+        });
 
         count++;
       } catch (err) {

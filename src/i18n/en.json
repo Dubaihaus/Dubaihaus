@@ -11,6 +11,7 @@
     "blog": "Blog",
     "find": "Find",
     "contact": "Contact",
+    "onSaleProjects": "On Sale Projects",
     "featuredProperties": "Featured Properties"
   },
   "hero": {
@@ -595,5 +596,53 @@
     "title": "Featured Properties",
     "subtitle": "Handpicked selection of the best properties and projects.",
     "empty": "No featured properties found."
+  },
+  "seo": {
+    "home": {
+      "title": "DubaiHaus: Off-Plan Properties in Dubai & Abu Dhabi",
+      "description": "Browse verified off-plan apartments, villas and townhouses in Dubai and Abu Dhabi. Compare developers, communities and flexible payment plans in AED, EUR and USD on DubaiHaus."
+    },
+    "offPlan": {
+      "title": "Off-Plan Properties for Sale in Dubai & Abu Dhabi | DubaiHaus",
+      "description": "Explore new off-plan properties for sale across Dubai and Abu Dhabi. Filter by area, developer, price, unit type and currency.",
+      "comingSoon": "Coming Soon (Presale) Projects in Dubai & Abu Dhabi | DubaiHaus",
+      "onSale": "Start of Sales Projects in Dubai & Abu Dhabi | DubaiHaus"
+    },
+    "faq": {
+      "title": "Dubai & Abu Dhabi Property FAQ | Off-Plan, Fees & Golden Visa",
+      "description": "Answers to common questions about buying property in Dubai and Abu Dhabi, including off-plan purchases, service charges, payment plans and Golden Visa eligibility."
+    },
+    "blog": {
+      "title": "DubaiHaus Insights | Guides & Articles",
+      "description": "Read guides about buying off-plan, investing in Dubai & Abu Dhabi, payment plans, community overviews and more."
+    },
+    "projectDetail": {
+      "title": "{title} ({city}) | Prices, Payment Plan & Handover | DubaiHaus",
+      "descriptionDefault": "Explore {title} by {developer} in {city}.",
+      "fallbackTitle": "Project Details | Prices, Payment Plan & Handover | DubaiHaus",
+      "fallbackDescription": "Explore off-plan project details including prices, payment plans, and handover dates across Dubai and Abu Dhabi on DubaiHaus."
+    },
+    "propertyDetail": {
+      "title": "{title} ({city}) | Prices, Payment Plan & Handover | DubaiHaus",
+      "descriptionDefault": "Explore {title} by {developer} in {city}.",
+      "fallbackTitle": "Property Details | Prices & Information | DubaiHaus",
+      "fallbackDescription": "Explore detailed information for this property in Dubai on DubaiHaus."
+    },
+    "blogDetail": {
+      "titleFallback": "{title} | DubaiHaus Insights"
+    },
+    "areas": {
+      "title": "UAE Areas Guide | Communities & Locations | DubaiHaus",
+      "description": "Explore UAE areas and communities including Downtown Dubai, Dubai Marina, JVC, Business Bay and more. Find off-plan projects by location on DubaiHaus."
+    },
+    "developers": {
+      "title": "UAE Property Developers | DubaiHaus",
+      "description": "Explore top real estate developers in Dubai and Abu Dhabi. Discover projects from Emaar, Damac, Sobha, Aldar and more on DubaiHaus."
+    },
+    "developerDetail": {
+      "title": "{name} Properties in Dubai | DubaiHaus",
+      "description": "Explore off-plan and ready properties by {name} in Dubai and Abu Dhabi on DubaiHaus.",
+      "fallbackTitle": "Developer Details | DubaiHaus"
+    }
   }
 }

@@ -162,7 +162,8 @@
 // src/app/api/off-plan/route.js
 import { getCachedProjects } from '@/lib/projectService';
 import { applyCurrencyToProjects } from '@/lib/currencyService';
-import { searchProperties } from '@/lib/reellyApi';
+import { searchProperties, searchAllProjects } from '@/lib/reellyApi';
+import { hydrateProjectsBatch } from '@/lib/projectDataHydration';
 
 export const runtime = 'nodejs';
 
@@ -245,7 +246,8 @@ export async function GET(request) {
 
       // legacy status keys
       case 'sale_status':
-        filters.saleStatus = value;
+        filters.sale_status = value; // Keep in snake_case so Reelly understands it
+        filters.saleStatus = value;  // DB fallback needs this camelCase
         break;
       case 'construction_status':
         filters.constructionStatus = value;
@@ -279,31 +281,134 @@ export async function GET(request) {
 
   console.log('🔍 /api/off-plan filters:', { ...filters, currency, forMap, isLatestRequest });
 
+  const needsManualPagination = !forMap && (filters.sale_status === 'presale' || filters.sale_status === 'start_of_sales');
+
   let data;
+  let dataSource = 'reelly_api';
 
-  // 🌍 Map mode: keep current behavior (cached DB, then filter coords)
+  // 🌍 Map mode: get ALL projects via searchAllProjects
   if (forMap) {
-    data = await getCachedProjects({
-      page: 1,
-      pageSize: 1000,
-      limit: 1000,
-    });
+    try {
+      const apiData = await searchAllProjects({
+        pageSize: 500,
+        maxPages: 10,
+      });
 
-    if (data?.results) {
-      data.results = data.results.filter(
-        (p) =>
-          typeof p.lat === 'number' &&
-          typeof p.lng === 'number' &&
-          !Number.isNaN(p.lat) &&
-          !Number.isNaN(p.lng)
-      );
-      data.total = data.results.length;
-      data.totalPages = 1;
+      if (apiData && apiData.results && apiData.results.length > 0) {
+        data = apiData;
+        data.results = data.results.filter(
+          (p) =>
+            typeof p.lat === 'number' &&
+            typeof p.lng === 'number' &&
+            !Number.isNaN(p.lat) &&
+            !Number.isNaN(p.lng)
+        );
+        data.total = data.results.length;
+        data.totalPages = 1;
+      }
+    } catch (e) {
+      console.warn("Map Reelly API fell back to DB:", e);
     }
   }
-  // ✅ Everything else: keep cached DB
-  else {
-    data = await getCachedProjects(filters);
+
+  // ✅ Search mode: try searchProperties first
+  if (!data && !forMap) {
+    try {
+      // Reelly filters object
+      const apiFilters = { ...filters };
+
+      if (needsManualPagination) {
+        // Fetch all pages up to a reasonable cap to ensure we get all presale/start_of_sales
+        // Then we will manually filter and paginate below.
+        delete apiFilters.page;
+        delete apiFilters.pageSize;
+
+        const apiData = await searchAllProjects({
+          pageSize: 200,
+          maxPages: 5, // up to 1000 projects per status is more than enough
+          ...apiFilters
+        });
+
+        if (apiData && apiData.results) {
+          data = apiData;
+        }
+      } else {
+        const apiData = await searchProperties(apiFilters);
+
+        if (apiData && apiData.results) {
+          data = apiData;
+        }
+      }
+    } catch (e) {
+      console.warn("List Reelly API fell back to DB:", e);
+    }
+  }
+
+  // Fallback to cached DB if API failed or returned empty/nothing due to network
+  if (!data) {
+    dataSource = 'db_fallback';
+    console.log("Fell back to cached DB for /api/off-plan");
+    if (forMap) {
+      data = await getCachedProjects({
+        page: 1,
+        pageSize: 1000,
+        limit: 1000,
+      });
+
+      if (data?.results) {
+        data.results = data.results.filter(
+          (p) =>
+            typeof p.lat === 'number' &&
+            typeof p.lng === 'number' &&
+            !Number.isNaN(p.lat) &&
+            !Number.isNaN(p.lng)
+        );
+        data.total = data.results.length;
+        data.totalPages = 1;
+      }
+    } else {
+      const dbFilters = { ...filters };
+      if (needsManualPagination) {
+        // Bypass pagination locally so we can do it manually after filtering
+        dbFilters.page = 1;
+        dbFilters.pageSize = 1000;
+        dbFilters.limit = 1000;
+      }
+      data = await getCachedProjects(dbFilters);
+    }
+  }
+
+  // Ensure we NEVER show out_of_stock on Coming Soon or On Sale pages.
+  if (data && Array.isArray(data.results)) {
+    if (filters.sale_status === 'presale' || filters.sale_status === 'start_of_sales') {
+      data.results = data.results.filter((p) => {
+        const status = (p.sale_status || '').toLowerCase();
+        return status !== 'out_of_stock' && status !== 'sold_out' && status !== 'sold';
+      });
+      data.total = data.results.length;
+
+      if (needsManualPagination) {
+        const page = parseInt(filters.page, 10) || 1;
+        const pageSize = parseInt(filters.pageSize, 10) || 20;
+
+        data.totalPages = Math.max(1, Math.ceil(data.total / pageSize));
+        data.page = page;
+        data.pageSize = pageSize;
+
+        const startIndex = (page - 1) * pageSize;
+        data.results = data.results.slice(startIndex, startIndex + pageSize);
+      } else if (filters.pageSize) {
+        data.totalPages = Math.max(1, Math.ceil(data.total / filters.pageSize));
+      }
+    }
+  }
+
+  if (!forMap && data && Array.isArray(data.results) && data.results.length > 0) {
+    try {
+      data.results = await hydrateProjectsBatch(data.results, currency, 5);
+    } catch (hydrateError) {
+      console.warn('⚠️ Hydration failed, using original data:', hydrateError.message);
+    }
   }
 
   // Currency enrichment (works for both sources)
@@ -313,6 +418,8 @@ export async function GET(request) {
     'Content-Type': 'application/json',
     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
     Vary: 'Accept-Encoding, Cookie, Next-Locale',
+    'X-Sale-Status-Filter': filters.sale_status || 'none',
+    'X-Data-Source': dataSource,
   };
 
   return new Response(JSON.stringify(data || { results: [], total: 0 }), {

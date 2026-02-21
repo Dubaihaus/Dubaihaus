@@ -1,29 +1,35 @@
-// src/app/developers/[id]/page.jsx
 import { getDeveloperById } from "@/lib/reellyApi";
 import { getCachedProjects } from "@/lib/projectService";
 import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
+import { generateStandardMetadata, getBreadcrumbSchema } from '@/lib/seo';
+
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }) {
-  const developer = await getDeveloperById(params.id);
+  const { id: developerId } = await params;
+  const developer = await getDeveloperById(developerId);
+  const t = await getTranslations({ namespace: 'seo.developerDetail' });
 
   if (!developer) {
-    return { title: "Developer not found | DubaiHaus" };
+    return { title: t('fallbackTitle') };
   }
 
-  const baseTitle = `${developer.name} Properties in Dubai | DubaiHaus`;
-  const description = `Explore off-plan and ready properties by ${developer.name} in Dubai and Abu Dhabi on DubaiHaus.`;
+  const title = t('title', { name: developer.name });
+  const description = t('description', { name: developer.name });
 
-  return {
-    title: baseTitle,
+  return generateStandardMetadata({
+    pathname: `developers/${developerId}`,
+    title,
     description,
-    openGraph: { title: baseTitle, description, type: "website" },
-  };
+    images: developer.logoUrl ? [developer.logoUrl] : []
+  });
 }
 
 export default async function DeveloperDetailPage({ params, searchParams }) {
-  const developerId = params.id;
-  const page = Number(searchParams?.page || 1);
+  const { id: developerId } = await params;
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams?.page || 1);
 
   const developer = await getDeveloperById(developerId);
 
@@ -64,8 +70,22 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
   const total = properties?.total ?? items.length;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const breadcrumbItems = [
+    { name: "Home", item: "https://www.dubaihaus.com" },
+    { name: "Developers", item: "https://www.dubaihaus.com/developers" },
+    { name: developer.name, item: `https://www.dubaihaus.com/developers/${developerId}` }
+  ];
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [getBreadcrumbSchema(breadcrumbItems)]
+  };
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-brand-sky)_0,_#F5F7FB_55%,_white_100%)] text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="border-b border-sky-100/70">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 pb-10 pt-16 sm:flex-row sm:items-center">
@@ -180,8 +200,8 @@ export default async function DeveloperDetailPage({ params, searchParams }) {
                     key={item}
                     href={`/developers/${developerId}?page=${item}`}
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition ${item === page
-                        ? 'bg-[var(--color-brand-sky)] text-white shadow-sm'
-                        : 'border border-slate-200 bg-white text-slate-700 hover:border-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]'
+                      ? 'bg-[var(--color-brand-sky)] text-white shadow-sm'
+                      : 'border border-slate-200 bg-white text-slate-700 hover:border-[var(--color-brand-sky)] hover:text-[var(--color-brand-dark)]'
                       }`}
                   >
                     {item}

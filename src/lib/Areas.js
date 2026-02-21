@@ -8,7 +8,7 @@ export const DUBAI_AREAS = [
     image: "/dashboard/downtown.webp",
     filters: {
       // use fuzzy search across area/district/location/title
-      search_query: "Downtown Dubai",
+      search: "Downtown Dubai",
       region: "Dubai",
     },
   },
@@ -17,7 +17,7 @@ export const DUBAI_AREAS = [
     title: "Dubai Hills Estate",
     image: "/dashboard/building.jpg",
     filters: {
-      search_query: "Dubai Hills",
+      search: "Dubai Hills",
       region: "Dubai",
     },
   },
@@ -26,7 +26,7 @@ export const DUBAI_AREAS = [
     title: "Palm Jumeirah",
     image: "/dashboard/palm1.jpg",
     filters: {
-      search_query: "Palm Jumeirah",
+      search: "Palm Jumeirah",
       region: "Dubai",
     },
   },
@@ -35,7 +35,7 @@ export const DUBAI_AREAS = [
     title: "Dubai Marina",
     image: "/dashboard/Marina.jpg",
     filters: {
-      search_query: "Dubai Marina",
+      search: "Dubai Marina",
       region: "Dubai",
     },
   },
@@ -44,7 +44,7 @@ export const DUBAI_AREAS = [
     title: "Jumeirah Village Circle (JVC)",
     image: "/dashboard/building.jpg",
     filters: {
-      search_query: "Jumeirah Village Circle",
+      search: "Jumeirah Village Circle",
       region: "Dubai",
     },
   },
@@ -53,7 +53,7 @@ export const DUBAI_AREAS = [
     title: "Business Bay",
     image: "/dashboard/downtown.jpg",
     filters: {
-      search_query: "Business Bay",
+      search: "Business Bay",
       region: "Dubai",
     },
   },
@@ -67,7 +67,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Reem Island",
     image: "/dashboard/reem.webp",
     filters: {
-      search_query: "Al Reem Island,Marina Square",
+      search: "Al Reem Island",
       region: "Abu Dhabi",
     },
   },
@@ -76,7 +76,7 @@ export const ABU_DHABI_AREAS = [
     title: "Yas Island",
     image: "/dashboard/yas.webp",
     filters: {
-      search_query: "Yas Island",
+      search: "Yas Island",
       region: "Abu Dhabi",
     },
   },
@@ -94,7 +94,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Raha Beach",
     image: "/dashboard/alraha.webp",
     filters: {
-      search_query: "Al Raha Beach",
+      search: "Al Raha Beach",
       region: "Abu Dhabi",
     },
   },
@@ -103,7 +103,7 @@ export const ABU_DHABI_AREAS = [
     title: "Masdar City",
     image: "/dashboard/masdar.webp",
     filters: {
-      search_query: "Masdar City",
+      search: "Masdar City",
       region: "Abu Dhabi",
     },
   },
@@ -112,7 +112,7 @@ export const ABU_DHABI_AREAS = [
     title: "Zayed City",
     image: "/dashboard/zayed.webp", // change image if you have a better one
     filters: {
-      search_query: "Zayed City",
+      search: "Zayed City",
       region: "Abu Dhabi",
     },
   },
@@ -123,7 +123,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Maryah Island",
     image: "/dashboard/abu-dhabi/al-maryah-island.jpg", // use placeholder if missing
     filters: {
-      search_query: "Al Maryah Island",
+      search: "Al Maryah Island",
       region: "Abu Dhabi",
     },
   },
@@ -133,7 +133,7 @@ export const ABU_DHABI_AREAS = [
     title: "Fahid Island",
     image: "/dashboard/abu-dhabi/fahid-island.jpg",
     filters: {
-      search_query: "Fahid Island",
+      search: "Fahid Island",
       region: "Abu Dhabi",
     },
   },
@@ -142,7 +142,7 @@ export const ABU_DHABI_AREAS = [
     title: "Ramhan Island",
     image: "/dashboard/abu-dhabi/ramhan-island.jpg",
     filters: {
-      search_query: "Ramhan Island",
+      search: "Ramhan Island",
       region: "Abu Dhabi",
     },
   },
@@ -159,7 +159,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Bahya",
     image: "/dashboard/abu-dhabi/al-bahya.jpg",
     filters: {
-      search_query: "Al Bahya",
+      search: "Al Bahya",
       region: "Abu Dhabi",
     },
   },
@@ -168,7 +168,7 @@ export const ABU_DHABI_AREAS = [
     title: "Al Shamkhah",
     image: "/dashboard/abu-dhabi/al-shamkhah.jpg",
     filters: {
-      search_query: "Al Shamkhah",
+      search: "Al Shamkhah",
       region: "Abu Dhabi",
     },
   },

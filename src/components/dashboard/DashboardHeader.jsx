@@ -16,7 +16,7 @@ const AREAS_CONFIG = [
   {
     title: 'Downtown Dubai',
     filters: {
-      search_query: 'Downtown Dubai',
+      search: 'Downtown Dubai',
       region: 'Dubai',
     },
     gradient: 'bg-gradient-to-r from-slate-900/60 to-sky-900/60',
@@ -25,7 +25,7 @@ const AREAS_CONFIG = [
   {
     title: 'Saadiyat Island',
     filters: {
-      search_query: 'Al Saadiyat Island',
+      search: 'Al Saadiyat Island',
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-sky-900/60 to-blue-900/60',
@@ -35,7 +35,7 @@ const AREAS_CONFIG = [
   {
     title: 'Jumeirah Village Circle (JVC)',
     filters: {
-      search_query: 'Jumeirah Village Circle',
+      search: 'Jumeirah Village Circle',
       region: 'Dubai',
     },
     gradient: 'bg-gradient-to-r from-green-900/60 to-blue-900/60',
@@ -44,7 +44,7 @@ const AREAS_CONFIG = [
   {
     title: 'Yas Island',
     filters: {
-      search_query: 'Yas Island',
+      search: 'Yas Island',
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60',
@@ -55,7 +55,7 @@ const AREAS_CONFIG = [
   {
     title: 'Business Bay',
     filters: {
-      search_query: 'Business Bay',
+      search: 'Business Bay',
       region: 'Dubai',
     },
     gradient: 'bg-gradient-to-r from-blue-900/60 to-purple-900/60',
@@ -64,7 +64,7 @@ const AREAS_CONFIG = [
   {
     title: 'Al Reem Island',
     filters: {
-      search_query: 'Al Reem Island',
+      search: 'Al Reem Island',
       region: 'Abu Dhabi',
     },
     gradient: 'bg-gradient-to-r from-indigo-900/60 to-cyan-900/60',
@@ -99,14 +99,14 @@ function extractImageUrl(project) {
 async function fetchAreaSlideData(areaConfig) {
   const baseParams = { page: '1', pageSize: '1', pricedOnly: 'false' };
 
-  // Prefer explicit filters.search_query, fallback to title without "(JVC)" etc.
+  // Prefer explicit filters.search, fallback to title without "(JVC)" etc.
   const searchQuery =
-    areaConfig.filters?.search_query ||
+    areaConfig.filters?.search ||
     areaConfig.title.split('(')[0].trim();
 
   const paramsObj = {
     ...baseParams,
-    search_query: searchQuery,
+    search: searchQuery,
   };
 
   // If region is provided in filters, pass it through as well

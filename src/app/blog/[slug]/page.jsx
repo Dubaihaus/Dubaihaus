@@ -1,4 +1,3 @@
-// src/app/blog/[slug]/page.jsx
 import { getCachedBlogPostBySlug } from "@/lib/blog-helpers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +5,8 @@ import MarkdownContent from "@/components/blog/MarkdownContent";
 import PropertyCard from "@/components/PropertyCard";
 import GalleryPreviewGrid from "@/components/blog/GalleryPreviewGrid";
 import HeroImagePreview from "@/components/blog/HeroImagePreview";
+import { generateStandardMetadata, getBreadcrumbSchema, getArticleSchema } from '@/lib/seo';
+import JsonLd from "@/components/seo/JsonLd";
 
 // Normalize property for card (simplified version of what's in FeaturedProperties)
 function normalizePropertyForCard(p) {
@@ -27,35 +28,33 @@ async function getPost(slug) {
   return getCachedBlogPostBySlug(slug);
 }
 
+import { getTranslations } from 'next-intl/server';
+
 export async function generateMetadata({ params }) {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   if (!post) {
     return { title: "Article not found | DubaiHaus" };
   }
 
-  const metaTitle =
-    post.seo?.metaTitle || `${post.title} | DubaiHaus Insights`;
-  const metaDesc =
-    post.seo?.metaDesc || post.excerpt || post.content.slice(0, 150);
+  const t = await getTranslations({ namespace: 'seo.blogDetail' });
+  const title = post.seo?.metaTitle || t('titleFallback', { title: post.title });
+  const description = post.seo?.metaDesc || post.excerpt || post.content.slice(0, 150);
+  const hero = post.media?.find((m) => m.role === "HERO") || { url: post.featuredImg };
+  const images = hero.url ? [hero.url] : [];
 
-  const hero =
-    post.media?.find((m) => m.role === "HERO") || { url: post.featuredImg };
-
-  return {
-    title: metaTitle,
-    description: metaDesc,
-    openGraph: {
-      title: metaTitle,
-      description: metaDesc,
-      type: "article",
-      images: hero.url ? [{ url: hero.url }] : [],
-    },
-  };
+  return generateStandardMetadata({
+    pathname: `blog/${slug}`,
+    title,
+    description,
+    images
+  });
 }
 
 export default async function BlogDetailPage({ params }) {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
 
   if (!post) return notFound();
 
@@ -77,8 +76,29 @@ export default async function BlogDetailPage({ params }) {
   const galleryImages =
     post.media?.filter((m) => m.role === "GALLERY") || [];
 
+  const breadcrumbItems = [
+    { name: "Home", item: "https://www.dubaihaus.com" },
+    { name: "Blog", item: "https://www.dubaihaus.com/blog" },
+    { name: safeTitle, item: `https://www.dubaihaus.com/blog/${slug}` }
+  ];
+
+  const articleSchema = getArticleSchema({
+    title: safeTitle,
+    description: post.excerpt || safeTitle,
+    image: heroImage,
+    datePublished: post.publishedAt || post.createdAt,
+    dateModified: post.updatedAt,
+    url: `https://www.dubaihaus.com/blog/${slug}`
+  });
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [getBreadcrumbSchema(breadcrumbItems), articleSchema]
+  };
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var white_0,_#F5F7FB_55%,_white_100%)]">
+      <JsonLd data={jsonLd} />
       {/* Progress Bar (simple implementation - sticky top) */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-100 z-50">
         <div

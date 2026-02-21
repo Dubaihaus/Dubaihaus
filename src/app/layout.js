@@ -16,7 +16,7 @@ async function getMessages(locale) {
 }
 
 export const metadata = {
-  metadataBase: new URL('https://dubaihaus.com'),
+  metadataBase: new URL('https://www.dubaihaus.com'),
 };
 
 export default async function RootLayout({ children }) {

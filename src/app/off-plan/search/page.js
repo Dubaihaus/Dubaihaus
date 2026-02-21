@@ -7,10 +7,16 @@ import Footer from '@/components/footer';
 // We need Navbar? It's usually in layout.js. 
 // Assuming layout.js handles navbar.
 
-export const metadata = {
-    title: 'Search Off-Plan Properties - DubaiHaus',
-    description: 'Find your dream off-plan property in Dubai with our advanced search filters.',
-};
+import { generateStandardMetadata } from '@/lib/seo';
+export async function generateMetadata() {
+    return generateStandardMetadata({
+        title: 'Search Off-Plan Properties - DubaiHaus',
+        description: 'Find your dream off-plan property in Dubai with our advanced search filters.',
+        pathname: 'off-plan/search',
+        index: false,
+        follow: true,
+    });
+}
 
 export default async function SearchPage({ searchParams }) {
     // 1. Parse params
@@ -63,7 +69,7 @@ export default async function SearchPage({ searchParams }) {
                 results={results}
                 filters={filters}
             />
-           
+
         </main>
     );
 }

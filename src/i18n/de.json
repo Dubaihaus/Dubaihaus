@@ -11,6 +11,7 @@
     "blog": "Blog",
     "find": "Finden",
     "contact": "Kontakt",
+    "onSaleProjects": "Verkaufsprojekte",
     "featuredProperties": "Ausgewählte Immobilien"
   },
   "hero": {
@@ -595,5 +596,53 @@
     "title": "Ausgewählte Immobilien",
     "subtitle": "Handverlesene Auswahl der besten Immobilien und Projekte.",
     "empty": "Keine ausgewählten Immobilien gefunden."
+  },
+  "seo": {
+    "home": {
+      "title": "DubaiHaus: Off-Plan Immobilien in Dubai & Abu Dhabi",
+      "description": "Durchsuchen Sie verifizierte Off-Plan-Wohnungen, Villen und Reihenhäuser in Dubai und Abu Dhabi. Vergleichen Sie Bauträger, Gemeinschaften und Zahlungspläne auf DubaiHaus."
+    },
+    "offPlan": {
+      "title": "Off-Plan Immobilien zum Verkauf in Dubai & Abu Dhabi | DubaiHaus",
+      "description": "Entdecken Sie neue Off-Plan-Immobilien zum Verkauf in Dubai und Abu Dhabi. Filtern Sie nach Gebiet, Entwickler, Preis und Immobilienart.",
+      "comingSoon": "Bald verfügbare Projekte (Presale) in Dubai & Abu Dhabi | DubaiHaus",
+      "onSale": "Verkaufsstart Projekte in Dubai & Abu Dhabi | DubaiHaus"
+    },
+    "faq": {
+      "title": "Immobilien-FAQ für Dubai & Abu Dhabi | Off-Plan, Gebühren & Golden Visa",
+      "description": "Antworten auf häufige Fragen zum Immobilienkauf in Dubai und Abu Dhabi, inklusive Off-Plan-Kauf, Nebenkosten, Zahlungsplänen und Golden Visa-Voraussetzungen."
+    },
+    "blog": {
+      "title": "DubaiHaus Magazin | Ratgeber & Artikel",
+      "description": "Lesen Sie unsere Ratgeber über den Kauf von Off-Plan-Immobilien, Investitionen in den VAE, Zahlungspläne und detaillierte Gebietsübersichten."
+    },
+    "projectDetail": {
+      "title": "{title} ({city}) | Preise, Zahlungsplan & Übergabe | DubaiHaus",
+      "descriptionDefault": "Entdecken Sie {title} von {developer} in {city}.",
+      "fallbackTitle": "Projektdetails | Preise, Zahlungsplan & Übergabe | DubaiHaus",
+      "fallbackDescription": "Entdecken Sie Off-Plan-Projektdetails inklusive Preise, Zahlungspläne und Übergabetermine in Dubai und Abu Dhabi auf DubaiHaus."
+    },
+    "propertyDetail": {
+      "title": "{title} ({city}) | Preise, Zahlungsplan & Übergabe | DubaiHaus",
+      "descriptionDefault": "Entdecken Sie {title} von {developer} in {city}.",
+      "fallbackTitle": "Immobiliendetails | Preise & Informationen | DubaiHaus",
+      "fallbackDescription": "Entdecken Sie detaillierte Informationen zu dieser Immobilie in Dubai auf DubaiHaus."
+    },
+    "blogDetail": {
+      "titleFallback": "{title} | DubaiHaus Magazin"
+    },
+    "areas": {
+      "title": "UAE Gebietsführer | Gemeinschaften & Standorte | DubaiHaus",
+      "description": "Entdecken Sie Gebiete und Gemeinschaften in den VAE wie Downtown Dubai, Dubai Marina, JVC, Business Bay und mehr. Finden Sie Off-Plan-Projekte nach Standort auf DubaiHaus."
+    },
+    "developers": {
+      "title": "Immobilienbauträger in den VAE | DubaiHaus",
+      "description": "Entdecken Sie die besten Immobilienbauträger in Dubai und Abu Dhabi. Finden Sie Projekte von Emaar, Damac, Sobha, Aldar und weiteren auf DubaiHaus."
+    },
+    "developerDetail": {
+      "title": "{name} Immobilien in Dubai | DubaiHaus",
+      "description": "Entdecken Sie Off-Plan- und fertige Immobilien von {name} in Dubai und Abu Dhabi auf DubaiHaus.",
+      "fallbackTitle": "Entwicklerdetails | DubaiHaus"
+    }
   }
 }

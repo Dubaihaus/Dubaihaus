@@ -1,35 +1,16 @@
-// src/app/contact/page.js
 import { getTranslations } from 'next-intl/server';
 import ContactSection from "@/components/ContactSection";
 import AboutUsSection from "@/components/AboutUsSection";
+import { generateStandardMetadata } from '@/lib/seo';
 
 export async function generateMetadata({ params }) {
   const t = await getTranslations('contact.metadata');
-  
-  return {
+
+  return generateStandardMetadata({
+    pathname: 'contact',
     title: t('title'),
     description: t('description'),
-    keywords: t('keywords').split(','),
-    alternates: {
-      canonical: "https://dubaihaus.com/contact",
-    },
-    openGraph: {
-      title: t('og.title'),
-      description: t('og.description'),
-      url: "https://dubaihaus.com/contact",
-      siteName: "DubaiHaus",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: t('twitter.title'),
-      description: t('twitter.description'),
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+  });
 }
 
 export default function ContactPage() {

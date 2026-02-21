@@ -2,25 +2,26 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { getCachedBlogPosts, getCachedCategories } from "@/lib/blog-helpers";
+import { generateStandardMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: "DubaiHaus Insights | Guides & Articles",
-  description:
-    "Read guides about buying off-plan, investing in Dubai & Abu Dhabi, payment plans, community overviews and more.",
-  openGraph: {
-    title: "DubaiHaus Insights | Guides & Articles",
-    description:
-      "Stay informed with curated articles about UAE property, off-plan projects and investment strategy.",
-    type: "website",
-  },
-};
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata() {
+  const t = await getTranslations({ namespace: 'seo.blog' });
+  return generateStandardMetadata({
+    pathname: 'blog',
+    title: t('title'),
+    description: t('description'),
+  });
+}
 
 // Conditional caching: dynamic for search, cached for filters
 export const dynamic = "auto";
 export const revalidate = 300; // 5 minutes for non-search pages
 
 export default async function BlogPage({ searchParams }) {
-  const { cat, tag, q } = searchParams || {};
+  const resolvedSearchParams = await searchParams;
+  const { cat, tag, q } = resolvedSearchParams || {};
 
   let posts;
   let allCats;
@@ -124,8 +125,8 @@ export default async function BlogPage({ searchParams }) {
             <Link
               href="/blog"
               className={`px-3 py-1 rounded-full text-xs font-medium transition ${!cat && !tag
-                  ? "bg-slate-800 text-white shadow-md"
-                  : "bg-white text-slate-600 hover:bg-slate-100"
+                ? "bg-slate-800 text-white shadow-md"
+                : "bg-white text-slate-600 hover:bg-slate-100"
                 }`}
             >
               All
@@ -136,8 +137,8 @@ export default async function BlogPage({ searchParams }) {
                 key={c.id}
                 href={`/blog?cat=${encodeURIComponent(c.slug)}`}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.slug
-                    ? "bg-[var(--color-brand-sky)] text-white shadow-md"
-                    : "bg-white text-slate-600 hover:bg-slate-100"
+                  ? "bg-[var(--color-brand-sky)] text-white shadow-md"
+                  : "bg-white text-slate-600 hover:bg-slate-100"
                   }`}
               >
                 {c.name}
@@ -212,12 +213,12 @@ export default async function BlogPage({ searchParams }) {
                   <div className="p-5 flex flex-col gap-3 flex-1">
                     <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
                       {new Date(
-  post.publishedAt ?? post.createdAt
-).toLocaleDateString("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-})}
+                        post.publishedAt ?? post.createdAt
+                      ).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                       {post.readMinutes && (
                         <>
                           <span className="text-slate-300">•</span>

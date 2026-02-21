@@ -1,13 +1,17 @@
-// src/i18n/request.js
 import { getRequestConfig } from 'next-intl/server';
+import { headers } from 'next/headers';
 
-export default getRequestConfig(async ({ locale }) => {
+export default getRequestConfig(async ({ requestLocale }) => {
+  const h = await headers();
+  const headerLocale = h.get('x-next-locale');
+
   // Define supported locales and default
   const supportedLocales = ['en', 'de'];
   const defaultLocale = 'en';
 
-  // Ensure locale is valid; fallback to default if undefined or invalid
-  const validLocale = supportedLocales.includes(locale) ? locale : defaultLocale;
+  // Read locale from our custom middleware header first, fallback to next-intl built-in, then default
+  const resolvedLocale = headerLocale || requestLocale || defaultLocale;
+  const validLocale = supportedLocales.includes(resolvedLocale) ? resolvedLocale : defaultLocale;
 
   // Load translation messages
   const messages = (await import(`@/i18n/${validLocale}.json`)).default;

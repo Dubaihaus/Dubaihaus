@@ -1,19 +1,18 @@
-// src/app/developers/page.jsx
 import { listDevelopers } from "@/lib/reellyApi";
 import DevelopersHero from "@/components/developers/DevelopersHero";
 import DevelopersGrid from "@/components/developers/DevelopersGrid";
+import { generateStandardMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: "UAE Property Developers | DubaiHaus",
-  description:
-    "Explore top real estate developers in Dubai and Abu Dhabi. Discover projects from Emaar, Damac, Sobha, Aldar and more on DubaiHaus.",
-  openGraph: {
-    title: "Dubai Property Developers | DubaiHaus",
-    description:
-      "Browse leading property developers and their projects in Dubai and Abu Dhabi.",
-    type: "website",
-  },
-};
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata() {
+  const t = await getTranslations({ namespace: 'seo.developers' });
+  return generateStandardMetadata({
+    pathname: 'developers',
+    title: t('title'),
+    description: t('description'),
+  });
+}
 
 export const dynamic = "force-dynamic";
 

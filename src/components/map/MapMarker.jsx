@@ -25,6 +25,13 @@ export default function MapMarker({ project, onMarkerClick, onHoverChange, isAct
   const currency = project.currency || project.priceCurrency || 'AED';
   const status = project.status || project.sale_status || '';
 
+  const isOutOfStock = () => {
+    const s = (status || "").toLowerCase();
+    return s === 'out_of_stock' || s === 'sold_out' || s === 'sold';
+  };
+
+  const isOOS = isOutOfStock();
+
   return (
     <div className="relative">
       <button
@@ -43,14 +50,16 @@ export default function MapMarker({ project, onMarkerClick, onHoverChange, isAct
           {/* main bubble */}
           <div
             className={`relative w-4 h-4 rounded-full border-2 border-white shadow-lg transition-all duration-200 ${isActive
-              ? 'bg-blue-600 scale-125 ring-2 ring-blue-400/50'
-              : 'bg-red-500 hover:bg-red-600'
+                ? 'bg-sky-600 scale-125 ring-2 ring-sky-400/50'
+                : isOOS
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-sky-400 hover:bg-sky-500' // Using slightly lighter sky blue for default state
               }`}
           >
             {/* glossy dot */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div
-                className={`w-1 h-1 rounded-full opacity-80 ${isActive ? 'bg-blue-200' : 'bg-white'
+                className={`w-1 h-1 rounded-full opacity-80 ${isActive ? 'bg-sky-200' : 'bg-white'
                   }`}
               />
             </div>
@@ -58,7 +67,7 @@ export default function MapMarker({ project, onMarkerClick, onHoverChange, isAct
 
           {/* little tail */}
           <div
-            className={`mx-auto w-0.5 h-3 mt-0.5 ${isActive ? 'bg-blue-600' : 'bg-red-600'
+            className={`mx-auto w-0.5 h-3 mt-0.5 ${isActive ? 'bg-sky-600' : isOOS ? 'bg-red-600' : 'bg-sky-500'
               }`}
           />
         </div>
