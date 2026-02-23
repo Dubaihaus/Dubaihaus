@@ -121,17 +121,35 @@ export async function syncProjects() {
 
     let count = 0;
 
-    for (const base of allProjects) {
-      let p = base;
+   for (const base of allProjects) {
+  let p = base;
 
-      // Removed redundant getPropertyById call. 
-      // searchAllProjects already uses includeAllData: true (expand=payment_plans,etc)
-      // so base should have paymentPlans and unitTypes normalized.
+  // If list endpoint didn’t give relations, fetch detail for this project
+  const missingPlans = !Array.isArray(p.paymentPlans) || p.paymentPlans.length === 0;
+  const missingTypes = !Array.isArray(p.unitTypes) || p.unitTypes.length === 0;
 
-      // Ensure we have arrays even if null properties
+  if (missingPlans || missingTypes) {
+    const detail = await getPropertyById(p.id);
+    if (detail) {
+      // merge only if detail has data
+      p.paymentPlans = (detail.paymentPlans && detail.paymentPlans.length > 0)
+        ? detail.paymentPlans
+        : (p.paymentPlans || []);
+
+      p.unitTypes = (detail.unitTypes && detail.unitTypes.length > 0)
+        ? detail.unitTypes
+        : (p.unitTypes || []);
+
+      // keep rawData if your normalizer uses it
+      p.rawData = detail.rawData || p.rawData;
+    } else {
       p.paymentPlans = p.paymentPlans || [];
       p.unitTypes = p.unitTypes || [];
-
+    }
+  } else {
+    p.paymentPlans = p.paymentPlans || [];
+    p.unitTypes = p.unitTypes || [];
+  }
       const data = mapProjectToPrisma(p);
 
       try {

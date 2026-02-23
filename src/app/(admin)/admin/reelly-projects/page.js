@@ -6,17 +6,31 @@ export const dynamic = "force-dynamic";
 
 export default async function ReellyProjectsPage({ searchParams }) {
     const page = parseInt(searchParams?.page || "1");
+    const q = searchParams?.q || "";
     const limit = 50;
     const skip = (page - 1) * limit;
+
+    const where = q
+        ? {
+            OR: [
+                { title: { contains: q, mode: "insensitive" } },
+                { city: { contains: q, mode: "insensitive" } },
+                { area: { contains: q, mode: "insensitive" } },
+                { locationString: { contains: q, mode: "insensitive" } },
+                { developerName: { contains: q, mode: "insensitive" } },
+            ],
+        }
+        : {};
 
     // Simple pagination logic
     const [projects, total] = await Promise.all([
         prisma.reellyProject.findMany({
+            where,
             orderBy: { lastSyncedAt: "desc" },
             take: limit,
             skip: skip,
         }),
-        prisma.reellyProject.count(),
+        prisma.reellyProject.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -26,6 +40,26 @@ export default async function ReellyProjectsPage({ searchParams }) {
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Reelly Projects</h1>
                 <p className="text-sm text-gray-500">Sync from Dashboard to update list</p>
+            </div>
+
+            <div className="mb-6 bg-white p-4 rounded-lg shadow">
+                <form action="/admin/reelly-projects" method="GET" className="flex items-center space-x-2 w-full max-w-2xl">
+                    <input
+                        type="text"
+                        name="q"
+                        defaultValue={q}
+                        placeholder="Search by title, city, area, developer..."
+                        className="flex-1 px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm text-sm font-medium">
+                        Search
+                    </button>
+                    {q && (
+                        <a href="/admin/reelly-projects" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 border border-gray-300 shadow-sm text-sm font-medium">
+                            Clear
+                        </a>
+                    )}
+                </form>
             </div>
 
             <div className="overflow-hidden rounded-lg bg-white shadow">
@@ -73,10 +107,10 @@ export default async function ReellyProjectsPage({ searchParams }) {
                     <span className="text-sm text-gray-700">Page {page} of {totalPages}</span>
                     <div className="space-x-2">
                         {page > 1 && (
-                            <a href={`/admin/reelly-projects?page=${page - 1}`} className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Previous</a>
+                            <a href={`/admin/reelly-projects?page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ""}`} className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Previous</a>
                         )}
                         {page < totalPages && (
-                            <a href={`/admin/reelly-projects?page=${page + 1}`} className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Next</a>
+                            <a href={`/admin/reelly-projects?page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ""}`} className="px-3 py-1 border rounded text-sm hover:bg-gray-50">Next</a>
                         )}
                     </div>
                 </div>

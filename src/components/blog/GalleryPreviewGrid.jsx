@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import ImageLightbox from "@/components/blog/ImageLightbox";
 
-const MAX_PREVIEW = 4;
+const MAX_PREVIEW = 6;
 
 export default function GalleryPreviewGrid({ images = [] }) {
   const safeImages = useMemo(() => images?.filter((i) => i?.url) ?? [], [images]);
@@ -22,71 +22,100 @@ export default function GalleryPreviewGrid({ images = [] }) {
 
   return (
     <>
-      {/* GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Desktop layout: 2 big left stacked + 4 small right (2x2) */}
+      <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[420px] lg:h-[480px]">
         {previewImages.map((img, idx) => {
           const isLastWithMore = idx === MAX_PREVIEW - 1 && remaining > 0;
 
+          // Layout map:
+          // idx 0 -> left big top (col-span-2)
+          // idx 1 -> left big bottom (col-span-2)
+          // idx 2 -> right top-left
+          // idx 3 -> right top-right
+          // idx 4 -> right bottom-left
+          // idx 5 -> right bottom-right (overlay +N)
+          const gridClass =
+            idx === 0
+              ? "col-span-2 row-span-1"
+              : idx === 1
+                ? "col-span-2 row-span-1"
+                : "col-span-1 row-span-1";
+
           return (
-            <div
+            <button
               key={`${img.url}-${idx}`}
-              className="relative rounded-2xl overflow-hidden aspect-[4/3] group shadow-sm hover:shadow-md transition"
+              type="button"
+              onClick={() => openAt(idx)}
+              className={`relative ${gridClass} w-full h-full rounded-2xl overflow-hidden group shadow-sm hover:shadow-md transition`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
                 alt={img.alt || `Gallery image ${idx + 1}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                className="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500"
                 loading="lazy"
               />
 
-              {/* Caption */}
-              {img.caption && (
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2 backdrop-blur-sm transform translate-y-full group-hover:translate-y-0 transition">
+              {/* Caption (optional hover strip) */}
+              {img.caption && !isLastWithMore && (
+                <div className="absolute left-0 right-0 bottom-0 bg-black/55 text-white text-xs px-3 py-2 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition">
                   {img.caption}
                 </div>
               )}
 
-              {/* "+N more" overlay on last tile */}
-              {isLastWithMore ? (
-                <button
-                  type="button"
-                  onClick={() => openAt(idx)}
-                  className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer transition hover:bg-black/60"
-                >
-                  <span className="text-white text-2xl font-bold drop-shadow-lg">
-                    +{remaining} more
-                  </span>
-                </button>
-              ) : (
-                /* Hover overlay + Preview */
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition">
-                  <button
-                    type="button"
-                    onClick={() => openAt(idx)}
-                    className="
-                      absolute left-4 bottom-10
-                      inline-flex items-center justify-center
-                      rounded-full px-4 py-2
-                      text-xs font-semibold
-                      bg-white/95 text-slate-900
-                      shadow-md
-                      transform translate-y-4 opacity-0
-                      group-hover:translate-y-0 group-hover:opacity-100
-                      transition duration-300
-                      hover:bg-white
-                    "
+              {/* Hover overlay */}
+              {!isLastWithMore && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+              )}
+
+              {/* +N more overlay on last tile */}
+              {isLastWithMore && (
+                <div className="absolute inset-0 bg-black/55 flex items-end justify-start p-3">
+                  <span className="text-white text-sm font-semibold px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
                   >
-                    Preview
-                  </button>
+                    + {remaining} more
+                  </span>
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
 
-      {/* Lightbox (NO CROP) — receives ALL images, not just preview */}
+      {/* Mobile layout: keep it simple + usable (2 columns, 6 tiles) */}
+      <div className="grid md:hidden grid-cols-2 gap-3">
+        {previewImages.map((img, idx) => {
+          const isLastWithMore = idx === MAX_PREVIEW - 1 && remaining > 0;
+
+          return (
+            <button
+              key={`${img.url}-${idx}`}
+              type="button"
+              onClick={() => openAt(idx)}
+              className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={img.url}
+                alt={img.alt || `Gallery image ${idx + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+
+              {isLastWithMore && (
+                <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                  <span className="text-white text-base font-bold">
+                    +{remaining} more
+                  </span>
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Lightbox (ALL images, not just preview) */}
       <ImageLightbox
         open={open}
         onClose={() => setOpen(false)}

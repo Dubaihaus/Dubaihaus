@@ -7,6 +7,7 @@ import GalleryPreviewGrid from "@/components/blog/GalleryPreviewGrid";
 import HeroImagePreview from "@/components/blog/HeroImagePreview";
 import { generateStandardMetadata, getBreadcrumbSchema, getArticleSchema } from '@/lib/seo';
 import JsonLd from "@/components/seo/JsonLd";
+import DraggableContactButton from "@/components/blog/DraggableContactButton";
 
 // Normalize property for card (simplified version of what's in FeaturedProperties)
 function normalizePropertyForCard(p) {
@@ -99,6 +100,7 @@ export default async function BlogDetailPage({ params }) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var white_0,_#F5F7FB_55%,_white_100%)]">
       <JsonLd data={jsonLd} />
+       
       {/* Progress Bar (simple implementation - sticky top) */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-100 z-50">
         <div
@@ -213,6 +215,7 @@ export default async function BlogDetailPage({ params }) {
           </section>
         )}
       </article>
+        <DraggableContactButton href="/contact" />
     </main>
   );
 }

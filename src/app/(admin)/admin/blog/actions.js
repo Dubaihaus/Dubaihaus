@@ -144,6 +144,15 @@ export async function updateBlog(id, formData) {
 
 const status = (formData.get("status") || "DRAFT").toString();
 const publishedAtStr = formData.get("publishedAt")?.toString().trim() || "";
+// Find existing blog including SEO and Media
+const existing = await prisma.blogPost.findUnique({
+  where: { id },
+  include: { seo: true, media: true },
+});
+
+if (!existing) {
+  throw new Error("Blog post not found");
+}
 
 // publishing right now?
 const isPublishingNow =
@@ -170,15 +179,6 @@ if (status === "DRAFT") {
   const hero = mediaItems.find(m => m.role === "HERO");
   const finalFeaturedImg = hero ? hero.url : featuredImg;
 
-  // Find existing blog including SEO and Media
-  const existing = await prisma.blogPost.findUnique({
-    where: { id },
-    include: { seo: true, media: true },
-  });
-
-  if (!existing) {
-    throw new Error("Blog post not found");
-  }
 
   // --- CLEANUP LOGIC ---
   // Identify media that was present but is now missing (removed by user)

@@ -1,8 +1,8 @@
-// src/app/featured-properties/page.js
 import { prisma } from "@/lib/prisma";
 import PropertyCard from "@/components/PropertyCard";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
+import { hydrateProjectsBatch } from "@/lib/projectDataHydration";
 
 export const dynamic = "force-dynamic";
 
@@ -24,19 +24,45 @@ function normalizeManualProperty(p) {
 }
 
 function normalizeReellyProject(p) {
-  let city = p.city;
+  let city = (p.city || "").trim();
 
-  if (!city) {
-    const loc = (p.locationString || "").toLowerCase();
-    const area = (p.area || "").toLowerCase();
-    const region = (p.region || "").toLowerCase();
+  if (!city || /^\d+$/.test(city) || city.length < 3) {
+    const textToInspect = [
+      p.locationString || "",
+      p.region || "",
+      p.district || "",
+      p.area || ""
+    ].join(" ").toLowerCase();
 
-    if (loc.includes("abu dhabi") || area.includes("abu dhabi") || region.includes("abu dhabi")) {
+    if (textToInspect.includes("abu dhabi")) {
       city = "Abu Dhabi";
-    } else {
+    } else if (textToInspect.includes("dubai")) {
       city = "Dubai";
+    } else if (textToInspect.includes("sharjah")) {
+      city = "Sharjah";
+    } else if (textToInspect.includes("ras al khaimah") || textToInspect.includes("rak")) {
+      city = "Ras Al Khaimah";
+    } else if (textToInspect.includes("ajman")) {
+      city = "Ajman";
+    } else {
+      city = "Other";
     }
   }
+
+  // Safety net
+  if (!city || /^\d+$/.test(city)) {
+    city = "Other";
+  }
+
+  const rawPropertyTypes = Array.isArray(p.propertyTypes) ? p.propertyTypes : [];
+  const propertyTypeNames = Array.from(
+    new Set(
+      rawPropertyTypes.map((pt) => {
+        const raw = pt.rawData || {};
+        return pt.type || raw.unit_category || raw.unit_type || raw.name || raw.unitCategory || null;
+      }).filter((v) => typeof v === "string" && v.trim())
+    )
+  );
 
   return {
     id: p.id,
@@ -45,7 +71,8 @@ function normalizeReellyProject(p) {
     priceCurrency: p.currency || "AED",
     location: p.locationString || `${p.city || ""}${p.area ? `, ${p.area}` : ""}`,
     coverPhoto: p.mainImageUrl || "/project_detail_images/building.jpg",
-    propertyTypes: [],
+    propertyTypes: propertyTypeNames,
+    paymentPlans: Array.isArray(p.paymentPlans) ? p.paymentPlans.map((pp) => pp.rawData || pp) : [],
     bedroomsRange:
       p.bedroomsMin && p.bedroomsMax
         ? `${p.bedroomsMin}-${p.bedroomsMax} BR`
@@ -72,12 +99,23 @@ export default async function FeaturedPropertiesPage() {
     }),
     prisma.reellyProject.findMany({
       where: { isFeatured: true },
+      include: {
+        paymentPlans: true,
+        propertyTypes: true,
+      },
     }),
   ]);
 
+  let normalizedReelly = reellyProjects.map(normalizeReellyProject);
+  try {
+    normalizedReelly = await hydrateProjectsBatch(normalizedReelly, "AED", 5);
+  } catch (err) {
+    console.warn("Hydration failed for featured properties:", err);
+  }
+
   const allItems = [
     ...manualProps.map(normalizeManualProperty),
-    ...reellyProjects.map(normalizeReellyProject),
+    ...normalizedReelly,
   ];
 
   const grouped = allItems.reduce((acc, item) => {
