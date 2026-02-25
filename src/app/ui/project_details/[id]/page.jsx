@@ -20,7 +20,8 @@ import ProjectFAQ from '@/components/project_details/ProjectFAQ';
 
 export const dynamic = 'force-dynamic'; // or: export const revalidate = 0;
 
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { translateProjectDetail } from '@/lib/translation/projectTranslationService';
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -63,9 +64,12 @@ export async function generateMetadata({ params }) {
 
 export default async function ProjectDetailsPage({ params }) {
   const { id } = await params; // await params in Next 15+
-  const property = await getPropertyById(id);
+  const rawProperty = await getPropertyById(id);
 
-  if (!property) notFound();
+  if (!rawProperty) notFound();
+
+  const locale = await getLocale();
+  const property = locale === 'de' ? await translateProjectDetail(rawProperty, 'de') : rawProperty;
 
   // JSON-LD Breadcrumb List
   const breadcrumbItems = [

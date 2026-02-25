@@ -203,7 +203,7 @@ export async function GET() {
         .map((d) => {
           const name = (d?.name || "").trim();
           const href = qsHref("/off-plan", {
-            search_query: name || "Dubai",
+            search: name || "Dubai",
             region: "Dubai",
           });
           return { name, href };
@@ -214,7 +214,7 @@ export async function GET() {
       apiItems: dubaiAreasFromApi,
       buildHrefFromName: (name) =>
         qsHref("/off-plan", {
-          search_query: name || "Dubai",
+          search: name || "Dubai",
           region: "Dubai",
         }),
       limit: MAX_FOOTER_ITEMS,
@@ -231,7 +231,7 @@ export async function GET() {
         .map((d) => {
           const name = (d?.name || "").trim();
           const href = qsHref("/off-plan", {
-            search_query: name || "Abu Dhabi",
+            search: name || "Abu Dhabi",
             region: "Abu Dhabi",
           });
           return { name, href };
@@ -240,7 +240,7 @@ export async function GET() {
 const abuDhabiAreas = FEATURED_ABU_DHABI_AREA_NAMES.slice(0, MAX_FOOTER_ITEMS).map((name) => ({
   name,
   href: qsHref("/off-plan", {
-    search_query: name || "Abu Dhabi",
+    search: name || "Abu Dhabi",
     region: "Abu Dhabi",
   }),
 }));

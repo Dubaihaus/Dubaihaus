@@ -319,6 +319,21 @@ model Translation {
   updatedAt      DateTime @updatedAt
 }
 
+model ProjectTranslation {
+  id            String   @id @default(cuid())
+  projectId     Int
+  lang          String   // 'de'
+  fieldKey      String   // e.g. 'description', 'amenities', 'paymentPlans'
+  originalHash  String   // hash of English source (sha256/md5)
+  translated    Json     // stores text or structured arrays
+  provider      String   @default("openai")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectId, lang, fieldKey])
+  @@index([projectId, lang])
+}
+
 model CurrencyRate {
   id        Int      @id @default(autoincrement())
   base      String // e.g. "AED"
