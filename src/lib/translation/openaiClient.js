@@ -49,7 +49,7 @@ ${text}`;
             const durationMs = Date.now() - startTime;
             const usage = completion.usage;
 
-            // Passive logging
+        
             logAIUsage({
                 model: 'gpt-4o-mini',
                 source,
