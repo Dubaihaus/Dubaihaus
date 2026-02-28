@@ -3,10 +3,11 @@
 
 import { memo } from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale } from '@/hooks/useLocale';
 
 const MapPopup = memo(({ project, onClose }) => {
   const t = useTranslations('map.popup');
+  const locale = useLocale();
 
   const title = project.title || project.name || t('fallbackTitle');
   const locationText =
@@ -36,7 +37,7 @@ const MapPopup = memo(({ project, onClose }) => {
         <div className="text-xs text-gray-600 mb-2">{locationText}</div>
 
         <a
-          href={`/ui/project_details/${project.id}`}
+          href={`/${locale}/ui/project_details/${project.id}`}
           className="text-blue-600 text-sm font-medium hover:text-blue-800 inline-flex items-center gap-1"
         >
           <span>{t('viewDetails')}</span>

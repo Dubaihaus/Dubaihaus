@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useLocale } from '@/hooks/useLocale';
 import { ChevronDown, Search, X, Check } from 'lucide-react';
 
 /**
@@ -264,7 +265,7 @@ export default function OffPlanFilterPanel({ filterOptions, initialFilters }) {
         const currentCurrency = searchParams.get('currency');
         if (currentCurrency) params.set('currency', currentCurrency);
 
-        router.push(`/off-plan/search?${params.toString()}`);
+        router.push(`/${locale}/off-plan/search?${params.toString()}`);
     };
 
     // Derive years options if not provided (e.g. 2025-2030 + Completed)

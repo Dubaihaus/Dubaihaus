@@ -17,20 +17,21 @@ import {
   FaCrown,
   FaArrowRight,
 } from 'react-icons/fa';
-
-// Small helper: turns {type:v} into "/off-plan/search?type=v"
-const toHref = (filters = {}) => {
-  const params = new URLSearchParams(
-    Object.entries(filters).filter(
-      ([, v]) => v !== undefined && v !== null && v !== ''
-    )
-  ).toString();
-  return `/off-plan/search${params ? `?${params}` : ''}`;
-};
-
+import { useLocale } from '@/hooks/useLocale';
 import { usePathname } from 'next/navigation';
 
 export default function MegaMenu() {
+  const locale = useLocale();
+  // Small helper: turns {type:v} into "/[locale]/off-plan/search?type=v"
+  const toHref = (filters = {}) => {
+    const params = new URLSearchParams(
+      Object.entries(filters).filter(
+        ([, v]) => v !== undefined && v !== null && v !== ''
+      )
+    ).toString();
+    return `/${locale}/off-plan/search${params ? `?${params}` : ''}`;
+  };
+
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const closeTimer = useRef(null);

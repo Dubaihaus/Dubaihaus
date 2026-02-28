@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { useLocale } from '@/hooks/useLocale';
 import { usePathname } from 'next/navigation';
 
 // Configure which devs to feature + the card background image to show
@@ -17,6 +18,7 @@ const FEATURED = [
 ];
 
 export default function DevelopersMegaMenu({ label = 'Developers' }) {
+  const locale = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -131,7 +133,7 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
           <div className="px-5 pb-5 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* All Developers */}
             <Link
-              href="/developers"
+              href={`/${locale}/developers`}
               className="group rounded-xl overflow-hidden border bg-white hover:shadow-md transition"
               onClick={() => setOpen(false)}
             >
@@ -165,7 +167,7 @@ export default function DevelopersMegaMenu({ label = 'Developers' }) {
             {/* Featured developer cards */}
             {cardsToRender.map(({ cfg, dev }, i) => {
               const href = dev
-                ? `/off-plan?developer=${encodeURIComponent(dev.id)}`
+                ? `/${locale}/off-plan?developer=${encodeURIComponent(dev.id)}`
                 : '#';
               const bg = cfg?.img || fallbackImg;
               const labelText = dev?.name || cfg?.label || 'Developer';

@@ -10,6 +10,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getHandoverLabel } from '../lib/FormatHandover';
 import { useTranslations } from 'next-intl';
+import { useLocale } from '@/hooks/useLocale';
 import { formatLocation, formatPaymentPlanShort } from '@/lib/formatters';
 
 /* ---------------- helpers ---------------- */
@@ -88,6 +89,7 @@ export default function PropertyCard({
   index = 0,
 }) {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('offPlan.card');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -151,15 +153,15 @@ export default function PropertyCard({
     // Determine base path based on source or ID format
     let pathname;
     if (property.source === 'ADMIN') {
-      pathname = `/ui/property_details/${property.id}`;
+      pathname = `/${locale}/ui/property_details/${property.id}`;
     } else if (property.source === 'REELLY') {
-      pathname = `/ui/project_details/${property.id}`;
+      pathname = `/${locale}/ui/project_details/${property.id}`;
     } else {
       // Fallback heuristic: Admin IDs are UUIDs (strings), Reelly IDs are integers
       // But Reelly IDs might be strings in some contexts if fetched from DB as string.
       // Safer to assume numeric regex for Reelly.
       const isNumeric = /^\d+$/.test(String(property.id));
-      pathname = isNumeric ? `/ui/project_details/${property.id}` : `/ui/property_details/${property.id}`;
+      pathname = isNumeric ? `/${locale}/ui/project_details/${property.id}` : `/${locale}/ui/property_details/${property.id}`;
     }
 
     const search = new URLSearchParams(queryParams).toString();

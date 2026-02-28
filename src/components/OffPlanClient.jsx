@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useLocale } from '@/hooks/useLocale';
 
 function shallowEqualObj(a = {}, b = {}) {
   const aKeys = Object.keys(a);
@@ -73,6 +74,7 @@ function pickHomeProjectsWithAbuDhabiQuota(results, limit = 9) {
 
 export default function OffPlanClient({ limit, latest = false, section, endpoint = '/api/off-plan', hideHeader = false }) {
   const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const t = useTranslations('offPlan.client');
   // ... (previous state code)
@@ -242,13 +244,13 @@ export default function OffPlanClient({ limit, latest = false, section, endpoint
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([k, v]) => v && params.set(k, v));
       if (page > 1) params.set('page', String(page));
-      router.replace(`/off-plan?${params.toString()}`, { scroll: false });
+      router.replace(`/${locale}/off-plan?${params.toString()}`, { scroll: false });
     }
   }, [filters, limit, router, page]);
 
   const handleViewMore = () => {
     setLoading(true);
-    setTimeout(() => router.push('/off-plan'), 300);
+    setTimeout(() => router.push(`/${locale}/off-plan`), 300);
   };
 
   const handleFiltersChange = (newFilters) => {

@@ -144,7 +144,8 @@ export function middleware(req) {
   // IMPORTANT: attach locale to the *request* that reaches RSC
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-next-locale', locale);
-
+  const isAdminRoute = finalPath === "/admin" || finalPath.startsWith("/admin/");
+  requestHeaders.set("x-hide-chrome", isAdminRoute ? "1" : "0");
   const res = NextResponse.rewrite(url, {
     request: { headers: requestHeaders }
   });

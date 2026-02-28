@@ -18,13 +18,14 @@ async function getMessages(locale) {
 export const metadata = {
   metadataBase: new URL('https://www.dubaihaus.com'),
    verification: {
-    google: "cgpG0Dyji4cmAmtgxLfMkWIO7W85FEGgAyzn9yXQW_U",
+
   },
 };
 
 export default async function RootLayout({ children }) {
   const headersList = await headers();
   const headerLocale = headersList.get('x-next-locale');
+    const hideChrome = headersList.get("x-hide-chrome") === "1";
 
   let locale = headerLocale || 'en';
   if (!['en', 'de'].includes(locale)) {
@@ -39,9 +40,9 @@ export default async function RootLayout({ children }) {
         {/* key={locale} ensures a fresh provider for each locale */}
         <NextIntlClientProvider locale={locale} messages={messages} key={locale}>
           <Providers>
-            <Navbar />
+          {!hideChrome && <Navbar />}
             {children}
-            <Footer />
+            {!hideChrome && <Footer />}
           </Providers>
         </NextIntlClientProvider>
       </body>

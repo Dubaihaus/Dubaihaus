@@ -2,12 +2,14 @@
 
 import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLocale } from '@/hooks/useLocale';
 import PropertyCard from '@/components/PropertyCard';
 import { X, Map as MapIcon, List } from 'lucide-react';
 import MapSection from '@/components/map/MapSection'; // Reusing map section if possible or building simple one
 
 export default function SearchResultsClient({ results, filters }) {
     const router = useRouter();
+    const locale = useLocale();
     const searchParams = useSearchParams();
 
     // Helper to remove a specific filter
@@ -26,11 +28,11 @@ export default function SearchResultsClient({ results, filters }) {
             // Remove entire key
             params.delete(key);
         }
-        router.push(`/off-plan/search?${params.toString()}`);
+        router.push(`/${locale}/off-plan/search?${params.toString()}`);
     };
 
     const clearAll = () => {
-        router.push('/off-plan/search');
+        router.push(`/${locale}/off-plan/search`);
     };
 
     // Generate active chips
