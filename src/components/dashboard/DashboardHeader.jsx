@@ -7,9 +7,7 @@ import Link from 'next/link';
 import { useQueries } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-// ====== CONFIG ======
-// ====== CONFIG ======
-// ====== CONFIG ======
+
 const AREAS_CONFIG = [
   // --- Abu Dhabi ---
 
