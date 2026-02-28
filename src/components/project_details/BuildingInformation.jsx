@@ -1,25 +1,26 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 /* -------- helpers -------- */
 
-function humanizeStatus(s) {
-  if (!s) return 'N/A';
+function humanizeStatus(s, t) {
+  if (!s) return t('location.buildingDetails.values.na');
   return String(s).replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
-function formatLocation(loc) {
-  if (!loc) return 'N/A';
+function formatLocation(loc, t) {
+  if (!loc) return t('location.buildingDetails.values.na');
   const parts = [loc?.sector, loc?.district, loc?.city, loc?.region].filter(Boolean);
-  return parts.length ? parts.join(', ') : 'N/A';
+  return parts.length ? parts.join(', ') : t('location.buildingDetails.values.na');
 }
 
 /** Format AED price nicely (with K / M / B suffix) */
-function formatAED(n) {
-  if (n == null || n === '') return 'Price on request';
+function formatAED(n, t) {
+  if (n == null || n === '') return t('location.buildingDetails.values.priceOnRequest');
   const num = Number(n);
-  if (!Number.isFinite(num)) return 'Price on request';
+  if (!Number.isFinite(num)) return t('location.buildingDetails.values.priceOnRequest');
 
   if (num >= 1_000_000_000) {
     const billions = num / 1_000_000_000;
@@ -34,9 +35,11 @@ function formatAED(n) {
   return `AED ${num.toLocaleString()}`;
 }
 
-function formatFurnishing(furnishing) {
-  if (!furnishing) return 'N/A';
-  return String(furnishing).toUpperCase() === 'YES' ? 'Furnished' : String(furnishing);
+function formatFurnishing(furnishing, t) {
+  if (!furnishing) return t('location.buildingDetails.values.na');
+  return String(furnishing).toUpperCase() === 'YES'
+    ? t('location.buildingDetails.values.furnished')
+    : String(furnishing);
 }
 
 /** Safely pull a URL out of different shapes */
@@ -80,6 +83,7 @@ function extractMdSection(md, heading) {
 }
 
 export default function CombinedPropertyDetails({ property }) {
+  const t = useTranslations('projectDetails');
   const p = property?.rawData ?? property ?? {};
 
   // Prefer last, distinct images from architecture → interior → cover
@@ -97,23 +101,26 @@ export default function CombinedPropertyDetails({ property }) {
     ? p.project_map_points.slice(0, 6)
     : [];
 
+  const na = t('location.buildingDetails.values.na');
+  const tba = t('location.buildingDetails.values.tba');
+
   // LEFT CARD: Property & Building Information
   const leftCardInfo = [
-    { label: 'Building Name', value: p.name || property?.title || 'N/A', category: 'building' },
-    { label: 'Developer', value: p.developer?.name || p.developer_name || p.developer || 'N/A', category: 'developer' },
-    { label: 'Furnishing', value: formatFurnishing(p.furnishing), category: 'features' },
-    { label: 'Construction Status', value: humanizeStatus(p.construction_status), category: 'status' },
-    { label: 'Sale Status', value: humanizeStatus(p.sale_status), category: 'status' },
-    { label: 'Completion Date', value: p.completion_date || p.handover || 'TBA', category: 'timeline' },
-    { label: 'Service Charge', value: p.service_charge || 'N/A', category: 'financial' },
-    { label: 'Reference No.', value: p.id ?? property?.id ?? 'N/A', category: 'administrative' },
-    { label: 'Location', value: formatLocation(p.location), category: 'location' },
-  ].filter((item) => item.value !== 'N/A');
+    { label: t('location.buildingDetails.labels.buildingName'), value: p.name || property?.title || na, category: 'building' },
+    { label: t('location.buildingDetails.labels.developer'), value: p.developer?.name || p.developer_name || p.developer || na, category: 'developer' },
+    { label: t('location.buildingDetails.labels.furnishing'), value: formatFurnishing(p.furnishing, t), category: 'features' },
+    { label: t('location.buildingDetails.labels.constructionStatus'), value: humanizeStatus(p.construction_status, t), category: 'status' },
+    { label: t('location.buildingDetails.labels.saleStatus'), value: humanizeStatus(p.sale_status, t), category: 'status' },
+    { label: t('location.buildingDetails.labels.completionDate'), value: p.completion_date || p.handover || tba, category: 'timeline' },
+    { label: t('location.buildingDetails.labels.serviceCharge'), value: p.service_charge || na, category: 'financial' },
+    { label: t('location.buildingDetails.labels.referenceNo'), value: p.id ?? property?.id ?? na, category: 'administrative' },
+    { label: t('location.buildingDetails.labels.location'), value: formatLocation(p.location, t), category: 'location' },
+  ].filter((item) => item.value !== na);
 
   // RIGHT CARD: Starting Price (always)
   const rightCardInfo = [
-    { label: 'Starting Price', value: formatAED(p.min_price), highlight: true },
-  ].filter((item) => item.value !== 'N/A');
+    { label: t('location.economicAppeal.startingPrice'), value: formatAED(p.min_price, t), highlight: true },
+  ].filter((item) => item.value !== na);
 
   // ---------- NEW: Prefer "Location description and benefits" from overview ----------
   const overviewSource =
@@ -132,10 +139,10 @@ export default function CombinedPropertyDetails({ property }) {
       {/* Section Header */}
       <div className="text-center mb-12">
         <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-3">
-          Property Details & Location
+          {t('location.sectionTitle')}
         </h2>
         <p className="text-slate-600 max-w-2xl mx-auto">
-          Comprehensive recap & overview of building specifications, amenities, and strategic location advantages
+          {t('location.sectionSubtitle')}
         </p>
       </div>
 
@@ -144,8 +151,8 @@ export default function CombinedPropertyDetails({ property }) {
         {/* LEFT CARD */}
         <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
           <div className="mb-6 pb-4 border-b border-slate-200">
-            <h3 className="text-xl md:text-2xl font-bold text-slate-900">Property &amp; Building Details</h3>
-            <p className="text-slate-600 text-sm mt-1">Complete specifications and features</p>
+            <h3 className="text-xl md:text-2xl font-bold text-slate-900">{t('location.buildingDetails.title')}</h3>
+            <p className="text-slate-600 text-sm mt-1">{t('location.buildingDetails.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
@@ -162,9 +169,9 @@ export default function CombinedPropertyDetails({ property }) {
 
           {/* Summary */}
           <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-            <p className="text-brand-dark font-semibold">Comprehensive Details</p>
+            <p className="text-brand-dark font-semibold">{t('location.buildingDetails.summary')}</p>
             <p className="text-brand-dark text-sm">
-              {leftCardInfo.length} key specifications provided
+              {t('location.buildingDetails.specsCount', { count: leftCardInfo.length })}
             </p>
           </div>
         </div>
@@ -174,8 +181,8 @@ export default function CombinedPropertyDetails({ property }) {
           {/* Economic Appeal Card */}
           <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
             <div className="mb-6 pb-4 border-b border-slate-200">
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900">Economic Appeal</h3>
-              <p className="text-slate-600 text-sm mt-1">Investment value &amp; location benefits</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900">{t('location.economicAppeal.title')}</h3>
+              <p className="text-slate-600 text-sm mt-1">{t('location.economicAppeal.subtitle')}</p>
             </div>
 
             {/* Images Grid (last, distinct) */}
@@ -200,17 +207,15 @@ export default function CombinedPropertyDetails({ property }) {
               {rightCardInfo.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 ${
-                    item.highlight
+                  className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 ${item.highlight
                       ? 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 shadow-sm'
                       : 'bg-white border border-slate-100 hover:border-slate-300'
-                  }`}
+                    }`}
                 >
                   <div className="text-slate-700 font-semibold">{item.label}</div>
                   <div
-                    className={`text-right ${
-                      item.highlight ? 'text-emerald-700 font-bold text-lg' : 'text-slate-900 font-medium'
-                    }`}
+                    className={`text-right ${item.highlight ? 'text-emerald-700 font-bold text-lg' : 'text-slate-900 font-medium'
+                      }`}
                   >
                     {item.value}
                   </div>
@@ -224,9 +229,9 @@ export default function CombinedPropertyDetails({ property }) {
             <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
               <div className="mb-4">
                 <h3 className="text-xl md:text-2xl font-bold text-slate-900">
-                  Location Description &amp; Benefits
+                  {t('location.benefits.title')}
                 </h3>
-             
+
               </div>
               <p className="text-slate-700 leading-7 md:leading-8 text-justify">
                 {locationDescription}
@@ -236,8 +241,8 @@ export default function CombinedPropertyDetails({ property }) {
             pointsOfInterest.length > 0 && (
               <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
                 <div className="mb-6">
-                  <h3 className="text-xl md:text-2xl font-bold text-slate-900">Nearby Locations</h3>
-                  <p className="text-slate-600 text-sm mt-1">Key destinations &amp; accessibility</p>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900">{t('location.nearby.title')}</h3>
+                  <p className="text-slate-600 text-sm mt-1">{t('location.nearby.subtitle')}</p>
                 </div>
 
                 <div className="space-y-3">
@@ -251,17 +256,17 @@ export default function CombinedPropertyDetails({ property }) {
                           {poi.map_point_name || poi.name || poi.title}
                         </h4>
                         <p className="text-slate-500 text-xs">
-                          {poi.distance ? `${poi.distance} km away` : 'Nearby'}
+                          {poi.distance ? t('location.nearby.distance', { distance: poi.distance }) : t('location.nearby.nearby')}
                         </p>
                       </div>
                       <div className="text-right">
                         {poi.time || poi.minutes || poi.time_min ? (
                           <span className="bg-slate-900/90 text-white px-3 py-1 rounded-full text-sm font-medium">
-                            {poi.time || poi.minutes || poi.time_min} min
+                            {t('location.nearby.time', { minutes: poi.time || poi.minutes || poi.time_min })}
                           </span>
                         ) : (
                           <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm">
-                            Nearby
+                            {t('location.nearby.nearby')}
                           </span>
                         )}
                       </div>
@@ -271,7 +276,7 @@ export default function CombinedPropertyDetails({ property }) {
 
                 <div className="mt-4 text-center">
                   <p className="text-slate-500 text-sm">
-                    {pointsOfInterest.length} key locations within easy reach
+                    {t('location.nearby.summary', { count: pointsOfInterest.length })}
                   </p>
                 </div>
               </div>

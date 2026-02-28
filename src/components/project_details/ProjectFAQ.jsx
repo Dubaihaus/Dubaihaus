@@ -1,5 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 /* ---------- helpers ---------- */
 const fmtNum = (v) => Number(v).toLocaleString();
@@ -26,23 +27,23 @@ function uniq(arr) {
 /** From units, build a human sentence like:
  * "Premium 1- and 2-bedroom apartments. 1BR (833–2,098 sq.ft.), 2BR (1,843–2,358 sq.ft.)"
  */
-function buildUnitMixSentence(p) {
+function buildUnitMixSentence(p, t) {
   const blocks = Array.isArray(p?.unit_blocks) ? p.unit_blocks : [];
   const tus = Array.isArray(p?.typical_units) ? p.typical_units : [];
   const entries =
     blocks.length > 0
       ? blocks.map((b) => ({
-          bedrooms: Number.isFinite(Number(b?.bedrooms)) ? Number(b.bedrooms) : null,
-          unit_type: b?.unit_type || p?.property_type || 'Residence',
-          from_sqft: b?.size_from_sqft ?? b?.sizeFromSqft ?? null,
-          to_sqft: b?.size_to_sqft ?? b?.sizeToSqft ?? null,
-        }))
-      : tus.map((t) => ({
-          bedrooms: Number.isFinite(Number(t?.bedrooms)) ? Number(t.bedrooms) : null,
-          unit_type: p?.property_type || 'Apartment',
-          from_sqft: t?.from_size_sqft ?? null,
-          to_sqft: t?.to_size_sqft ?? null,
-        }));
+        bedrooms: Number.isFinite(Number(b?.bedrooms)) ? Number(b.bedrooms) : null,
+        unit_type: b?.unit_type || p?.property_type || t('faq.helpers.residence'),
+        from_sqft: b?.size_from_sqft ?? b?.sizeFromSqft ?? null,
+        to_sqft: b?.size_to_sqft ?? b?.sizeToSqft ?? null,
+      }))
+      : tus.map((t_unit) => ({
+        bedrooms: Number.isFinite(Number(t_unit?.bedrooms)) ? Number(t_unit.bedrooms) : null,
+        unit_type: p?.property_type || t('faq.helpers.apartment'),
+        from_sqft: t_unit?.from_size_sqft ?? null,
+        to_sqft: t_unit?.to_size_sqft ?? null,
+      }));
 
   if (!entries.length) return null;
 
@@ -69,44 +70,45 @@ function buildUnitMixSentence(p) {
   const detail = [];
   const brs = [...byBr.values()].sort((a, b) => a.br - b.br);
 
-  const label = (br) => (br <= 0 ? 'Studio' : `${br}-Bedroom`);
+  const label = (br) => (br <= 0 ? t('faq.helpers.studio') : t('faq.helpers.bedroom', { br }));
 
   for (const g of brs) {
     // summary list “1- and 2-bedroom”
-    if (g.br <= 0) parts.push('Studio');
-    else parts.push(`${g.br}-bedroom`);
+    if (g.br <= 0) parts.push(t('faq.helpers.studio'));
+    else parts.push(t('faq.helpers.bedroom', { br: g.br }).toLowerCase());
 
     // detail with sizes
     const have = Number.isFinite(g.min) && g.max > 0;
     detail.push(
       have
         ? `${label(g.br)} (${fmtNum(Math.round(g.min))}–${fmtNum(Math.round(g.max))} sq.ft.)`
-        : `${label(g.br)} (size on request)`
+        : `${label(g.br)} (${t('faq.helpers.sizeOnRequest')})`
     );
   }
 
   const unitTypes = uniq(
     entries.map((e) => (e.unit_type || '').toString().trim().toLowerCase())
-  ).map((s) => titleCase(s || 'Residence'));
-  const typeText = unitTypes.length ? unitTypes.join(' & ') : 'Residences';
+  ).map((s) => titleCase(s || t('faq.helpers.residence')));
+  const typeText = unitTypes.length ? unitTypes.join(' & ') : t('faq.helpers.residence');
 
+  const andStr = t('faq.helpers.and');
   const brText =
     parts.length === 1
       ? parts[0]
       : parts.length === 2
-      ? parts.join(' and ')
-      : `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+        ? parts.join(` ${andStr} `)
+        : `${parts.slice(0, -1).join(', ')}, ${andStr} ${parts[parts.length - 1]}`;
 
   return `${typeText} include ${brText}. ${detail.join(', ')}`;
 }
 
-function extractPaymentPlan(p) {
+function extractPaymentPlan(p, t) {
   const plans = Array.isArray(p?.payment_plans) ? p.payment_plans : [];
   if (!plans.length) return null;
 
   const plan = plans[0]; // choose first plan if many
   const steps = Array.isArray(plan?.steps) ? plan.steps : [];
-  if (!steps.length) return plan?.name || 'Flexible payment plans available';
+  if (!steps.length) return plan?.name || t('faq.answers.paymentPlan.flexible');
 
   // Try to find “handover” total vs downpayment
   const total = steps.reduce((acc, s) => acc + (Number(s.percentage) || 0), 0);
@@ -114,8 +116,8 @@ function extractPaymentPlan(p) {
   const handover = steps.find((s) => /handover/i.test(s?.name || ''));
 
   const pieces = [];
-  if (down?.percentage != null) pieces.push(`${down.percentage}% on booking`);
-  if (handover?.percentage != null) pieces.push(`${handover.percentage}% on handover`);
+  if (down?.percentage != null) pieces.push(t('faq.answers.paymentPlan.onBooking', { percentage: down.percentage }));
+  if (handover?.percentage != null) pieces.push(t('faq.answers.paymentPlan.onHandover', { percentage: handover.percentage }));
   if (!pieces.length) {
     // generic sentence
     pieces.push(
@@ -124,9 +126,9 @@ function extractPaymentPlan(p) {
         .join(', ')
     );
   }
-  if (total && total !== 100) pieces.push(`(Total scheduled: ${total}%)`);
+  if (total && total !== 100) pieces.push(t('faq.answers.paymentPlan.totalScheduled', { total }));
 
-  return `${plan?.name || 'Payment Plan'}: ${pieces.join('; ')}.`;
+  return `${plan?.name || t('projectDetails.paymentPlan.fallbackTitle')}: ${pieces.join('; ')}.`;
 }
 
 function pickNearby(points = [], kind = 'school') {
@@ -153,16 +155,16 @@ function buildAmenitiesList(project_amenities = []) {
 }
 
 /* ---------- FAQ builder ---------- */
-function makeFaq(property) {
+function makeFaq(property, t) {
   const p = property?.rawData ?? property ?? {};
 
-  const name = p.name || property?.title || 'the Project';
+  const name = p.name || property?.title || t('faq.projectFallback');
   const developer = p.developer || property?.developer || null;
   const loc = formatLocation(p.location);
   const completion = p.completion_date || null;
   const minPrice = p.min_price ?? null;
-  const unitMix = buildUnitMixSentence(p);
-  const plan = extractPaymentPlan(p);
+  const unitMix = buildUnitMixSentence(p, t);
+  const plan = extractPaymentPlan(p, t);
   const mapPoints = Array.isArray(p.project_map_points) ? p.project_map_points : [];
   const schools = pickNearby(mapPoints, 'school');
   const hospitals = pickNearby(mapPoints, 'hospital');
@@ -172,64 +174,64 @@ function makeFaq(property) {
 
   if (loc) {
     faqs.push({
-      q: `Where is ${name} located?`,
-      a: `${name} is located in ${loc}.`,
+      q: t('faq.questions.location', { name }),
+      a: t('faq.answers.location', { name, location: loc }),
     });
   }
 
   if (developer) {
     faqs.push({
-      q: `Who is the developer of ${name}?`,
-      a: `${name} is developed by ${developer}.`,
+      q: t('faq.questions.developer', { name }),
+      a: t('faq.answers.developer', { name, developer }),
     });
   }
 
   if (unitMix) {
     faqs.push({
-      q: `What types of properties are available at ${name}?`,
+      q: t('faq.questions.types', { name }),
       a: unitMix,
     });
   }
 
   if (minPrice != null) {
     faqs.push({
-      q: `What’s the starting price at ${name}?`,
-      a: `Prices start from ${AED(minPrice)}.`,
+      q: t('faq.questions.price', { name }),
+      a: t('faq.answers.price', { name, price: AED(minPrice) }),
     });
   }
 
   if (plan) {
     faqs.push({
-      q: `What payment plans are available at ${name}?`,
+      q: t('faq.questions.paymentPlan', { name }),
       a: plan,
     });
   }
 
   if (completion) {
     faqs.push({
-      q: `When is handover scheduled for ${name}?`,
-      a: `Handover (completion) is scheduled for ${completion}.`,
+      q: t('faq.questions.handover', { name }),
+      a: t('faq.answers.handover', { name, completion }),
     });
   }
 
   if (amenities.length) {
     faqs.push({
-      q: `What amenities are available at ${name}?`,
-      a: `Key amenities include: ${amenities.join(', ')}.`,
+      q: t('faq.questions.amenities', { name }),
+      a: t('faq.answers.amenities', { name, list: amenities.join(', ') }),
     });
   }
 
   if (hospitals.length) {
     faqs.push({
-      q: `Are there healthcare facilities near ${name}?`,
-      a: `Nearby healthcare options include ${hospitals.join(', ')}.`,
+      q: t('faq.questions.healthcare', { name }),
+      a: t('faq.answers.healthcare', { name, list: hospitals.join(', ') }),
     });
   }
 
   if (schools.length) {
     faqs.push({
-      q: `Are there schools near ${name}?`,
-      a: `Nearby schools include ${schools.join(', ')}.`,
+      q: t('faq.questions.schools', { name }),
+      a: t('faq.answers.schools', { name, list: schools.join(', ') }),
     });
   }
 
@@ -287,7 +289,8 @@ function FaqItem({ i, q, a, open, onToggle }) {
 
 /* ---------- Main ---------- */
 export default function ProjectFAQ({ property }) {
-  const faqs = useMemo(() => makeFaq(property), [property]);
+  const t = useTranslations('projectDetails');
+  const faqs = useMemo(() => makeFaq(property, t), [property, t]);
   const [open, setOpen] = useState(-1);
 
   // JSON-LD for SEO (FAQPage)
@@ -306,16 +309,16 @@ export default function ProjectFAQ({ property }) {
 
   if (!faqs.length) return null;
 
-  const name = property?.rawData?.name || property?.title || 'the Project';
+  const name = property?.rawData?.name || property?.title || t('faq.projectFallback');
 
   return (
     <section className="px-4 py-12 md:px-16 bg-white" dir="ltr">
       {/* Heading: property name in bluish color only here */}
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-        FAQ about <span className="text-[#00C6FF]">{name}</span>
+        {t('faq.title')} <span className="text-[#00C6FF]">{name}</span>
       </h2>
       <p className="text-gray-600 mb-6 text-sm md:text-base">
-        Answers to the most common questions buyers ask.
+        {t('faq.subtitle')}
       </p>
 
       {/* Card container */}

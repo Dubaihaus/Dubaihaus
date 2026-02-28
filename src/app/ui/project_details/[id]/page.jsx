@@ -70,12 +70,13 @@ export default async function ProjectDetailsPage({ params }) {
 
   const locale = await getLocale();
   const property = locale === 'de' ? await translateProjectDetail(rawProperty, 'de') : rawProperty;
+  const tHeader = await getTranslations({ namespace: 'projectDetails.hero.breadcrumb' });
 
   // JSON-LD Breadcrumb List
   const breadcrumbItems = [
-    { name: "Home", item: "https://www.dubaihaus.com" },
-    { name: "Off-Plan Projects", item: "https://www.dubaihaus.com/off-plan" },
-    { name: property.title || "Project Details", item: `https://www.dubaihaus.com/ui/project_details/${id}` }
+    { name: tHeader('home'), item: "https://www.dubaihaus.com" },
+    { name: tHeader('offPlanProjects'), item: "https://www.dubaihaus.com/off-plan" },
+    { name: property.title || tHeader('projectDetails'), item: `https://www.dubaihaus.com/ui/project_details/${id}` }
   ];
 
   const jsonLd = {

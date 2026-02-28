@@ -11,10 +11,11 @@ import {
 } from 'react-icons/fa';
 import ContactModal from '@/components/ContactModal';
 import { getHandoverLabel } from '../../lib/FormatHandover';
+import { useTranslations } from 'next-intl';
 
 /* ---------- Utilities (unchanged) ---------- */
-function formatAED(n) {
-  return n != null ? `AED ${Number(n).toLocaleString()}` : 'Price on request';
+function formatAED(n, t) {
+  return n != null ? `AED ${Number(n).toLocaleString()}` : t('buildingDetails.values.priceOnRequest');
 }
 function formatLocationLikeHighlights(locOrString) {
   if (!locOrString) return 'Dubai';
@@ -91,7 +92,7 @@ function getFirstPaymentPlan(property) {
 }
 
 // 🔹 Label for header card: "20% / 20% / 60%"
-function getHeaderPaymentPlanLabel(property) {
+function getHeaderPaymentPlanLabel(property, t) {
   const plan = getFirstPaymentPlan(property);
 
   if (!plan) {
@@ -102,7 +103,7 @@ function getHeaderPaymentPlanLabel(property) {
     ) {
       return property.paymentPlan.trim();
     }
-    return 'Flexible Payment Plan';
+    return t('hero.tags.paymentPlan'); // Default translable label if no structured plan
   }
 
   const percentages = (plan.steps || [])
@@ -110,7 +111,7 @@ function getHeaderPaymentPlanLabel(property) {
     .filter((n) => Number.isFinite(n) && n > 0)
     .map((n) => Math.round(n));
 
-  if (!percentages.length) return 'Flexible Payment Plan';
+  if (!percentages.length) return t('hero.tags.paymentPlan');
 
   // show first 3–4 steps max to keep it clean
   const label = percentages
@@ -121,12 +122,11 @@ function getHeaderPaymentPlanLabel(property) {
   return label;
 }
 
-
-
-
 /* ---------- Component ---------- */
 export default function ProjectHeaderSection({ property }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('projectDetails');
+
   const raw = property?.rawData ?? property ?? {};
   const coverUrl = pickCoverUrl(property);
   const title = property.title || raw.name || 'Project Title';
@@ -134,26 +134,26 @@ export default function ProjectHeaderSection({ property }) {
     raw.location || property.location
   );
   const startPrice = getStartingPriceAED(raw);
-  const priceLabel = formatAED(startPrice);
+  const priceLabel = formatAED(startPrice, t);
 
   // ✅ Correct payment plan (same logic as PaymentPlanSection heading)
   // ✅ Header card: show percentages like "20% / 20% / 60%"
-const paymentPlan = getHeaderPaymentPlanLabel(property);
+  const paymentPlan = getHeaderPaymentPlanLabel(property, t);
 
 
   // ✅ Correct handover label (same as cards & highlights)
-  const handoverDate = getHandoverLabel(property) || 'TBA';
+  const handoverDate = getHandoverLabel(property) || t('buildingDetails.values.tba');
 
   /* ----- rotating tagline (one of 5 lines; new on mount) ----- */
   const taglines = useMemo(
     () => [
-      ' Premium development with exceptional amenities and luxury finishes',
-      ' Waterfront lifestyle with world-class facilities and curated services',
-      ' Wellness-forward design with serene, resort-style spaces',
-      ' Seamless access to key landmarks, retail, and dining destinations',
-      ' Limited residences with flexible payment options and trusted developer',
+      t('hero.taglines.0'),
+      t('hero.taglines.1'),
+      t('hero.taglines.2'),
+      t('hero.taglines.3'),
+      t('hero.taglines.4'),
     ],
-    []
+    [t]
   );
   const [tagline, setTagline] = useState(taglines[0]);
   useEffect(() => {
@@ -209,7 +209,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
       <div className="flex flex-col justify-center gap-6 md:gap-7 pl-4 md:pl-8">
         {/* Breadcrumb */}
         <nav className="text-[13px] md:text-sm text-gray-500">
-          <span className="text-gray-400">Main Page &gt; Projects &gt;</span>{' '}
+          <span className="text-gray-400">{t('hero.breadcrumb.separator')}</span>{' '}
           <span className="text-sky-600 font-medium">{community}</span>
         </nav>
 
@@ -219,7 +219,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
             {title}
           </h1>
           <p className="text-xl md:text-2xl font-medium text-slate-#004C99">
-            in <span className="text-sky-600">{community}</span>
+            {t('hero.tags.in')} <span className="text-sky-600">{community}</span>
           </p>
         </header>
 
@@ -232,7 +232,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
                        shadow-[0_10px_20px_rgba(56,189,248,0.25)] hover:shadow-[0_12px_24px_rgba(56,189,248,0.35)]
                        transition-all"
           >
-            Discover More
+            {t('hero.cta.discoverMore')}
           </button>
 
           <div className="relative group">
@@ -244,13 +244,13 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
               className="rounded-xl shadow-md border border-gray-200 transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute -top-2 -right-2 bg-rose-500 text-white text-[11px] px-2 py-0.5 rounded-full shadow-sm">
-              Scan
+              {t('hero.qr.scan')}
             </div>
             <div
               className="absolute left-1/2 -translate-x-1/2 top-[110%] opacity-0 group-hover:opacity-100 transition
                             text-xs bg-slate-900 text-white px-2 py-1 rounded pointer-events-none"
             >
-              Open brochure on phone
+              {t('hero.qr.tooltip')}
             </div>
           </div>
         </div>
@@ -263,7 +263,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
             </div>
             <div>
               <p className="font-bold text-slate-900 text-lg">{priceLabel}</p>
-              <span className="text-slate-500 text-sm">Starting Price</span>
+              <span className="text-slate-500 text-sm">{t('hero.tags.startingPrice')}</span>
             </div>
           </div>
 
@@ -275,7 +275,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
               <p className="font-bold text-slate-900 text-md">
                 {paymentPlan}
               </p>
-              <span className="text-slate-500 text-sm">Payment Plan</span>
+              <span className="text-slate-500 text-sm">{t('hero.tags.paymentPlan')}</span>
             </div>
           </div>
 
@@ -287,7 +287,7 @@ const paymentPlan = getHeaderPaymentPlanLabel(property);
               <p className="font-bold text-slate-900 text-lg">
                 {handoverDate}
               </p>
-              <span className="text-slate-500 text-sm">Handover</span>
+              <span className="text-slate-500 text-sm">{t('hero.tags.handover')}</span>
             </div>
           </div>
         </div>

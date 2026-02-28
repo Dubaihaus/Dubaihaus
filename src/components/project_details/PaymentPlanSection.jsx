@@ -1,10 +1,11 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 function hasUsableSteps(plan) {
   return plan && Array.isArray(plan.steps) && plan.steps.length > 0;
 }
 
-function planTitle(plan, property) {
+function planTitle(plan, property, t) {
   const dev =
     property?.rawData?.developer?.name ||
     property?.developer?.name ||
@@ -21,7 +22,7 @@ function planTitle(plan, property) {
     const a = Math.round(sorted[0].percentage);
     const b = Math.round(sorted[1].percentage);
     const total = (plan.steps || []).reduce(
-      (t, s) => t + (Number(s.percentage) || 0),
+      (t_acc, s) => t_acc + (Number(s.percentage) || 0),
       0
     );
     if (total > 0 && a + b >= total * 0.9) {
@@ -35,17 +36,19 @@ function planTitle(plan, property) {
   // - If we have a ratio, use that (e.g. "60/40")
   // - Else use plan.name
   // - Else fall back to "Payment Plan"
-  let base = ratio || rawName || 'Payment Plan';
+  let base = ratio || rawName || t('paymentPlan.fallbackTitle');
 
   // 🔹 Avoid "Payment Plan Payment Plan" duplication
-  if (!ratio && rawName && /payment\s*plan/i.test(rawName)) {
-    base = rawName; // already contains "Payment Plan"
+  const fallbackTitle = t('paymentPlan.fallbackTitle').toLowerCase();
+  if (!ratio && rawName && rawName.toLowerCase().includes(fallbackTitle)) {
+    base = rawName; // already contains translated "Payment Plan"
   }
 
-  return dev ? `${base} from ${dev}` : base;
+  return dev ? t('paymentPlan.fromDeveloper', { base, developer: dev }) : base;
 }
 
 export default function PaymentPlanSection({ property }) {
+  const t = useTranslations('projectDetails');
   const plans = Array.isArray(property?.paymentPlans) ? property.paymentPlans.filter(hasUsableSteps) : [];
 
   // If nothing useful, render nothing.
@@ -55,8 +58,8 @@ export default function PaymentPlanSection({ property }) {
     <section className="py-10 md:py-14">
       <div className="max-w-7xl mx-auto px-5 md:px-10">
         {plans.map((plan, index) => {
-          const title = planTitle(plan, property);
-          const duration = Number(plan?.duration_months) > 0 ? `${plan.duration_months} months` : null;
+          const title = planTitle(plan, property, t);
+          const durationMonths = Number(plan?.duration_months);
 
           return (
             <div key={index} className="mb-10 last:mb-0">
@@ -82,17 +85,17 @@ export default function PaymentPlanSection({ property }) {
                             {typeof step.percentage === 'number' ? `${step.percentage}%` : step.percentage}
                           </div>
                           <div className="mt-2 text-sky-50 text-sm md:text-base font-medium">
-                            {step.name || 'Installment'}
+                            {step.name || t('paymentPlan.installment')}
                           </div>
                         </div>
                       ))}
                     </div>
 
                     {/* Duration (optional) */}
-                    {duration && (
+                    {durationMonths > 0 && (
                       <div className="mt-6 text-center">
                         <span className="inline-block rounded-full bg-white/15 text-white px-4 py-1 text-sm font-semibold border border-white/30">
-                          Duration: {duration}
+                          {t('paymentPlan.duration', { months: durationMonths })}
                         </span>
                       </div>
                     )}
@@ -103,7 +106,7 @@ export default function PaymentPlanSection({ property }) {
               {/* Deposit info (outside the blue banner; only if provided) */}
               {property?.depositDescription && (
                 <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-                  <h3 className="text-slate-900 font-semibold mb-1">Deposit Information</h3>
+                  <h3 className="text-slate-900 font-semibold mb-1">{t('paymentPlan.depositTitle')}</h3>
                   <p className="text-slate-700">{property.depositDescription}</p>
                 </div>
               )}

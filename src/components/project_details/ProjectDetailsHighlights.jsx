@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 /* ---------------- utils (unchanged) ---------------- */
 
@@ -61,7 +62,7 @@ function extractProjectGeneralFacts(md) {
 /* buildAutoDescription */
 /* -------------------------------------------------------------- */
 
-function inferPropertyTypes(property, raw, selectedFromUrl = []) {
+function inferPropertyTypes(property, raw, t, selectedFromUrl = []) {
   const types = [];
 
   if (Array.isArray(property?.propertyTypes) && property.propertyTypes.length) {
@@ -96,16 +97,16 @@ function inferPropertyTypes(property, raw, selectedFromUrl = []) {
 
   if (!types.length) return null;
 
-  const pretty = types.map((t) => {
-    const s = String(t).toLowerCase();
-    if (s.includes('mansion')) return 'Mansions';
-    if (s.includes('villa')) return 'Villas';
-    if (s.includes('townhouse') || s === 'th') return 'Townhouses';
-    if (s.includes('penthouse')) return 'Penthouses';
-    if (s.includes('studio')) return 'Studios';
-    if (s.includes('apartment')) return 'Apartments';
-    if (s.includes('loft')) return 'Lofts';
-    return t.charAt(0).toUpperCase() + t.slice(1);
+  const pretty = types.map((type) => {
+    const s = String(type).toLowerCase();
+    if (s.includes('mansion')) return t('highlights.propertyTypesFallback.mansions');
+    if (s.includes('villa')) return t('highlights.propertyTypesFallback.villas');
+    if (s.includes('townhouse') || s === 'th') return t('highlights.propertyTypesFallback.townhouses');
+    if (s.includes('penthouse')) return t('highlights.propertyTypesFallback.penthouses');
+    if (s.includes('studio')) return t('highlights.propertyTypesFallback.studios');
+    if (s.includes('apartment')) return t('highlights.propertyTypesFallback.apartments');
+    if (s.includes('loft')) return t('highlights.propertyTypesFallback.lofts');
+    return type.charAt(0).toUpperCase() + type.slice(1);
   });
 
   return uniqJoin(pretty) || null;
@@ -126,7 +127,7 @@ function inferBedroomsSummary(p) {
   return `${sorted[0]}–${sorted[sorted.length - 1]} BR`;
 }
 
-function inferAreaRange(p) {
+function inferAreaRange(p, t) {
   const areas = [];
   const pushNum = v => {
     const n = Number(v);
@@ -139,7 +140,8 @@ function inferAreaRange(p) {
   const min = Math.min(...areas);
   const max = Math.max(...areas);
   const fmt = n => Math.round(n).toLocaleString();
-  return min === max ? `${fmt(min)} sq.ft` : `${fmt(min)} – ${fmt(max)} sq.ft`;
+  const unit = t('propertyTypes.measurement.sqft');
+  return min === max ? `${fmt(min)} ${unit}` : `${fmt(min)} – ${fmt(max)} ${unit}`;
 }
 
 function inferHandover(p) {
@@ -166,25 +168,22 @@ function buildAutoDescription({
   title,
   location,
   developer,
-  propertyTypes,
-  bedroomsSummary,
   handover,
   startingPrice,
+  t
 }) {
   const bits = [];
-  const main = [];
-  main.push(title);
-  if (location) main.push(`in ${location}`);
 
-  const sentence1 =
-    developer
-      ? `${main.join(' ')} is a development by ${developer}.`
-      : `${main.join(' ')} is a modern residential development.`;
+  const ctx = { title, location: location || 'Dubai', developer };
+
+  const sentence1 = developer
+    ? t('highlights.autoDescription.isA', ctx)
+    : t('highlights.autoDescription.isModern', ctx);
 
   bits.push(sentence1);
 
-  if (startingPrice) bits.push(`Homes start from ${startingPrice}.`);
-  if (handover) bits.push(`Handover expected ${handover}.`);
+  if (startingPrice) bits.push(t('highlights.autoDescription.homesStart', { price: startingPrice }));
+  if (handover) bits.push(t('highlights.autoDescription.handoverExpected', { date: handover }));
 
   return bits.join(' ');
 }
@@ -192,16 +191,17 @@ function buildAutoDescription({
 /* ---------------- component ---------------- */
 
 export default function ProjectDetailsHighlights({ property }) {
+  const t = useTranslations('projectDetails');
   const p = property?.rawData ?? property ?? {};
   const sp = useSearchParams();
 
   const projectTitle = titleFromProperty(property);
   const location = formatLocation(p?.location);
-  const propertyTypes = inferPropertyTypes(property, p);
+  const propertyTypes = inferPropertyTypes(property, p, t);
   const startingPrice = formatAED(p?.min_price);
   const handover = inferHandover(p);
   const paymentPlan = inferPaymentPlan(p);
-  const areaRange = inferAreaRange(p);
+  const areaRange = inferAreaRange(p, t);
   const bedroomsSummary = inferBedroomsSummary(p);
   const developerName = inferDeveloper(p);
   const brochureUrl = p?.marketing_brochure || null;
@@ -220,6 +220,7 @@ export default function ProjectDetailsHighlights({ property }) {
       bedroomsSummary,
       handover,
       startingPrice,
+      t
     });
 
   const overviewText = extractProjectGeneralFacts(overviewTextRaw) || overviewTextRaw;
@@ -243,29 +244,29 @@ export default function ProjectDetailsHighlights({ property }) {
   /* ----------------------------------------------------- */
 
   const details = [
-    ['Starting Price', startingPrice],
-    ['Handover', handover],
-    ['Payment Plan', paymentPlan],
-    ['Area', areaRange],
-    ['Property Type', propertyTypes],
-    ['Bedrooms', bedroomsSummary],
-    ['Developer', developerName],
-    ['Location', location],
+    [t('highlights.startingPrice'), startingPrice],
+    [t('highlights.handover'), handover],
+    [t('highlights.paymentPlan'), paymentPlan],
+    [t('highlights.area'), areaRange],
+    [t('highlights.propertyType'), propertyTypes],
+    [t('highlights.bedrooms'), bedroomsSummary],
+    [t('highlights.developer'), developerName],
+    [t('highlights.location'), location],
   ].filter(([, value]) => Boolean(value));
 
   return (
     <section className="bg-[#f6f8fb] py-10 md:py-12">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="grid grid-cols-1 lg:[grid-template-columns:minmax(0,1fr)_460px] gap-12 lg:gap-20 xl:gap-24">
-          
+
           {/* LEFT */}
           <div className="lg:pr-9">
             <p className="text-sm font-semibold text-slate-600 mb-3">
-              About the Project
+              {t('highlights.aboutTitle')}
             </p>
 
             <h2 className="text-[30px] leading-[1.15] md:text-5xl md:leading-[1.15] font-extrabold tracking-tight text-slate-900 mb-6">
-              Overview of {projectTitle}
+              {t('highlights.overviewOf', { title: projectTitle })}
             </h2>
 
             {overviewText && (
@@ -278,7 +279,7 @@ export default function ProjectDetailsHighlights({ property }) {
                     onClick={() => setExpanded(v => !v)}
                     className="ml-2 text-sm font-semibold text-sky-600 hover:text-sky-700 underline underline-offset-2"
                   >
-                    {expanded ? 'See less' : 'See more'}
+                    {expanded ? t('highlights.seeLess') : t('highlights.seeMore')}
                   </button>
                 )}
               </p>
@@ -287,7 +288,7 @@ export default function ProjectDetailsHighlights({ property }) {
             {poi.length > 0 && (
               <>
                 <div className="text-slate-900 font-semibold mb-3">
-                  Nearby locations include:
+                  {t('highlights.nearbyTitle')}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 md:gap-x-12">
                   {poi.map((line, idx) => (
@@ -305,7 +306,7 @@ export default function ProjectDetailsHighlights({ property }) {
           <aside className="mt-0 lg:mt-32 lg:sticky lg:top-24">
             <div className="max-w-[460px] w-full ml-auto rounded-2xl bg-slate-50 border border-slate-200 shadow-[0_8px_24px_rgba(17,24,39,0.06)] p-6 md:p-7">
               <h3 className="text-lg md:text-xl font-semibold text-slate-800 mb-3.5">
-                Project Details
+                {t('highlights.title')}
               </h3>
 
               <dl className="divide-y divide-slate-200">
@@ -326,7 +327,7 @@ export default function ProjectDetailsHighlights({ property }) {
                   rel="noreferrer"
                   className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-sky hover:bg-sky-500 text-white font-semibold py-3 transition-colors"
                 >
-                  Download Brochure
+                  {t('highlights.downloadBrochure')}
                 </a>
               )}
             </div>

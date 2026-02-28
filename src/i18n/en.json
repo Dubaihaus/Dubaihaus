@@ -644,5 +644,204 @@
       "description": "Explore off-plan and ready properties by {name} in Dubai and Abu Dhabi on DubaiHaus.",
       "fallbackTitle": "Developer Details | DubaiHaus"
     }
+  },
+  "projectDetails": {
+    "hero": {
+      "breadcrumb": {
+        "home": "Home",
+        "properties": "Properties",
+        "offPlanProjects": "Off-Plan Projects",
+        "projectDetails": "Project Details",
+        "separator": "Main Page > Projects >"
+      },
+      "cta": {
+        "downloadBrochure": "Download brochure",
+        "getOffer": "Get an offer",
+        "discoverMore": "Discover More"
+      },
+      "tags": {
+        "paymentPlan": "Payment Plan",
+        "completionDate": "Completion Date",
+        "startingPrice": "Starting Price",
+        "handover": "Handover",
+        "in": "in"
+      },
+      "taglines": [
+        "Premium development with exceptional amenities and luxury finishes",
+        "Waterfront lifestyle with world-class facilities and curated services",
+        "Wellness-forward design with serene, resort-style spaces",
+        "Seamless access to key landmarks, retail, and dining destinations",
+        "Limited residences with flexible payment options and trusted developer"
+      ],
+      "qr": {
+        "scan": "Scan",
+        "tooltip": "Open brochure on phone"
+      }
+    },
+    "highlights": {
+      "title": "Project details",
+      "startingPrice": "Starting price",
+      "handover": "Handover",
+      "paymentPlan": "Payment plan",
+      "area": "Area",
+      "propertyType": "Property type",
+      "bedrooms": "Bedrooms",
+      "developer": "Developer",
+      "location": "Location",
+      "aboutTitle": "About the Project",
+      "overviewOf": "Overview of {title}",
+      "seeMore": "See more",
+      "seeLess": "See less",
+      "nearbyTitle": "Nearby locations include:",
+      "downloadBrochure": "Download Brochure",
+      "propertyTypesFallback": {
+        "mansions": "Mansions",
+        "villas": "Villas",
+        "townhouses": "Townhouses",
+        "penthouses": "Penthouses",
+        "studios": "Studios",
+        "apartments": "Apartments",
+        "lofts": "Lofts"
+      },
+      "autoDescription": {
+        "isA": "{title} in {location} is a development by {developer}.",
+        "isModern": "{title} in {location} is a modern residential development.",
+        "homesStart": "Homes start from {price}.",
+        "handoverExpected": "Handover expected {date}."
+      }
+    },
+    "amenities": {
+      "title": "Signature Features & Resort-Style Amenities",
+      "fallback": "Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities.",
+      "seeMore": "See more",
+      "seeLess": "See less",
+      "noImages": "No amenity images",
+      "moreCount": "+{count} more amenities"
+    },
+    "propertyTypes": {
+      "title": "Property Types",
+      "downloadBrochure": "Download brochure",
+      "table": {
+        "unitType": "Property Type",
+        "area": "Living area",
+        "price": "Price",
+        "onQuery": "Upon Request"
+      },
+      "bedrooms": {
+        "studio": "Studio",
+        "bedroom": "{count}-Bedroom",
+        "br": "{count}-BR"
+      },
+      "measurement": {
+        "sqft": "sq.ft.",
+        "sqm": "m²"
+      },
+      "summary": "{title} features {total} {type} — {list}.",
+      "noPreview": "No image preview available.",
+      "variant": "Variant {current} of {total}",
+      "prev": "‹ Prev",
+      "next": "Next ›"
+    },
+    "gallery": {
+      "title": "Photo Gallery",
+      "noPhotos": "No photos available at the moment.",
+      "photoCount": "{count, plural, one {# photo} other {# photos}} available",
+      "slideshowActive": "Slideshow active",
+      "tabs": {
+        "exterior": "Exteriors ({count})",
+        "interior": "Interiors ({count})",
+        "all": "All Photos ({count})"
+      }
+    },
+    "paymentPlan": {
+      "duration": "Duration: {months} months",
+      "depositTitle": "Deposit Information",
+      "fallbackTitle": "Payment Plan",
+      "installment": "Installment",
+      "fromDeveloper": "{base} from {developer}"
+    },
+    "location": {
+      "sectionTitle": "Property Details & Location",
+      "sectionSubtitle": "Comprehensive recap & overview of building specifications, amenities, and strategic location advantages",
+      "buildingDetails": {
+        "title": "Property & Building Details",
+        "subtitle": "Complete specifications and features",
+        "summary": "Comprehensive Details",
+        "specsCount": "{count} key specifications provided",
+        "labels": {
+          "buildingName": "Building Name",
+          "developer": "Developer",
+          "furnishing": "Furnishing",
+          "constructionStatus": "Construction Status",
+          "saleStatus": "Sale Status",
+          "completionDate": "Completion Date",
+          "serviceCharge": "Service Charge",
+          "referenceNo": "Reference No.",
+          "location": "Location"
+        },
+        "values": {
+          "na": "N/A",
+          "tba": "TBA",
+          "furnished": "Furnished",
+          "priceOnRequest": "Price on request"
+        }
+      },
+      "economicAppeal": {
+        "title": "Economic Appeal",
+        "subtitle": "Investment value & location benefits",
+        "startingPrice": "Starting Price"
+      },
+      "nearby": {
+        "title": "Nearby Locations",
+        "subtitle": "Key destinations & accessibility",
+        "distance": "{distance} km away",
+        "nearby": "Nearby",
+        "time": "{minutes} min",
+        "summary": "{count} key locations within easy reach"
+      },
+      "benefits": {
+        "title": "Location Description & Benefits"
+      }
+    },
+    "faq": {
+      "title": "FAQ about",
+      "subtitle": "Answers to the most common questions buyers ask.",
+      "projectFallback": "the Project",
+      "questions": {
+        "location": "Where is {name} located?",
+        "developer": "Who is the developer of {name}?",
+        "types": "What types of properties are available at {name}?",
+        "price": "What’s the starting price at {name}?",
+        "paymentPlan": "What payment plans are available at {name}?",
+        "handover": "When is handover scheduled for {name}?",
+        "amenities": "What amenities are available at {name}?",
+        "healthcare": "Are there healthcare facilities near {name}?",
+        "schools": "Are there schools near {name}?"
+      },
+      "answers": {
+        "location": "{name} is located in {location}.",
+        "developer": "{name} is developed by {developer}.",
+        "price": "Prices start from {price}.",
+        "handover": "Handover (completion) is scheduled for {completion}.",
+        "amenities": "Key amenities include: {list}.",
+        "healthcare": "Nearby healthcare options include {list}.",
+        "schools": "Nearby schools include {list}.",
+        "paymentPlan": {
+          "flexible": "Flexible payment plans available",
+          "onBooking": "{percentage}% on booking",
+          "onHandover": "{percentage}% on handover",
+          "totalScheduled": "(Total scheduled: {total}%)"
+        }
+      },
+      "helpers": {
+        "studio": "Studio",
+        "bedroom": "{br}-Bedroom",
+        "sizeOnRequest": "size on request",
+        "residence": "Residence",
+        "apartment": "Apartment",
+        "and": "and",
+        "nearby": "Nearby"
+      }
+    }
   }
 }

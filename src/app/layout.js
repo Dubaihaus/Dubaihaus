@@ -17,6 +17,9 @@ async function getMessages(locale) {
 
 export const metadata = {
   metadataBase: new URL('https://www.dubaihaus.com'),
+   verification: {
+    google: "cgpG0Dyji4cmAmtgxLfMkWIO7W85FEGgAyzn9yXQW_U",
+  },
 };
 
 export default async function RootLayout({ children }) {

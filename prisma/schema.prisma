@@ -421,3 +421,37 @@ model ReellyProjectPropertyType {
   sizeFrom  Decimal?
   rawData   Json?
 }
+
+model AIUsageLog {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  provider       String   @default("openai")
+  model          String
+  purpose        String   @default("translation")
+  source         String   // e.g. "project_details", "offplan_listing"
+  locale         String   // e.g. "de", "en"
+  inputTokens    Int?
+  outputTokens   Int?
+  totalTokens    Int?
+  durationMs     Int?
+  status         String   // "success" or "failed"
+  errorCode      String?
+  errorMessage   String?
+  requestId      String?
+  metadata       Json?
+
+  // NEW: Entity Tracking
+  entityType     String?  // e.g. "project"
+  entityId       String?  // ID of the entity
+  routePath      String?  // Path where translation happened
+  fieldKey       String?  // Field being translated (e.g. "description")
+  chunkIndex     Int?
+  chunkCount     Int?
+
+  @@index([createdAt])
+  @@index([source])
+  @@index([locale])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([fieldKey])
+}

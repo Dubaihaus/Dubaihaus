@@ -4,6 +4,7 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { CheckCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 function parseImageUrl(imageUrlJson) {
   if (!imageUrlJson) return null;
@@ -162,6 +163,7 @@ function truncateText(s, limit = 500) {
 }
 
 export default function AmenitiesSection({ property }) {
+  const t = useTranslations('projectDetails');
   // Use project_amenities from Reelly API
   const rawAmenities = Array.isArray(property?.amenities) ? property.amenities : [];
 
@@ -186,11 +188,11 @@ export default function AmenitiesSection({ property }) {
   const galleryFallback = Array.isArray(property?.media?.photos)
     ? property.media.photos
     : [
-        ...(property?.rawData?.architecture || []).map((x) => x?.url).filter(Boolean),
-        ...(property?.rawData?.interior || []).map((x) => x?.url).filter(Boolean),
-        ...(property?.rawData?.lobby || []).map((x) => x?.url).filter(Boolean),
-        property?.rawData?.cover_image?.url,
-      ].filter(Boolean);
+      ...(property?.rawData?.architecture || []).map((x) => x?.url).filter(Boolean),
+      ...(property?.rawData?.interior || []).map((x) => x?.url).filter(Boolean),
+      ...(property?.rawData?.lobby || []).map((x) => x?.url).filter(Boolean),
+      property?.rawData?.cover_image?.url,
+    ].filter(Boolean);
 
   const carouselImages = amenities.map((a) => a.img).filter(Boolean);
   const images = carouselImages.length > 0 ? carouselImages : galleryFallback;
@@ -216,8 +218,7 @@ export default function AmenitiesSection({ property }) {
   const cleanedAmenitiesText = buildAmenitiesParagraph(overviewSource);
 
   // Fallback text (only if cleaned content isn't available/meaningful)
-  const fallbackText =
-    'Residences blending elegant design with wellness-focused living, premium finishes, and thoughtfully curated amenities.';
+  const fallbackText = t('amenities.fallback');
 
   const paragraphFull =
     cleanedAmenitiesText && cleanedAmenitiesText.length > 40 ? cleanedAmenitiesText : fallbackText;
@@ -253,7 +254,7 @@ export default function AmenitiesSection({ property }) {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  No amenity images
+                  {t('amenities.noImages')}
                 </div>
               )}
             </div>
@@ -285,9 +286,8 @@ export default function AmenitiesSection({ property }) {
                   <span
                     key={i}
                     onClick={() => setIdx(i)}
-                    className={`h-2.5 w-2.5 rounded-full cursor-pointer ${
-                      i === idx ? 'bg-white' : 'bg-white/60'
-                    }`}
+                    className={`h-2.5 w-2.5 rounded-full cursor-pointer ${i === idx ? 'bg-white' : 'bg-white/60'
+                      }`}
                   />
                 ))}
               </div>
@@ -297,7 +297,7 @@ export default function AmenitiesSection({ property }) {
           {/* RIGHT: copy + amenity list */}
           <div>
             <h2 className="text-2xl md:text-4xl font-semibold text-gray-900 leading-tight">
-              Signature Features & Resort-Style Amenities
+              {t('amenities.title')}
             </h2>
 
             <p className="text-gray-600 mt-3">
@@ -309,7 +309,7 @@ export default function AmenitiesSection({ property }) {
                   onClick={() => setExpanded((v) => !v)}
                   className="ml-2 text-sm font-semibold text-sky-600 hover:text-sky-700 underline underline-offset-2"
                 >
-                  {expanded ? 'See less' : 'See more'}
+                  {expanded ? t('amenities.seeLess') : t('amenities.seeMore')}
                 </button>
               )}
             </p>
@@ -329,7 +329,7 @@ export default function AmenitiesSection({ property }) {
             {/* if there are more amenities, show a small "+N more" */}
             {amenities.length > 12 && (
               <div className="mt-3 text-sm text-gray-500">
-                +{amenities.length - 12} more amenities
+                {t('amenities.moreCount', { count: amenities.length - 12 })}
               </div>
             )}
           </div>

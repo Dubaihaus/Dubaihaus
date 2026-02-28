@@ -644,5 +644,204 @@
       "description": "Entdecken Sie Off-Plan- und fertige Immobilien von {name} in Dubai und Abu Dhabi auf DubaiHaus.",
       "fallbackTitle": "Entwicklerdetails | DubaiHaus"
     }
+  },
+  "projectDetails": {
+    "hero": {
+      "breadcrumb": {
+        "home": "Startseite",
+        "properties": "Immobilien",
+        "offPlanProjects": "Off-Plan Projekte",
+        "projectDetails": "Projekt-Details",
+        "separator": "Hauptseite > Projekte >"
+      },
+      "cta": {
+        "downloadBrochure": "Broschüre herunterladen",
+        "getOffer": "Angebot erhalten",
+        "discoverMore": "Mehr Entdecken"
+      },
+      "tags": {
+        "paymentPlan": "Zahlungsplan",
+        "completionDate": "Übergabe-Termin",
+        "startingPrice": "Startpreis",
+        "handover": "Übergabe",
+        "in": "in"
+      },
+      "taglines": [
+        "Exklusive Entwicklung mit außergewöhnlichen Annehmlichkeiten und luxuriöser Ausstattung",
+        "Lifestyle am Wasser mit erstklassigen Einrichtungen und kuratierten Dienstleistungen",
+        "Wellness-orientiertes Design mit ruhigen Räumen im Resort-Stil",
+        "Nahtloser Zugang zu wichtigen Sehenswürdigkeiten, Geschäften und Restaurants",
+        "Limitierte Residenzen mit flexiblen Zahlungsoptionen und vertrauenswürdigem Entwickler"
+      ],
+      "qr": {
+        "scan": "Scanen",
+        "tooltip": "Broschüre auf dem Handy öffnen"
+      }
+    },
+    "highlights": {
+      "title": "Projektdetails",
+      "startingPrice": "Ab Preis",
+      "handover": "Übergabe",
+      "paymentPlan": "Zahlungsplan",
+      "area": "Gebiet",
+      "propertyType": "Immobilienart",
+      "bedrooms": "Schlafzimmer",
+      "developer": "Entwickler",
+      "location": "Standort",
+      "aboutTitle": "Über das Projekt",
+      "overviewOf": "Überblick über {title}",
+      "seeMore": "Mehr anzeigen",
+      "seeLess": "Weniger anzeigen",
+      "nearbyTitle": "Standorte in der Nähe sind unter anderem:",
+      "downloadBrochure": "Broschüre herunterladen",
+      "propertyTypesFallback": {
+        "mansions": "Villen/Mansions",
+        "villas": "Villen",
+        "townhouses": "Reihenhäuser",
+        "penthouses": "Penthäuser",
+        "studios": "Studios",
+        "apartments": "Apartments",
+        "lofts": "Lofts"
+      },
+      "autoDescription": {
+        "isA": "{title} in {location} ist ein Projekt von {developer}.",
+        "isModern": "{title} in {location} ist ein modernes Wohnbauprojekt.",
+        "homesStart": "Die Häuser beginnen bei {price}.",
+        "handoverExpected": "Übergabe voraussichtlich {date}."
+      }
+    },
+    "amenities": {
+      "title": "Exklusive Merkmale & Annehmlichkeiten im Resort-Stil",
+      "fallback": "Residenzen, die elegantes Design mit wellness-orientiertem Wohnen, hochwertigen Oberflächen und sorgfältig kuratierten Annehmlichkeiten verbinden.",
+      "seeMore": "Mehr anzeigen",
+      "seeLess": "Weniger anzeigen",
+      "noImages": "Keine Bilder der Annehmlichkeiten",
+      "moreCount": "+{count} weitere Annehmlichkeiten"
+    },
+    "propertyTypes": {
+      "title": "Immobilienarten",
+      "downloadBrochure": "Broschüre herunterladen",
+      "table": {
+        "unitType": "Immobilienart",
+        "area": "Wohnfläche",
+        "price": "Preis",
+        "onQuery": "Auf Anfrage"
+      },
+      "bedrooms": {
+        "studio": "Studio",
+        "bedroom": "{count}-Schlafzimmer",
+        "br": "{count}-SZ"
+      },
+      "measurement": {
+        "sqft": "sq.ft.",
+        "sqm": "m²"
+      },
+      "summary": "{title} bietet {total} {type} — {list}.",
+      "noPreview": "Keine Bildvorschau verfügbar.",
+      "variant": "Variante {current} von {total}",
+      "prev": "‹ Zurück",
+      "next": "Weiter ›"
+    },
+    "gallery": {
+      "title": "Fotogalerie",
+      "noPhotos": "Momentan sind keine Fotos verfügbar.",
+      "photoCount": "{count, plural, one {# Foto} other {# Fotos}} verfügbar",
+      "slideshowActive": "Slideshow aktiv",
+      "tabs": {
+        "exterior": "Außenaufnahmen ({count})",
+        "interior": "Innenaufnahmen ({count})",
+        "all": "Alle Fotos ({count})"
+      }
+    },
+    "paymentPlan": {
+      "duration": "Dauer: {months} Monate",
+      "depositTitle": "Anzahlungsinformationen",
+      "fallbackTitle": "Zahlungsplan",
+      "installment": "Rate",
+      "fromDeveloper": "{base} von {developer}"
+    },
+    "location": {
+      "sectionTitle": "Immobiliendetails & Lage",
+      "sectionSubtitle": "Umfassende Zusammenfassung & Überblick über Gebäudespezifikationen, Annehmlichkeiten und strategische Standortvorteile",
+      "buildingDetails": {
+        "title": "Immobilien- & Gebäudedetails",
+        "subtitle": "Vollständige Spezifikationen und Merkmale",
+        "summary": "Umfassende Details",
+        "specsCount": "{count} wichtige Spezifikationen bereitgestellt",
+        "labels": {
+          "buildingName": "Gebäudename",
+          "developer": "Entwickler",
+          "furnishing": "Möblierung",
+          "constructionStatus": "Baustatus",
+          "saleStatus": "Verkaufsstatus",
+          "completionDate": "Fertigstellungstermin",
+          "serviceCharge": "Servicegebühr",
+          "referenceNo": "Referenznummer",
+          "location": "Standort"
+        },
+        "values": {
+          "na": "N/A",
+          "tba": "TBA",
+          "furnished": "Möbliert",
+          "priceOnRequest": "Preis auf Anfrage"
+        }
+      },
+      "economicAppeal": {
+        "title": "Wirtschaftliche Attraktivität",
+        "subtitle": "Investitionswert & Standortvorteile",
+        "startingPrice": "Startpreis"
+      },
+      "nearby": {
+        "title": "Standorte in der Nähe",
+        "subtitle": "Wichtige Ziele & Erreichbarkeit",
+        "distance": "{distance} km entfernt",
+        "nearby": "In der Nähe",
+        "time": "{minutes} Min.",
+        "summary": "{count} wichtige Standorte in bequemer Reichweite"
+      },
+      "benefits": {
+        "title": "Lagebeschreibung & Vorteile"
+      }
+    },
+    "faq": {
+      "title": "Häufig gestellte Fragen zu",
+      "subtitle": "Antworten auf die häufigsten Fragen von Käufern.",
+      "projectFallback": "dem Projekt",
+      "questions": {
+        "location": "Wo befindet sich {name}?",
+        "developer": "Wer ist der Entwickler von {name}?",
+        "types": "Welche Arten von Immobilien sind in {name} verfügbar?",
+        "price": "Was ist der Startpreis bei {name}?",
+        "paymentPlan": "Welche Zahlungspläne sind bei {name} verfügbar?",
+        "handover": "Wann ist die Übergabe für {name} geplant?",
+        "amenities": "Welche Annehmlichkeiten sind in {name} verfügbar?",
+        "healthcare": "Gibt es Gesundheitseinrichtungen in der Nähe von {name}?",
+        "schools": "Gibt es Schulen in der Nähe von {name}?"
+      },
+      "answers": {
+        "location": "{name} befindet sich in {location}.",
+        "developer": "{name} wird von {developer} entwickelt.",
+        "price": "Die Preise beginnen bei {price}.",
+        "handover": "Die Übergabe (Fertigstellung) ist für {completion} geplant.",
+        "amenities": "Zu den wichtigsten Annehmlichkeiten gehören: {list}.",
+        "healthcare": "Zu den Gesundheitsoptionen in der Nähe gehören {list}.",
+        "schools": "Zu den Schulen in der Nähe gehören {list}.",
+        "paymentPlan": {
+          "flexible": "Flexible Zahlungspläne verfügbar",
+          "onBooking": "{percentage}% bei Buchung",
+          "onHandover": "{percentage}% bei Übergabe",
+          "totalScheduled": "(Gesamt geplant: {total}%)"
+        }
+      },
+      "helpers": {
+        "studio": "Studio",
+        "bedroom": "{br}-Schlafzimmer",
+        "sizeOnRequest": "Größe auf Anfrage",
+        "residence": "Residenz",
+        "apartment": "Apartment",
+        "and": "und",
+        "nearby": "In der Nähe"
+      }
+    }
   }
 }

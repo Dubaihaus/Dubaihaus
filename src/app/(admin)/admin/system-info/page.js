@@ -1,5 +1,5 @@
-
 import { prisma } from "@/lib/prisma";
+import AIUsageSection from "@/components/admin/AIUsageSection";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +63,8 @@ export default async function SystemInfoPage() {
                     </dl>
                 </div>
             </div>
+
+            <AIUsageSection />
         </div>
     );
 }

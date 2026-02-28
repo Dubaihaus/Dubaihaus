@@ -112,11 +112,11 @@ export async function translateField(projectId, lang, fieldKey, sourceData, tran
 /**
  * Translates a single string property using Dictionary then OpenAI.
  */
-async function translateStringField(text) {
+async function translateStringField(text, context = {}) {
     if (!text || typeof text !== 'string') return text;
     const directDict = getDictionaryTranslation(text);
     if (directDict) return directDict;
-    return await translateTextToGerman(text);
+    return await translateTextToGerman(text, context);
 }
 
 /**
@@ -129,20 +129,31 @@ export async function translateProjectDetail(project, lang) {
     // Clone to avoid mutating original memory object
     const clone = JSON.parse(JSON.stringify(project));
 
+    const commonContext = {
+        source: 'project_details',
+        locale: lang,
+        entityType: 'project',
+        entityId: clone.id,
+        routePath: `/ui/project_details/${clone.id}`
+    };
+
     // --- 1. Top-Level Text Fields ---
     if (clone.description) {
         clone.description = await translateField(
-            clone.id, lang, 'description', clone.description, translateStringField
+            clone.id, lang, 'description', clone.description,
+            (t) => translateStringField(t, { ...commonContext, fieldKey: 'description' })
         );
     }
     if (clone.depositDescription) {
         clone.depositDescription = await translateField(
-            clone.id, lang, 'depositDescription', clone.depositDescription, translateStringField
+            clone.id, lang, 'depositDescription', clone.depositDescription,
+            (t) => translateStringField(t, { ...commonContext, fieldKey: 'depositDescription' })
         );
     }
     if (clone.propertyType) {
         clone.propertyType = await translateField(
-            clone.id, lang, 'propertyType', clone.propertyType, translateStringField
+            clone.id, lang, 'propertyType', clone.propertyType,
+            (t) => translateStringField(t, { ...commonContext, fieldKey: 'propertyType' })
         );
     }
 
@@ -150,7 +161,7 @@ export async function translateProjectDetail(project, lang) {
     if (clone.propertyTypes && clone.propertyTypes.length) {
         clone.propertyTypes = await translateField(
             clone.id, lang, 'propertyTypes', clone.propertyTypes,
-            async (types) => Promise.all(types.map(t => translateStringField(t)))
+            async (types) => Promise.all(types.map(t => translateStringField(t, { ...commonContext, fieldKey: 'propertyTypes' })))
         );
     }
 
@@ -167,7 +178,7 @@ export async function translateProjectDetail(project, lang) {
                         translatedArr.push(am);
                         continue;
                     }
-                    const tName = await translateStringField(am.name);
+                    const tName = await translateStringField(am.name, { ...commonContext, fieldKey: 'amenities' });
                     translatedArr.push({ ...am, name: tName });
                 }
                 return translatedArr;
@@ -184,13 +195,13 @@ export async function translateProjectDetail(project, lang) {
                 for (const plan of planArr) {
                     const tPlan = { ...plan };
                     if (tPlan.name) {
-                        tPlan.name = await translateStringField(tPlan.name);
+                        tPlan.name = await translateStringField(tPlan.name, { ...commonContext, fieldKey: 'paymentPlans' });
                     }
                     if (tPlan.steps && tPlan.steps.length) {
                         const tSteps = [];
                         for (const step of tPlan.steps) {
                             if (step.name) {
-                                const stepNameT = await translateStringField(step.name);
+                                const stepNameT = await translateStringField(step.name, { ...commonContext, fieldKey: 'paymentPlans' });
                                 tSteps.push({ ...step, name: stepNameT });
                             } else {
                                 tSteps.push(step);
@@ -213,8 +224,8 @@ export async function translateProjectDetail(project, lang) {
                 const tArr = [];
                 for (const ut of unitTypesArr) {
                     const tUt = { ...ut };
-                    if (tUt.unitCategory) tUt.unitCategory = await translateStringField(tUt.unitCategory);
-                    if (tUt.unitType) tUt.unitType = await translateStringField(tUt.unitType);
+                    if (tUt.unitCategory) tUt.unitCategory = await translateStringField(tUt.unitCategory, { ...commonContext, fieldKey: 'unitTypes' });
+                    if (tUt.unitType) tUt.unitType = await translateStringField(tUt.unitType, { ...commonContext, fieldKey: 'unitTypes' });
                     tArr.push(tUt);
                 }
                 return tArr;
@@ -223,13 +234,13 @@ export async function translateProjectDetail(project, lang) {
     }
 
     // --- 4. RawData Fallbacks ---
-    // The UI occasionally falls back to `rawData.description` or `rawData.overview` directly.
     if (clone.rawData) {
         const fieldsToTranslate = ['description', 'overview', 'about'];
         for (const f of fieldsToTranslate) {
             if (clone.rawData[f]) {
                 clone.rawData[f] = await translateField(
-                    clone.id, lang, `rawData_${f}`, clone.rawData[f], translateStringField
+                    clone.id, lang, `rawData_${f}`, clone.rawData[f],
+                    (t) => translateStringField(t, { ...commonContext, fieldKey: `rawData_${f}` })
                 );
             }
         }

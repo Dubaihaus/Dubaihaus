@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 /* ---- Enhanced Helpers for Best Quality ---- */
 
@@ -26,12 +27,12 @@ function pickBestFromObject(photo) {
     const best = [...variants].sort((a, b) => (b.width || 0) - (a.width || 0))[0];
     return getRawUrl(best);
   }
-  
+
   // Check for direct width/height properties
   if (photo?.width && photo?.height) {
     return getRawUrl(photo);
   }
-  
+
   // Otherwise fall back to main URL
   return getRawUrl(photo);
 }
@@ -124,13 +125,14 @@ function getBlurUrl(photo) {
 /* ---------------- Component ---------------- */
 
 const PhotoGallerySection = ({ property }) => {
+  const t = useTranslations('projectDetails');
   // Collect all possible image sources from API
   const exterior = (property?.rawData?.architecture || []).map(p => p);
   const interior = (property?.rawData?.interior || []).map(p => p);
-  const lobby    = (property?.rawData?.lobby || []).map(p => p);
-  const cover    = property?.rawData?.cover_image ? [property.rawData.cover_image] : [];
-  const media    = Array.isArray(property?.media?.photos) ? property.media.photos : [];
-  const amenities = Array.isArray(property?.amenities) 
+  const lobby = (property?.rawData?.lobby || []).map(p => p);
+  const cover = property?.rawData?.cover_image ? [property.rawData.cover_image] : [];
+  const media = Array.isArray(property?.media?.photos) ? property.media.photos : [];
+  const amenities = Array.isArray(property?.amenities)
     ? property.amenities.map(a => a?.image || a?.icon || a?.photo).filter(Boolean)
     : [];
 
@@ -139,7 +141,7 @@ const PhotoGallerySection = ({ property }) => {
     const sources = [
       ...media,
       ...exterior,
-      ...interior, 
+      ...interior,
       ...lobby,
       ...cover,
       ...amenities
@@ -216,7 +218,7 @@ const PhotoGallerySection = ({ property }) => {
     setIsSlideshowActive(true);
   };
 
-  const currentImage = images[currentImageIndex] || { 
+  const currentImage = images[currentImageIndex] || {
     original: "/project_detail_images/building.jpg",
     thumbnail: "/project_detail_images/building.jpg",
     blur: "/project_detail_images/building.jpg"
@@ -226,8 +228,8 @@ const PhotoGallerySection = ({ property }) => {
     return (
       <section className="px-5 py-12 md:px-10 md:py-16 lg:px-14 bg-white/80 backdrop-blur-[1px] rounded-2xl shadow-[0_10px_30px_rgba(17,24,39,0.06)]">
         <div className="text-center py-12">
-          <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-4">Photo Gallery</h2>
-          <p className="text-slate-600">No photos available at the moment.</p>
+          <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-4">{t('gallery.title')}</h2>
+          <p className="text-slate-600">{t('gallery.noPhotos')}</p>
         </div>
       </section>
     );
@@ -241,54 +243,51 @@ const PhotoGallerySection = ({ property }) => {
       {/* Title + Tabs */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">Photo Gallery</h2>
+          <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">{t('gallery.title')}</h2>
           <p className="text-slate-600">
-            {images.length} {images.length === 1 ? 'photo' : 'photos'} available
-            {isSlideshowActive && " • Slideshow active"}
+            {t('gallery.photoCount', { count: images.length })}
+            {isSlideshowActive && ` • ${t('gallery.slideshowActive')}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {hasExterior && (
             <button
               onClick={() => handleTabChange('exterior')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                activeTab === 'exterior'
+              className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === 'exterior'
                   ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
+                }`}
             >
-              Exteriors ({exteriorUrls.length})
+              {t('gallery.tabs.exterior', { count: exteriorUrls.length })}
             </button>
           )}
           {hasInterior && (
             <button
               onClick={() => handleTabChange('interior')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                activeTab === 'interior'
+              className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === 'interior'
                   ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
+                }`}
             >
-              Interiors ({interiorUrls.length})
+              {t('gallery.tabs.interior', { count: interiorUrls.length })}
             </button>
           )}
           <button
             onClick={() => handleTabChange('all')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-              activeTab === 'all'
+            className={`px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === 'all'
                 ? 'bg-gradient-to-r from-brand-sky to-brand-dark text-white shadow-lg'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
+              }`}
           >
-            All Photos ({allPhotos.length})
+            {t('gallery.tabs.all', { count: allPhotos.length })}
           </button>
         </div>
       </div>
 
       {/* Main Image Container - Fixed 1280x768 aspect ratio */}
-      <div 
+      <div
         className="relative mb-6 rounded-2xl overflow-hidden bg-slate-100 shadow-xl"
-        style={{ 
+        style={{
           width: '100%',
           height: '0',
           paddingBottom: '60%', // 768/1280 = 0.6 = 60%
@@ -312,11 +311,10 @@ const PhotoGallerySection = ({ property }) => {
             placeholder="blur"
             blurDataURL={currentImage.blur}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
-            className={`object-cover transition-all ease-in-out duration-700 ${
-              isHovered ? 'scale-105' : 'scale-100'
-            }`}
+            className={`object-cover transition-all ease-in-out duration-700 ${isHovered ? 'scale-105' : 'scale-100'
+              }`}
           />
-          
+
           {/* Slideshow controls */}
           {images.length > 1 && (
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
@@ -329,11 +327,11 @@ const PhotoGallerySection = ({ property }) => {
               >
                 ‹
               </button>
-              
+
               <div className="text-white text-sm font-medium">
                 {currentImageIndex + 1} / {images.length}
               </div>
-              
+
               <button
                 onClick={() => {
                   setCurrentImageIndex(prev => (prev + 1) % images.length);
@@ -343,7 +341,7 @@ const PhotoGallerySection = ({ property }) => {
               >
                 ›
               </button>
-              
+
               <button
                 onClick={() => setIsSlideshowActive(!isSlideshowActive)}
                 className="text-white hover:text-sky-300 transition-colors ml-2"
@@ -356,7 +354,7 @@ const PhotoGallerySection = ({ property }) => {
           {/* Progress bar for slideshow (now 5s) */}
           {isSlideshowActive && images.length > 1 && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-200/50">
-              <div 
+              <div
                 className="h-full bg-sky-500"
                 style={{ animation: 'progress 5s linear infinite' }}
               />
@@ -370,39 +368,38 @@ const PhotoGallerySection = ({ property }) => {
           )}
         </div>
       </div>
-          {/* Thumbnail Strip */}
-{images.length > 1 && (
-  <div className="mt-6 flex flex-wrap justify-center gap-3">
-    {images.map((img, index) => (
-      <button
-        key={index}
-        onClick={() => {
-          setCurrentImageIndex(index);
-          setIsSlideshowActive(false);
-        }}
-        className={`relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-          index === currentImageIndex
-            ? 'border-sky-500 scale-105 shadow-md'
-            : 'border-transparent hover:border-sky-300'
-        }`}
-        style={{ width: '100px', height: '65px' }}
-      >
-        <Image
-          src={img.thumbnail || img.original}
-          alt={`Thumbnail ${index + 1}`}
-          fill
-          className="object-cover"
-          sizes="100px"
-          placeholder="blur"
-          blurDataURL={img.blur}
-        />
-        {index === currentImageIndex && (
-          <div className="absolute inset-0 bg-sky-500/20"></div>
-        )}
-      </button>
-    ))}
-  </div>
-)}
+      {/* Thumbnail Strip */}
+      {images.length > 1 && (
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {images.map((img, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentImageIndex(index);
+                setIsSlideshowActive(false);
+              }}
+              className={`relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${index === currentImageIndex
+                  ? 'border-sky-500 scale-105 shadow-md'
+                  : 'border-transparent hover:border-sky-300'
+                }`}
+              style={{ width: '100px', height: '65px' }}
+            >
+              <Image
+                src={img.thumbnail || img.original}
+                alt={`Thumbnail ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="100px"
+                placeholder="blur"
+                blurDataURL={img.blur}
+              />
+              {index === currentImageIndex && (
+                <div className="absolute inset-0 bg-sky-500/20"></div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Thumbnails removed as requested */}
     </section>

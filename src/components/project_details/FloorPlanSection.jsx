@@ -1,8 +1,9 @@
-// src/components/project_details/PropertyTypesAndPlans.jsx
+// src/components/project_details/FloorPlanSection.jsx
 'use client';
 
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 /* ------------------- helpers (unchanged logic) ------------------- */
 const norm = (s) => (s ?? '').toString().trim();
@@ -12,33 +13,35 @@ const isPdf = (u = '') => /\.pdf(\?.*)?$/i.test(u); // kept in case you expand l
 const N = (v) => { const x = Number(v); return Number.isFinite(x) ? x : null; };
 const fmt = (v) => Number(v).toLocaleString();
 
-const brLabelShort = (b) => (Number(b) === 0 ? 'Studio' : `${Number(b)}-BR`);
-const brLabelLong  = (b) => (Number(b) === 0 ? 'Studio' : `${Number(b)}-Bedroom`);
+const brLabelShort = (b, t) => (Number(b) === 0 ? t('propertyTypes.bedrooms.studio') : t('propertyTypes.bedrooms.br', { count: Number(b) }));
+const brLabelLong = (b, t) => (Number(b) === 0 ? t('propertyTypes.bedrooms.studio') : t('propertyTypes.bedrooms.bedroom', { count: Number(b) }));
 
-const sizeStrSqft = (min, max) => {
+const sizeStrSqft = (min, max, t) => {
   const lo = N(min), hi = N(max);
-  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} sq.ft.`;
-  if (lo) return `${fmt(lo)} sq.ft.`;
-  if (hi) return `${fmt(hi)} sq.ft.`;
-  return 'Upon Request';
+  const unit = t('propertyTypes.measurement.sqft');
+  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} ${unit}`;
+  if (lo) return `${fmt(lo)} ${unit}`;
+  if (hi) return `${fmt(hi)} ${unit}`;
+  return t('propertyTypes.table.onQuery');
 };
-const sizeStrM2 = (min, max) => {
+const sizeStrM2 = (min, max, t) => {
   const lo = N(min), hi = N(max);
-  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} m²`;
-  if (lo) return `${fmt(lo)} m²`;
-  if (hi) return `${fmt(hi)} m²`;
+  const unit = t('propertyTypes.measurement.sqm');
+  if (lo && hi) return `${fmt(lo)}–${fmt(hi)} ${unit}`;
+  if (lo) return `${fmt(lo)} ${unit}`;
+  if (hi) return `${fmt(hi)} ${unit}`;
   return null;
 };
-const priceStrAED = (min, max) => {
+const priceStrAED = (min, max, t) => {
   const lo = N(min), hi = N(max);
   if (lo && hi) return `AED ${fmt(lo)} – ${fmt(hi)}`;
   if (lo) return `AED ${fmt(lo)}`;
   if (hi) return `AED ${fmt(hi)}`;
-  return 'Upon Request';
+  return t('propertyTypes.table.onQuery');
 };
 
 /** Normalize API into flat entries (unchanged) */
-function extractEntries(property) {
+function extractEntries(property, t) {
   const unitBlocks = Array.isArray(property?.rawData?.unit_blocks)
     ? property.rawData.unit_blocks
     : null;
@@ -55,13 +58,13 @@ function extractEntries(property) {
         key: `ub-${i}`,
         unitType: b?.unit_type || b?.type || (property?.rawData?.property_type || 'Residence'),
         bedrooms: N(b?.bedrooms),
-        name: b?.name || brLabelLong(b?.bedrooms),
+        name: b?.name || brLabelLong(b?.bedrooms, t),
         fromSizeSqft: N(b?.size_from_sqft ?? b?.sizeFromSqft),
-        toSizeSqft:   N(b?.size_to_sqft   ?? b?.sizeToSqft),
-        fromSizeM2:   N(b?.size_from_m2   ?? b?.sizeFromM2),
-        toSizeM2:     N(b?.size_to_m2     ?? b?.sizeToM2),
-        fromPrice:    N(b?.price_from_aed ?? b?.units_price_from_aed),
-        toPrice:      N(b?.price_to_aed   ?? b?.units_price_to_aed),
+        toSizeSqft: N(b?.size_to_sqft ?? b?.sizeToSqft),
+        fromSizeM2: N(b?.size_from_m2 ?? b?.sizeFromM2),
+        toSizeM2: N(b?.size_to_m2 ?? b?.sizeToM2),
+        fromPrice: N(b?.price_from_aed ?? b?.units_price_from_aed),
+        toPrice: N(b?.price_to_aed ?? b?.units_price_to_aed),
         media: [...files, ...layoutImgs].filter(Boolean),
       };
     });
@@ -71,33 +74,33 @@ function extractEntries(property) {
   const tus = Array.isArray(property?.rawData?.typical_units)
     ? property.rawData.typical_units
     : Array.isArray(property?.typical_units)
-    ? property.typical_units
-    : [];
+      ? property.typical_units
+      : [];
 
-  return tus.map((t, i) => {
-    const layoutImgs = (Array.isArray(t.layout) ? t.layout : [])
+  return tus.map((t_unit, i) => {
+    const layoutImgs = (Array.isArray(t_unit.layout) ? t_unit.layout : [])
       .map((x) => x?.image?.url)
       .filter(Boolean);
     return {
       key: `tu-${i}`,
       unitType: property?.rawData?.property_type || 'Apartment',
-      bedrooms: N(t?.bedrooms),
-      name: brLabelLong(t?.bedrooms),
-      fromSizeSqft: N(t?.from_size_sqft),
-      toSizeSqft:   N(t?.to_size_sqft),
-      fromSizeM2:   N(t?.from_size_m2),
-      toSizeM2:     N(t?.to_size_m2),
-      fromPrice:    N(t?.from_price_aed),
-      toPrice:      N(t?.to_price_aed),
+      bedrooms: N(t_unit?.bedrooms),
+      name: brLabelLong(t_unit?.bedrooms, t),
+      fromSizeSqft: N(t_unit?.from_size_sqft),
+      toSizeSqft: N(t_unit?.to_size_sqft),
+      fromSizeM2: N(t_unit?.from_size_m2),
+      toSizeM2: N(t_unit?.to_size_m2),
+      fromPrice: N(t_unit?.from_price_aed),
+      toPrice: N(t_unit?.to_price_aed),
       media: layoutImgs, // images only
     };
   });
 }
 
 /** Summary using ALL entries (unchanged logic) */
-function buildSummary(title, entries, fallbackType = 'residences') {
+function buildSummary(title, entries, t, fallbackType = 'residences') {
   const total = entries.length;
-  const typeGuess  = norm(entries[0]?.unitType) || fallbackType;
+  const typeGuess = norm(entries[0]?.unitType) || fallbackType;
   const typePlural = /s$/i.test(typeGuess) ? typeGuess : `${typeGuess}s`;
 
   const byBr = new Map();
@@ -105,23 +108,24 @@ function buildSummary(title, entries, fallbackType = 'residences') {
     const k = Number.isFinite(e.bedrooms) ? e.bedrooms : e.name || 'Unit';
     if (!byBr.has(k)) {
       byBr.set(k, {
-        label: brLabelLong(Number.isFinite(e.bedrooms) ? e.bedrooms : k),
+        label: brLabelLong(Number.isFinite(e.bedrooms) ? e.bedrooms : k, t),
         minSqft: Number.POSITIVE_INFINITY,
         maxSqft: 0,
       });
     }
     const g = byBr.get(k);
     if (N(e.fromSizeSqft)) g.minSqft = Math.min(g.minSqft, e.fromSizeSqft);
-    if (N(e.toSizeSqft))   g.maxSqft = Math.max(g.maxSqft, e.toSizeSqft || e.fromSizeSqft || 0);
+    if (N(e.toSizeSqft)) g.maxSqft = Math.max(g.maxSqft, e.toSizeSqft || e.fromSizeSqft || 0);
   }
 
   const parts = [];
+  const unit = t('propertyTypes.measurement.sqft');
   for (const [, g] of byBr) {
     const has = Number.isFinite(g.minSqft) && g.maxSqft > 0;
-    parts.push(`${g.label} (${has ? `${fmt(Math.round(g.minSqft))}–${fmt(Math.round(g.maxSqft))} sq.ft.` : 'size on request'})`);
+    parts.push(`${g.label} (${has ? `${fmt(Math.round(g.minSqft))}–${fmt(Math.round(g.maxSqft))} ${unit}` : t('propertyTypes.table.onQuery')})`);
   }
 
-  return `${title} features ${total} ${typePlural.toLowerCase()} — ${parts.join(', ')}.`;
+  return t('propertyTypes.summary', { title, total, type: typePlural.toLowerCase(), list: parts.join(', ') });
 }
 
 /* ------------------- Row reveal helper ------------------- */
@@ -156,22 +160,23 @@ function useRevealOnScroll(delayMs = 0) {
 
 /* ------------------- Component ------------------- */
 export default function PropertyTypesAndPlans({ property }) {
+  const t = useTranslations('projectDetails');
   const title =
     property?.title || property?.rawData?.name || property?.name || 'Project';
 
-  const allEntries = useMemo(() => extractEntries(property), [property]);
+  const allEntries = useMemo(() => extractEntries(property, t), [property, t]);
 
   // Summary counts ALL entries (with or without plans)
   const summary = useMemo(
-    () => buildSummary(title, allEntries, property?.rawData?.property_type || 'residences'),
-    [title, allEntries, property?.rawData?.property_type]
+    () => buildSummary(title, allEntries, t, property?.rawData?.property_type || 'residences'),
+    [title, allEntries, t, property?.rawData?.property_type]
   );
 
   // Group rows by bedroom, but ONLY include groups having at least one media item
   const groups = useMemo(() => {
     const by = new Map();
     for (const e of allEntries) {
-      const label = brLabelLong(e.bedrooms);
+      const label = brLabelLong(e.bedrooms, t);
       if (!by.has(label)) by.set(label, []);
       by.get(label).push(e);
     }
@@ -181,10 +186,10 @@ export default function PropertyTypesAndPlans({ property }) {
       const withMedia = arr.filter((x) => Array.isArray(x.media) && x.media.some(isImg));
       if (!withMedia.length) continue;
 
-      const minSqft  = Math.min(...withMedia.map((x) => N(x.fromSizeSqft) || Infinity));
-      const maxSqft  = Math.max(...withMedia.map((x) => N(x.toSizeSqft) || N(x.fromSizeSqft) || 0));
-      const minM2    = Math.min(...withMedia.map((x) => N(x.fromSizeM2) || Infinity));
-      const maxM2    = Math.max(...withMedia.map((x) => N(x.toSizeM2) || N(x.fromSizeM2) || 0));
+      const minSqft = Math.min(...withMedia.map((x) => N(x.fromSizeSqft) || Infinity));
+      const maxSqft = Math.max(...withMedia.map((x) => N(x.toSizeSqft) || N(x.fromSizeSqft) || 0));
+      const minM2 = Math.min(...withMedia.map((x) => N(x.fromSizeM2) || Infinity));
+      const maxM2 = Math.max(...withMedia.map((x) => N(x.toSizeM2) || N(x.fromSizeM2) || 0));
       const minPrice = Math.min(...withMedia.map((x) => N(x.fromPrice) || Infinity));
       const maxPrice = Math.max(...withMedia.map((x) => N(x.toPrice) || N(x.fromPrice) || 0));
 
@@ -192,10 +197,10 @@ export default function PropertyTypesAndPlans({ property }) {
         label,
         bedroom: Number(arr[0]?.bedrooms),
         variants: withMedia,
-        sizeSqftText: sizeStrSqft(Number.isFinite(minSqft) ? minSqft : null, maxSqft > 0 ? maxSqft : null),
-        priceText:    priceStrAED(Number.isFinite(minPrice) ? minPrice : null, maxPrice > 0 ? maxPrice : null),
-        sizeM2Min:    Number.isFinite(minM2) ? minM2 : null,
-        sizeM2Max:    maxM2 > 0 ? maxM2 : null,
+        sizeSqftText: sizeStrSqft(Number.isFinite(minSqft) ? minSqft : null, maxSqft > 0 ? maxSqft : null, t),
+        priceText: priceStrAED(Number.isFinite(minPrice) ? minPrice : null, maxPrice > 0 ? maxPrice : null, t),
+        sizeM2Min: Number.isFinite(minM2) ? minM2 : null,
+        sizeM2Max: maxM2 > 0 ? maxM2 : null,
       });
     }
 
@@ -206,7 +211,7 @@ export default function PropertyTypesAndPlans({ property }) {
     });
 
     return result;
-  }, [allEntries]);
+  }, [allEntries, t]);
 
   const brochureHref =
     property?.rawData?.brochure_url ||
@@ -230,7 +235,7 @@ export default function PropertyTypesAndPlans({ property }) {
         {/* Heading + CTA */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-            Property Types
+            {t('propertyTypes.title')}
           </h2>
           {brochureHref && (
             <a
@@ -239,7 +244,7 @@ export default function PropertyTypesAndPlans({ property }) {
               rel="noreferrer"
               className="px-4 py-2 rounded-lg border border-sky-600 text-sky-700 text-sm font-semibold hover:bg-sky-50 transition"
             >
-              Download brochure
+              {t('propertyTypes.downloadBrochure')}
             </a>
           )}
         </div>
@@ -250,9 +255,9 @@ export default function PropertyTypesAndPlans({ property }) {
         {/* Table header */}
         <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_56px] items-center px-6 py-3
                         bg-slate-50 border border-slate-200 rounded-t-2xl text-sm font-semibold text-slate-700">
-          <div>Property Type</div>
-          <div>Living area</div>
-          <div>Price</div>
+          <div>{t('propertyTypes.table.unitType')}</div>
+          <div>{t('propertyTypes.table.area')}</div>
+          <div>{t('propertyTypes.table.price')}</div>
           <div></div>
         </div>
 
@@ -267,6 +272,7 @@ export default function PropertyTypesAndPlans({ property }) {
               setOpenIdx={setOpenIdx}
               slideIdx={slideIdx}
               setSlideIdx={setSlideIdx}
+              t={t}
             />
           ))}
         </div>
@@ -276,7 +282,7 @@ export default function PropertyTypesAndPlans({ property }) {
 }
 
 /* ------------------- Animated Row ------------------- */
-function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx }) {
+function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx, t }) {
   const open = openIdx === idx;
   const i = slideIdx[idx] ?? 0;
   const v = g.variants[i] || g.variants[0];
@@ -284,9 +290,9 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
   const imgs = Array.isArray(v.media) ? v.media.filter(isImg) : [];
   const firstImg = imgs[0] || null;
 
-  const thisSizeSqft = sizeStrSqft(v.fromSizeSqft, v.toSizeSqft);
-  const thisSizeM2   = sizeStrM2(v.fromSizeM2, v.toSizeM2);
-  const thisPrice    = priceStrAED(v.fromPrice, v.toPrice);
+  const thisSizeSqft = sizeStrSqft(v.fromSizeSqft, v.toSizeSqft, t);
+  const thisSizeM2 = sizeStrM2(v.fromSizeM2, v.toSizeM2, t);
+  const thisPrice = priceStrAED(v.fromPrice, v.toPrice, t);
 
   // Reveal on scroll with stagger ~80ms per row
   const { ref, visible } = useRevealOnScroll(Math.min(idx * 80, 600));
@@ -341,7 +347,7 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
                   />
                 </div>
               ) : (
-                <div className="text-sm text-slate-500">No image preview available.</div>
+                <div className="text-sm text-slate-500">{t('propertyTypes.noPreview')}</div>
               )}
 
               {imgs.length > 1 && (
@@ -373,10 +379,10 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
                       }))
                     }
                   >
-                    ‹ Prev
+                    {t('propertyTypes.prev')}
                   </button>
                   <div className="text-sm text-slate-600">
-                    Variant {i + 1} of {g.variants.length}
+                    {t('propertyTypes.variant', { current: i + 1, total: g.variants.length })}
                   </div>
                   <button
                     className="px-3 py-1.5 rounded-md text-sm border border-slate-300 hover:bg-slate-50"
@@ -387,7 +393,7 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
                       }))
                     }
                   >
-                    Next ›
+                    {t('propertyTypes.next')}
                   </button>
                 </div>
               )}
@@ -399,12 +405,12 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
                 <h3 className="text-lg font-semibold text-slate-900">{g.label}</h3>
                 <div className="mt-1 text-sm text-slate-600 space-y-1">
                   <div>
-                    <span className="font-medium">Living area: </span>
+                    <span className="font-medium">{t('propertyTypes.table.area')}: </span>
                     {thisSizeSqft}
                     {thisSizeM2 ? ` (${thisSizeM2})` : ''}
                   </div>
                   <div>
-                    <span className="font-medium">Price: </span>
+                    <span className="font-medium">{t('propertyTypes.table.price')}: </span>
                     {thisPrice}
                   </div>
                 </div>
@@ -417,9 +423,9 @@ function AnimatedRow({ idx, group: g, openIdx, setOpenIdx, slideIdx, setSlideIdx
                   <ul className="space-y-1 list-disc ml-5">
                     {g.variants.map((vv, k) => (
                       <li key={`li-${idx}-${k}`}>
-                        {sizeStrSqft(vv.fromSizeSqft, vv.toSizeSqft)}
+                        {sizeStrSqft(vv.fromSizeSqft, vv.toSizeSqft, t)}
                         {vv.fromPrice || vv.toPrice
-                          ? ` • ${priceStrAED(vv.fromPrice, vv.toPrice)}`
+                          ? ` • ${priceStrAED(vv.fromPrice, vv.toPrice, t)}`
                           : ''}
                       </li>
                     ))}
