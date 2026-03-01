@@ -83,7 +83,7 @@ export default async function sitemap() {
     const allProjects = await searchAllProjects({
       pageSize: 200,
       maxPages: 10,       // up to 5000 projects
-      pricedOnly: false,  // include "Coming Soon" / unpriced
+      pricedOnly: true,  // include "Coming Soon" / unpriced
       ordering: "-updated_at"
     });
 
