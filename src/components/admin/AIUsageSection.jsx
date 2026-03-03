@@ -100,6 +100,7 @@ export default function AIUsageSection() {
                         options={[
                             { label: 'All Sources', value: '' },
                             { label: 'Project Details', value: 'project_details' },
+                            { label: 'Blog', value: 'blog' },
                             { label: 'Unknown', value: 'unknown' },
                         ]}
                     />

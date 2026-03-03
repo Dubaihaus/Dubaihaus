@@ -29,14 +29,20 @@ async function getPost(slug) {
   return getCachedBlogPostBySlug(slug);
 }
 
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { translateBlog } from "@/lib/translation/blogTranslationService";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  let post = await getPost(slug);
 
   if (!post) {
     return { title: "Article not found | DubaiHaus" };
+  }
+
+  const locale = await getLocale();
+  if (locale === 'de') {
+    post = await translateBlog(post, locale);
   }
 
   const t = await getTranslations({ namespace: 'seo.blogDetail' });
@@ -55,9 +61,14 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogDetailPage({ params }) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  let post = await getPost(slug);
 
   if (!post) return notFound();
+
+  const locale = await getLocale();
+  if (locale === 'de') {
+    post = await translateBlog(post, locale);
+  }
 
   const safeTitle = post.title || "Untitled article";
   const published = post.publishedAt
@@ -100,7 +111,7 @@ export default async function BlogDetailPage({ params }) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_var white_0,_#F5F7FB_55%,_white_100%)]">
       <JsonLd data={jsonLd} />
-       
+
       {/* Progress Bar (simple implementation - sticky top) */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-100 z-50">
         <div
@@ -114,7 +125,7 @@ export default async function BlogDetailPage({ params }) {
         {/* Back link */}
         <div className="mb-6 flex items-center justify-between">
           <Link
-            href="/blog"
+            href={`/${locale}/blog`}
             className="text-xs font-semibold text-slate-500 hover:text-[var(--color-brand-sky)] flex items-center gap-1 transition"
           >
             ← Back to all articles
@@ -125,7 +136,7 @@ export default async function BlogDetailPage({ params }) {
             {post.categoryLinks?.map((cl) => (
               <Link
                 key={cl.id}
-                href={`/blog?cat=${encodeURIComponent(cl.category.slug)}`}
+                href={`/${locale}/blog?cat=${encodeURIComponent(cl.category.slug)}`}
                 className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-brand-sky)] bg-sky-50 px-2 py-1 rounded-md hover:bg-sky-100"
               >
                 {cl.category.name}
@@ -168,7 +179,7 @@ export default async function BlogDetailPage({ params }) {
                 {post.tagLinks.map((tl) => (
                   <Link
                     key={tl.id}
-                    href={`/blog?tag=${encodeURIComponent(tl.tag.slug)}`}
+                    href={`/${locale}/blog?tag=${encodeURIComponent(tl.tag.slug)}`}
                     className="text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition"
                   >
                     #{tl.tag.name}
@@ -215,7 +226,7 @@ export default async function BlogDetailPage({ params }) {
           </section>
         )}
       </article>
-        <DraggableContactButton href="/contact" />
+      <DraggableContactButton href="/contact" />
     </main>
   );
 }

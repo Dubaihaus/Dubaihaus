@@ -334,6 +334,21 @@ model ProjectTranslation {
   @@index([projectId, lang])
 }
 
+model BlogTranslation {
+  id            String   @id @default(cuid())
+  blogId        String
+  lang          String   // 'de'
+  fieldKey      String   // e.g. 'title', 'excerpt', 'content'
+  originalHash  String   // hash of English source (sha256/md5)
+  translated    Json     // stores text or structured arrays
+  provider      String   @default("openai")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([blogId, lang, fieldKey])
+  @@index([blogId, lang])
+}
+
 model CurrencyRate {
   id        Int      @id @default(autoincrement())
   base      String // e.g. "AED"

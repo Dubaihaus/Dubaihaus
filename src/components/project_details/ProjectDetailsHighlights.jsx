@@ -3,9 +3,18 @@
 
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 /* ---------------- utils (unchanged) ---------------- */
+
+function normalizeText(text) {
+  if (!text || typeof text !== 'string') return text;
+  return text
+    .replace(/\u00A0/g, ' ') // replace NBSP with normal space
+    .replace(/[ \t]+/g, ' ') // collapse multiple spaces and tabs
+    .replace(/\n{3,}/g, '\n\n') // collapse >2 newlines into 2
+    .trim();
+}
 
 function formatAED(n) {
   if (n == null || n === '') return null;
@@ -192,6 +201,7 @@ function buildAutoDescription({
 
 export default function ProjectDetailsHighlights({ property }) {
   const t = useTranslations('projectDetails');
+  const locale = useLocale();
   const p = property?.rawData ?? property ?? {};
   const sp = useSearchParams();
 
@@ -223,7 +233,8 @@ export default function ProjectDetailsHighlights({ property }) {
       t
     });
 
-  const overviewText = extractProjectGeneralFacts(overviewTextRaw) || overviewTextRaw;
+  const overviewTextRawExtracted = extractProjectGeneralFacts(overviewTextRaw) || overviewTextRaw;
+  const overviewText = normalizeText(overviewTextRawExtracted);
 
   /* ---------------- NEW: SEE MORE LOGIC ---------------- */
 
@@ -270,7 +281,11 @@ export default function ProjectDetailsHighlights({ property }) {
             </h2>
 
             {overviewText && (
-              <p className="text-slate-700 text-[16px] leading-7 md:text-[17px] md:leading-8 mb-7 md:mb-8 text-justify">
+              <p
+                lang={locale || 'de'}
+                className="text-slate-700 text-[16px] leading-7 md:text-[17px] md:leading-8 mb-7 md:mb-8 text-left md:text-justify hyphens-auto break-words"
+                style={{ overflowWrap: 'anywhere' }}
+              >
                 {expanded ? overviewText : previewText}
 
                 {showToggle && (

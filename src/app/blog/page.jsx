@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import { getCachedBlogPosts, getCachedCategories } from "@/lib/blog-helpers";
 import { generateStandardMetadata } from '@/lib/seo';
 
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { translateBlog, translateCategoryList } from "@/lib/translation/blogTranslationService";
 
 export async function generateMetadata() {
   const t = await getTranslations({ namespace: 'seo.blog' });
@@ -78,6 +79,19 @@ export default async function BlogPage({ searchParams }) {
     ]);
   }
 
+  // TRANSLATION LAYER
+  const locale = await getLocale();
+  if (locale === 'de') {
+    if (posts && posts.length > 0) {
+      posts = await Promise.all(posts.map(p => translateBlog(p, locale)));
+    }
+    if (allCats && allCats.length > 0) {
+      allCats = await translateCategoryList(allCats, locale);
+    }
+  }
+
+  const t = await getTranslations({ namespace: 'blogHero' });
+
   // Optional: show category name in heading instead of slug
   const selectedCategory = cat ? allCats.find((c) => c.slug === cat) : null;
 
@@ -91,29 +105,28 @@ export default async function BlogPage({ searchParams }) {
         <div className="relative z-10 mx-auto max-w-6xl space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/85 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-sky)]" />
-            DubaiHaus insights
+            {t('badge')}
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-end gap-6">
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
-                Practical guides for buying and {" "}
+                {t('title1')} {" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-brand-sky)] to-[var(--color-brand-dark)]">
-                  investing
+                  {t('title2')}
                 </span>
               </h1>
               <p className="text-sm sm:text-base text-slate-600 max-w-2xl">
-                Market analysis, community guides, and expert advice for Dubai
-                Real Estate.
+                {t('desc')}
               </p>
             </div>
 
             {/* Search Box */}
-            <form className="w-full md:w-auto relative" action="/blog">
+            <form className="w-full md:w-auto relative" action={`/${locale}/blog`}>
               <input
                 name="q"
                 defaultValue={q || ""}
-                placeholder="Search articles..."
+                placeholder={t('search')}
                 className="pl-10 pr-4 py-3 rounded-full border border-slate-200 shadow-sm focus:ring-2 focus:ring-[var(--color-brand-sky)] focus:border-transparent outline-none w-full md:w-80 text-sm"
               />
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -123,19 +136,19 @@ export default async function BlogPage({ searchParams }) {
           {/* Categories Pill Bar (NOW: ALL categories) */}
           <div className="flex flex-wrap gap-2 pt-4">
             <Link
-              href="/blog"
+              href={`/${locale}/blog`}
               className={`px-3 py-1 rounded-full text-xs font-medium transition ${!cat && !tag
                 ? "bg-slate-800 text-white shadow-md"
                 : "bg-white text-slate-600 hover:bg-slate-100"
                 }`}
             >
-              All
+              {t('all')}
             </Link>
 
             {allCats.map((c) => (
               <Link
                 key={c.id}
-                href={`/blog?cat=${encodeURIComponent(c.slug)}`}
+                href={`/${locale}/blog?cat=${encodeURIComponent(c.slug)}`}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition ${cat === c.slug
                   ? "bg-[var(--color-brand-sky)] text-white shadow-md"
                   : "bg-white text-slate-600 hover:bg-slate-100"
@@ -162,20 +175,20 @@ export default async function BlogPage({ searchParams }) {
                     : "Latest articles"}
             </h2>
             <p className="text-xs text-slate-500">
-              {posts.length} article{posts.length !== 1 ? "s" : ""} found
+              {posts.length} {t('resultsFound')}
             </p>
           </div>
 
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
               <p className="text-slate-500">
-                No articles found matching your criteria.
+                {t('noResults')}
               </p>
               <Link
-                href="/blog"
+                href={`/${locale}/blog`}
                 className="text-[var(--color-brand-sky)] text-sm font-medium mt-2 inline-block hover:underline"
               >
-                Clear filters
+                {t('clearFilters')}
               </Link>
             </div>
           ) : (
@@ -183,7 +196,7 @@ export default async function BlogPage({ searchParams }) {
               {posts.map((post) => (
                 <Link
                   key={post.id}
-                  href={`/blog/${post.seo?.slug}`}
+                  href={`/${locale}/blog/${post.seo?.slug}`}
                   className="group rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 overflow-hidden flex flex-col h-full"
                 >
                   <div className="aspect-[16/9] w-full relative bg-slate-100 overflow-hidden">

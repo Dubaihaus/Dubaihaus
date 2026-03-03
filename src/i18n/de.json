@@ -19,6 +19,17 @@
     "subheadline": "Strandvillen-Grundstücke zum Verkauf auf Palm Jebel Ali",
     "button": "Mehr Entdecken"
   },
+  "blogHero": {
+    "badge": "DubaiHaus Einblicke",
+    "title1": "Praktische Leitfäden für Kauf und ",
+    "title2": "Investoren",
+    "desc": "Marktanalysen, Stadtführer und Expertenrat für Dubai Immobilien.",
+    "search": "Artikel suchen...",
+    "all": "Alle",
+    "resultsFound": "Artikel gefunden",
+    "noResults": "Keine Artikel entsprechen Ihren Kriterien.",
+    "clearFilters": "Filter zurücksetzen"
+  },
   "section": {
     "offPlanTitle": "Neue Off-Plan Immobilien zum Verkauf in Dubai",
     "offPlanDesc": "Off-Plan Immobilien befinden sich noch in der Planungs- oder Bauphase. Der Kauf in den VAE bietet Frühbucherpreise und flexible Zahlungspläne."
@@ -783,7 +794,21 @@
           "na": "N/A",
           "tba": "TBA",
           "furnished": "Möbliert",
-          "priceOnRequest": "Preis auf Anfrage"
+          "priceOnRequest": "Preis auf Anfrage",
+          "sale": {
+            "announced": "Angeboten",
+            "presale": "Vorverkauf",
+            "onSale": "Im Verkauf",
+            "outOfStock": "Ausverkauft"
+          },
+          "construction": {
+            "underConstruction": "Im Bau",
+            "completed": "Fertiggestellt"
+          },
+          "furnishing": {
+            "yes": "Ja",
+            "no": "Nein"
+          }
         }
       },
       "economicAppeal": {

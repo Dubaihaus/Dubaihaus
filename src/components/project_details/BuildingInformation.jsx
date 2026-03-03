@@ -7,6 +7,17 @@ import { useTranslations } from 'next-intl';
 
 function humanizeStatus(s, t) {
   if (!s) return t('location.buildingDetails.values.na');
+
+  const val = String(s).toLowerCase().trim();
+
+  if (val === 'announced') return t('location.buildingDetails.values.sale.announced');
+  if (val === 'presale' || val === 'pre-sale') return t('location.buildingDetails.values.sale.presale');
+  if (val === 'on_sale') return t('location.buildingDetails.values.sale.onSale');
+  if (val === 'out_of_stock') return t('location.buildingDetails.values.sale.outOfStock');
+
+  if (val === 'under_construction') return t('location.buildingDetails.values.construction.underConstruction');
+  if (val === 'completed' || val === 'constructed') return t('location.buildingDetails.values.construction.completed');
+
   return String(s).replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
@@ -37,6 +48,11 @@ function formatAED(n, t) {
 
 function formatFurnishing(furnishing, t) {
   if (!furnishing) return t('location.buildingDetails.values.na');
+
+  const val = String(furnishing).toLowerCase().trim();
+  if (val === 'yes' || val === 'true' || val === '1') return t('location.buildingDetails.values.furnishing.yes');
+  if (val === 'no' || val === 'false' || val === '0') return t('location.buildingDetails.values.furnishing.no');
+
   return String(furnishing).toUpperCase() === 'YES'
     ? t('location.buildingDetails.values.furnished')
     : String(furnishing);
@@ -208,8 +224,8 @@ export default function CombinedPropertyDetails({ property }) {
                 <div
                   key={idx}
                   className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 ${item.highlight
-                      ? 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 shadow-sm'
-                      : 'bg-white border border-slate-100 hover:border-slate-300'
+                    ? 'bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 shadow-sm'
+                    : 'bg-white border border-slate-100 hover:border-slate-300'
                     }`}
                 >
                   <div className="text-slate-700 font-semibold">{item.label}</div>

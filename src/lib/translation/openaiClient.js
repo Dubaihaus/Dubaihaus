@@ -30,7 +30,9 @@ export async function translateTextToGerman(text, context = {}) {
     const prompt = `Translate the following real estate text to German. 
 Strict rules:
 - Do not translate numbers, currency codes (like AED, USD), measurements (like sq.ft., m2), addresses, or proper nouns (like Dubai, Abu Dhabi, developer names).
-- DO NOT translate Markdown headers (any line starting with # like "### Amenities", "##### Project general facts"). Keep the headers exactly in English so regex extractors still work.
+- DO translate the human-readable text inside Markdown headings (e.g., "#", "##") and list items ("-", "*", "1."), keeping the markdown symbols exactly as they are.
+- DO translate narrative labels ending with a colon (e.g., "Amenities:").
+- DO NOT translate contents inside markdown link URLs or image URLs ("[text](url)" -> translate "text", keep "url").
 - Preserve any markdown structure exactly as it is (including headers like ###, bold **, lists *, etc.).
 - Return ONLY the translated text, no commentary, no starting phrases.
 
@@ -49,7 +51,7 @@ ${text}`;
             const durationMs = Date.now() - startTime;
             const usage = completion.usage;
 
-        
+
             logAIUsage({
                 model: 'gpt-4o-mini',
                 source,

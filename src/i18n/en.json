@@ -19,6 +19,17 @@
     "subheadline": "Beachfront Villa Plots for Sale on Palm Jebel Ali",
     "button": "Discover More"
   },
+  "blogHero": {
+    "badge": "DubaiHaus insights",
+    "title1": "Practical guides for buying and ",
+    "title2": "investing",
+    "desc": "Market analysis, community guides, and expert advice for Dubai Real Estate.",
+    "search": "Search articles...",
+    "all": "All",
+    "resultsFound": "article(s) found",
+    "noResults": "No articles found matching your criteria.",
+    "clearFilters": "Clear filters"
+  },
   "section": {
     "offPlanTitle": "New Off-Plan Properties for Sale in Dubai",
     "offPlanDesc": "Off-plan properties are developments which are still in planning or construction. Buying in the UAE provides early-phase pricing and flexible payment plans."
@@ -783,7 +794,21 @@
           "na": "N/A",
           "tba": "TBA",
           "furnished": "Furnished",
-          "priceOnRequest": "Price on request"
+          "priceOnRequest": "Price on request",
+          "sale": {
+            "announced": "Announced",
+            "presale": "Presale",
+            "onSale": "On Sale",
+            "outOfStock": "Out of Stock"
+          },
+          "construction": {
+            "underConstruction": "Under Construction",
+            "completed": "Completed"
+          },
+          "furnishing": {
+            "yes": "Yes",
+            "no": "No"
+          }
         }
       },
       "economicAppeal": {

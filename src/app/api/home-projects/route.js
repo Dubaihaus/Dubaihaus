@@ -18,7 +18,7 @@ export async function GET(request) {
             pageSize: limit,
             sale_status: 'announced',
             ordering: '-updated_at',
-            currency
+            // currency
         });
 
         const presalePromise = searchProperties({
@@ -26,30 +26,23 @@ export async function GET(request) {
             pageSize: limit,
             sale_status: 'presale',
             ordering: '-updated_at',
-            currency
+            // currency
         });
 
-        const onSalePromise = searchProperties({
-            page: 1,
-            pageSize: limit,
-            sale_status: 'on_sale',
-            ordering: '-updated_at',
-            currency
-        });
+        
 
         // Set a timeout for the API call
-        const apiPromise = Promise.all([announcedPromise, presalePromise, onSalePromise]);
+        const apiPromise = Promise.all([announcedPromise, presalePromise]);
         const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Reelly API timeout')), 15000)
         );
 
-        const [announcedData, presaleData, onSaleData] = await Promise.race([apiPromise, timeoutPromise]);
+        const [announcedData, presaleData] = await Promise.race([apiPromise, timeoutPromise]);
 
         // Merge results from all three statuses
         const combined = [
             ...(announcedData?.results || []),
-            ...(presaleData?.results || []),
-            ...(onSaleData?.results || [])
+            ...(presaleData?.results || [])
         ];
 
         if (combined.length > 0) {
@@ -93,7 +86,7 @@ export async function GET(request) {
         const dbFilters = {
             page: 1,
             pageSize: limit,
-            saleStatus: ['announced', 'presale', 'on_sale'],
+            saleStatus: ['announced', 'presale'],
             sortBy: 'updatedAt',
             sortOrder: 'desc',
         };
