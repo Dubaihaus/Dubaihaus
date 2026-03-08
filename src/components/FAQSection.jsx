@@ -55,11 +55,11 @@ const ABU_DHABI_KEYS = [
   "q_ad_6", "q_ad_7", "q_ad_8", "q_ad_9", "q_ad_10"
 ];
 
-export default function FAQSection() {
+export default function FAQSection({ hideTabs = false, defaultTab = "dubai" }) {
   const t = useTranslations();
   const [openIndex, setOpenIndex] = useState(null);
   const [showAll, setShowAll] = useState(false);
-  const [activeTab, setActiveTab] = useState("dubai"); // "dubai" | "abudhabi"
+  const [activeTab, setActiveTab] = useState(defaultTab); // "dubai" | "abudhabi"
 
   const currentKeys = activeTab === "dubai" ? DUBAI_KEYS : ABU_DHABI_KEYS;
 
@@ -132,34 +132,36 @@ export default function FAQSection() {
           </motion.p>
 
           {/* Region Tabs */}
-          <div className="mt-8 inline-flex p-1 bg-slate-100 rounded-full relative">
-            <button
-              onClick={() => handleTabChange("dubai")}
-              className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "dubai" ? "text-white" : "text-slate-600 hover:text-slate-900"
-                }`}
-            >
-              Dubai
-              {activeTab === "dubai" && (
-                <motion.div
-                  layoutId="activeTabBg"
-                  className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => handleTabChange("abudhabi")}
-              className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "abudhabi" ? "text-white" : "text-slate-600 hover:text-slate-900"
-                }`}
-            >
-              Abu Dhabi
-              {activeTab === "abudhabi" && (
-                <motion.div
-                  layoutId="activeTabBg"
-                  className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
-                />
-              )}
-            </button>
-          </div>
+          {!hideTabs && (
+            <div className="mt-8 inline-flex p-1 bg-slate-100 rounded-full relative">
+              <button
+                onClick={() => handleTabChange("dubai")}
+                className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "dubai" ? "text-white" : "text-slate-600 hover:text-slate-900"
+                  }`}
+              >
+                Dubai
+                {activeTab === "dubai" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
+                  />
+                )}
+              </button>
+              <button
+                onClick={() => handleTabChange("abudhabi")}
+                className={`relative z-10 px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${activeTab === "abudhabi" ? "text-white" : "text-slate-600 hover:text-slate-900"
+                  }`}
+              >
+                Abu Dhabi
+                {activeTab === "abudhabi" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-sky-500 rounded-full -z-10 shadow-md"
+                  />
+                )}
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* FAQ List */}

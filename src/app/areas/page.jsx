@@ -9,6 +9,7 @@ export async function generateMetadata() {
     pathname: 'areas',
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
   });
 }
 

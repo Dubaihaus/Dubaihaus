@@ -4,7 +4,22 @@ import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { hydrateProjectsBatch } from "@/lib/projectDataHydration";
 
+import { generateStandardMetadata } from "@/lib/seo";
+
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const t = await getTranslations({ namespace: "seo.featuredProperties" });
+
+  return generateStandardMetadata({
+    pathname: "featured-properties",
+    title: t("title"),
+    description: t("description"),
+    keywords: t("keywords"),
+    index: true,
+    follow: true,
+  });
+}
 
 function normalizeManualProperty(p) {
   return {

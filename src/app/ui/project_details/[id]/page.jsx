@@ -58,6 +58,7 @@ export async function generateMetadata({ params }) {
     pathname: `ui/project_details/${id}`,
     title,
     description,
+    keywords: t('keywords'),
     images,
   });
 }

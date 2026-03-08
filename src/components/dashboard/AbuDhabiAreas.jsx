@@ -46,21 +46,21 @@ function AreaCard({ area, index }) {
     area.filters
   );
 
- const firstProperty = data?.results?.[0];
+  const firstProperty = data?.results?.[0];
 
-const rawCover =
-  firstProperty?.coverPhoto ||
-  (typeof firstProperty?.coverImage === "string"
-    ? firstProperty.coverImage
-    : firstProperty?.cover_image?.url) ||
-  firstProperty?.rawData?.cover_image?.url ||
-  area.image ||
-  PLACEHOLDER;
+  const rawCover =
+    firstProperty?.coverPhoto ||
+    (typeof firstProperty?.coverImage === "string"
+      ? firstProperty.coverImage
+      : firstProperty?.cover_image?.url) ||
+    firstProperty?.rawData?.cover_image?.url ||
+    area.image ||
+    PLACEHOLDER;
 
-const imageSrc =
-  typeof rawCover === "string" && rawCover.trim()
-    ? rawCover
-    : PLACEHOLDER;
+  const imageSrc =
+    typeof rawCover === "string" && rawCover.trim()
+      ? rawCover
+      : PLACEHOLDER;
 
   const params = new URLSearchParams(area.filters || {});
   const loadMoreHref = `/off-plan?${params.toString()}`;
@@ -132,9 +132,8 @@ const imageSrc =
           src={imageSrc}
           alt={area.title}
           fill
-          className={`object-cover transition-transform duration-700 ${
-            isHovered ? "scale-110" : "scale-100"
-          } ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+          className={`object-cover transition-transform duration-700 ${isHovered ? "scale-110" : "scale-100"
+            } ${imageLoaded ? "opacity-100" : "opacity-0"}`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onLoad={() => setImageLoaded(true)}
         />
@@ -334,7 +333,7 @@ export default function AbuDhabiAreasSection() {
             transition={{ delay: 1.2, duration: 0.5 }}
           >
             <Link
-              href="/off-plan?region=Abu%20Dhabi"
+              href="/abu-dhabi"
               className="inline-flex items-center text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
               style={{ backgroundColor: "#00C6FF" }}
               onMouseEnter={(e) =>

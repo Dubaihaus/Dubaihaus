@@ -10,6 +10,7 @@ export async function generateMetadata({ params }) {
     pathname: 'contact',
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
   });
 }
 

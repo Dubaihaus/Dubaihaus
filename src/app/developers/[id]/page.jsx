@@ -15,13 +15,25 @@ export async function generateMetadata({ params }) {
     return { title: t('fallbackTitle') };
   }
 
-  const title = t('title', { name: developer.name });
-  const description = t('description', { name: developer.name });
+  const whitelistedSlugs = ['emaar', 'damac', 'sobha', 'nakheel', 'aldar'];
+  let title, description, keywords;
+
+  if (whitelistedSlugs.includes(developerId.toLowerCase())) {
+    const dt = await getTranslations({ namespace: `seo.developers.${developerId.toLowerCase()}` });
+    title = dt('title');
+    description = dt('description');
+    keywords = dt('keywords');
+  } else {
+    title = t('title', { name: developer.name });
+    description = t('description', { name: developer.name });
+    keywords = t('keywords'); // Fallback keywords from seo.developerDetail
+  }
 
   return generateStandardMetadata({
     pathname: `developers/${developerId}`,
     title,
     description,
+    keywords,
     images: developer.logoUrl ? [developer.logoUrl] : []
   });
 }

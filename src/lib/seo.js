@@ -35,6 +35,7 @@ export async function generateStandardMetadata({
   queryString = '',
   title,
   description,
+  keywords,
   images = [],
   index = true,
   follow = true,
@@ -51,6 +52,7 @@ export async function generateStandardMetadata({
   return {
     title,
     description,
+    keywords,
     alternates: {
       canonical: canonicalUrl,
       languages: {
@@ -62,6 +64,7 @@ export async function generateStandardMetadata({
     openGraph: {
       title,
       description,
+      keywords,
       url: canonicalUrl,
       siteName,
       type: 'website',

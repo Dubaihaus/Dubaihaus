@@ -287,15 +287,50 @@ export async function GET(request) {
   let dataSource = 'reelly_api';
 
   // 🌍 Map mode: get ALL projects via searchAllProjects
+  // if (forMap) {
+  //   try {
+  //     const apiData = await searchAllProjects({
+  //       pageSize: 500,
+  //       maxPages: 10,
+  //     });
+
+  //     if (apiData && apiData.results && apiData.results.length > 0) {
+  //       data = apiData;
+  //       data.results = data.results.filter(
+  //         (p) =>
+  //           typeof p.lat === 'number' &&
+  //           typeof p.lng === 'number' &&
+  //           !Number.isNaN(p.lat) &&
+  //           !Number.isNaN(p.lng)
+  //       );
+  //       data.total = data.results.length;
+  //       data.totalPages = 1;
+  //     }
+  //   } catch (e) {
+  //     console.warn("Map Reelly API fell back to DB:", e);
+  //   }
+  // }
   if (forMap) {
     try {
+      const apiFilters = { ...filters };
+
+      // map mode should not depend on priced units
+      delete apiFilters.page;
+      delete apiFilters.pageSize;
+      delete apiFilters.limit;
+      delete apiFilters.forMap;
+      delete apiFilters.mode;
+
       const apiData = await searchAllProjects({
         pageSize: 500,
         maxPages: 10,
+        pricedOnly: false,
+        ...apiFilters,
       });
 
       if (apiData && apiData.results && apiData.results.length > 0) {
         data = apiData;
+
         data.results = data.results.filter(
           (p) =>
             typeof p.lat === 'number' &&
@@ -303,8 +338,11 @@ export async function GET(request) {
             !Number.isNaN(p.lat) &&
             !Number.isNaN(p.lng)
         );
+
         data.total = data.results.length;
         data.totalPages = 1;
+        data.page = 1;
+        data.pageSize = data.results.length;
       }
     } catch (e) {
       console.warn("Map Reelly API fell back to DB:", e);
@@ -350,6 +388,7 @@ export async function GET(request) {
     console.log("Fell back to cached DB for /api/off-plan");
     if (forMap) {
       data = await getCachedProjects({
+        ...filters,
         page: 1,
         pageSize: 1000,
         limit: 1000,

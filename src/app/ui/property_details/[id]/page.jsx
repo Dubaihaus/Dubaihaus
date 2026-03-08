@@ -47,6 +47,7 @@ export async function generateMetadata({ params }) {
         pathname: `ui/property_details/${id}`,
         title,
         description,
+        keywords: t('keywords'),
         images,
     });
 }

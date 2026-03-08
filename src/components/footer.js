@@ -102,7 +102,7 @@ export default function Footer() {
               <SkeletonList />
             ) : (
               // single-column list
-               <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                 {abuDhabiDevelopers.slice(0, MAX_OTHERS).map((d, idx) => (
                   <li key={`${d?.name || 'abu-dev'}-${idx}`}>
                     <SafeInternalLink
@@ -191,7 +191,7 @@ export default function Footer() {
             { label: 'Properties in Dubai', href: '/off-plan?region=Dubai' },
             {
               label: 'Properties in Abu Dhabi',
-              href: '/off-plan?region=Abu Dhabi',
+              href: '/abu-dhabi',
             },
             {
               label: 'Properties in Ras Al Khaimah',

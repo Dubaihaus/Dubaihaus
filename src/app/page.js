@@ -11,6 +11,7 @@ export async function generateMetadata({ params }) {
     pathname: '',
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
   });
 }
 

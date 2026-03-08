@@ -9,6 +9,7 @@ export async function generateMetadata() {
     pathname: 'faq',
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
   });
 }
 export default function FAQPage() {

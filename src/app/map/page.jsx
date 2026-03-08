@@ -1,17 +1,21 @@
 // src/app/map/page.jsx
 import MapSection from "@/components/map/MapSection";
 
-export const metadata = {
-  title: "Dubai & Abu Dhabi Property Map | DubaiHaus",
-  description:
-    "Explore off-plan and ready properties across Dubai and Abu Dhabi on an interactive map. Filter by location and discover projects visually.",
-  openGraph: {
-    title: "Dubai & Abu Dhabi Property Map | DubaiHaus",
-    description:
-      "Browse properties on a visual map across Dubai and Abu Dhabi with DubaiHaus.",
-    type: "website",
-  },
-};
+import { getTranslations } from "next-intl/server";
+import { generateStandardMetadata } from "@/lib/seo";
+
+export async function generateMetadata() {
+  const t = await getTranslations({ namespace: "seo.map" });
+
+  return generateStandardMetadata({
+    pathname: "map",
+    title: t("title"),
+    description: t("description"),
+    keywords: t("keywords"),
+    index: true,
+    follow: true,
+  });
+}
 
 export default function MapPage() {
   return (

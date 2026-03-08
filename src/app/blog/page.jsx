@@ -13,6 +13,7 @@ export async function generateMetadata() {
     pathname: 'blog',
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
   });
 }
 

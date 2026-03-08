@@ -114,10 +114,10 @@
   "contact": {
     "metadata": {
       "title": "Contact DubaiHaus | Speak with Dubai & Abu Dhabi Property Experts",
-      "description": "Get in touch with DubaiHaus for help buying, selling or investing in property in Dubai and Abu Dhabi. Talk to our experts about off-plan projects, payment plans and Golden Visa eligibility.",
-      "keywords": "contact DubaiHaus, Dubai property contact, speak to real estate expert Dubai, off-plan property consultation Dubai, Dubai real estate agency contact, buy property in Dubai help, Dubai Abu Dhabi property experts",
+      "description": "Contact DubaiHaus for help buying, selling, or investing in properties in Dubai and Abu Dhabi. Speak with our experts about off-plan projects, payment plans, and Golden Visa eligibility.",
+      "keywords": "Contact DubaiHaus, Dubai Real Estate Contact, Speak to Property Experts Dubai, Off-plan property advice Dubai, Dubai Property Agency Contact, Buy Property Dubai Help, Dubai Abu Dhabi Real Estate Experts",
       "og": {
-        "title": "Contact DubaiHaus | Dubai & Abu Dhabi Property Experts | DubaiHaus",
+        "title": "Contact DubaiHaus | Dubai & Abu Dhabi Real Estate Experts | DubaiHaus",
         "description": "Reach out to our team for tailored advice on buying, selling and investing in Dubai & Abu Dhabi real estate."
       },
       "twitter": {
@@ -611,21 +611,113 @@
   "seo": {
     "home": {
       "title": "DubaiHaus: Off-Plan Properties in Dubai & Abu Dhabi",
-      "description": "Browse verified off-plan apartments, villas and townhouses in Dubai and Abu Dhabi. Compare developers, communities and flexible payment plans in AED, EUR and USD on DubaiHaus."
+      "description": "Browse verified off-plan apartments, villas, and townhouses in Dubai and Abu Dhabi. Compare developers, communities, and flexible payment plans in AED, EUR, and USD on DubaiHaus.",
+      "keywords": "Dubai Real Estate, Abu Dhabi Real Estate, Off-plan properties Dubai, Luxury apartments Dubai, Buy Villas Dubai, Dubai Property Investment, Abu Dhabi Property Market, DubaiHaus"
     },
     "offPlan": {
       "title": "Off-Plan Properties for Sale in Dubai & Abu Dhabi | DubaiHaus",
-      "description": "Explore new off-plan properties for sale across Dubai and Abu Dhabi. Filter by area, developer, price, unit type and currency.",
+      "description": "Explore new off-plan properties for sale across Dubai and Abu Dhabi. Filter by area, developer, price, unit type, and currency.",
+      "keywords": "Off-plan Dubai, New developments Dubai, Buy property Dubai, Dubai real estate investment, Abu Dhabi off-plan, Dubai construction projects, Luxury off-plan Dubai",
       "comingSoon": "Coming Soon (Presale) Projects in Dubai & Abu Dhabi | DubaiHaus",
-      "onSale": "Start of Sales Projects in Dubai & Abu Dhabi | DubaiHaus"
+      "comingSoonKeywords": "Coming soon projects Dubai, Dubai presale properties, New project launches Dubai, Upcoming real estate Dubai",
+      "onSale": "Start of Sales Projects in Dubai & Abu Dhabi | DubaiHaus",
+      "onSaleKeywords": "Dubai property sales start, New launch properties Dubai, Buy off-plan Dubai now, Real estate launches Dubai",
+      "apartments": "Off-Plan Apartments for Sale in Dubai & Abu Dhabi | DubaiHaus",
+      "apartmentsDesc": "Browse premium off-plan apartments for sale in Dubai and Abu Dhabi. From studios to luxury penthouses, find your perfect home with flexible payment plans.",
+      "apartmentsKeywords": "Off-plan apartments Dubai, Buy apartment Dubai, Luxury apartments Dubai, New apartments Abu Dhabi, Dubai studio apartments off-plan",
+      "penthouses": "Luxury Off-Plan Penthouses for Sale in Dubai | DubaiHaus",
+      "penthousesDesc": "Discover exclusive off-plan penthouses in Dubai's most prestigious locations. Experience luxury living with stunning views and world-class amenities.",
+      "penthousesKeywords": "Luxury penthouses Dubai, Buy penthouse Dubai, Off-plan penthouses Dubai, Dubai waterfront penthouses, Premium real estate Dubai",
+      "townhouses": "Off-Plan Townhouses for Sale in Dubai & Abu Dhabi | DubaiHaus",
+      "townhousesDesc": "Find spacious off-plan townhouses in family-friendly communities across Dubai and Abu Dhabi. Modern designs and easy payment plans available.",
+      "townhousesKeywords": "Off-plan townhouses Dubai, Buy townhouse Dubai, Family communities Dubai, New townhouses Abu Dhabi, Dubai townhouse investment"
+    },
+    "abuDhabi": {
+      "title": "Abu Dhabi Off-Plan Properties & Real Estate | DubaiHaus",
+      "description": "Discover premium off-plan properties, new projects, and luxury developments in Abu Dhabi. View prices, flexible payment plans, and handover dates on DubaiHaus.",
+      "keywords": "Abu Dhabi Real Estate, Off-plan Abu Dhabi, Buy property Abu Dhabi, Yas Island properties, Saadiyat Island apartments, Abu Dhabi investment properties, Al Reem Island off-plan"
     },
     "faq": {
       "title": "Dubai & Abu Dhabi Property FAQ | Off-Plan, Fees & Golden Visa",
-      "description": "Answers to common questions about buying property in Dubai and Abu Dhabi, including off-plan purchases, service charges, payment plans and Golden Visa eligibility."
+      "description": "Answers to common questions about buying property in Dubai and Abu Dhabi, including off-plan purchases, service charges, payment plans, and Golden Visa eligibility.",
+      "keywords": "Dubai Property FAQ, Buying property Dubai guide, Abu Dhabi real estate questions, Dubai Golden Visa requirements, Off-plan property fees Dubai, Dubai real estate laws"
     },
     "blog": {
       "title": "DubaiHaus Insights | Guides & Articles",
-      "description": "Read guides about buying off-plan, investing in Dubai & Abu Dhabi, payment plans, community overviews and more."
+      "description": "Read guides about buying off-plan, investing in Dubai & Abu Dhabi, payment plans, community overviews, and more.",
+      "keywords": "Dubai Real Estate blog, Dubai Property news, Investing in Dubai guide, Abu Dhabi property market updates, DubaiHaus insights, Real estate tips Dubai"
+    },
+    "map": {
+      "title": "Dubai & Abu Dhabi Property Map | Interactive Real Estate Search",
+      "description": "Explore properties across Dubai and Abu Dhabi on our interactive map. Find off-plan projects, filter by location, and discover your next home visually.",
+      "keywords": "Dubai Property Map, Abu Dhabi Real Estate Map, Interactive map Dubai properties, Visual property search Dubai, Find projects on map Dubai"
+    },
+    "featuredProperties": {
+      "title": "Featured Properties in Dubai & Abu Dhabi | Handpicked Real Estate",
+      "description": "Explore our curated selection of featured properties in Dubai and Abu Dhabi. Top-rated off-plan projects with the best investment potential.",
+      "keywords": "Featured properties Dubai, Best projects Dubai, Top real estate Dubai, Handpicked properties Dubai, Best investment projects Dubai"
+    },
+    "areas": {
+      "title": "UAE Areas Guide | Communities & Locations | DubaiHaus",
+      "description": "Explore UAE areas and communities including Downtown Dubai, Dubai Marina, JVC, Business Bay, and more. Find off-plan projects by location on DubaiHaus.",
+      "keywords": "Dubai Areas Guide, Communities in Dubai, Best places to live Dubai, Downtown Dubai guide, Dubai Marina overview, JVC properties, Business Bay developments"
+    },
+    "districts": {
+      "palm-jebel-ali": {
+        "title": "Palm Jebel Ali Villas & Properties | Luxury Island Living",
+        "description": "Discover the latest luxury villas and off-plan projects on Palm Jebel Ali. Experience iconic island living with exclusive beach access and premium amenities.",
+        "keywords": "Palm Jebel Ali, Buy villa Palm Jebel Ali, Palm Jebel Ali plots, Luxury island Dubai, Nakheel Palm Jebel Ali, Waterfront properties Dubai"
+      },
+      "palm-jumeirah": {
+        "title": "Palm Jumeirah Properties for Sale | Luxury Real Estate Dubai",
+        "description": "Explore luxury apartments, villas, and penthouses on the world-famous Palm Jumeirah. Find iconic waterfront properties with unmatched views.",
+        "keywords": "Palm Jumeirah properties, Buy villa Palm Jumeirah, Palm Jumeirah apartments, Luxury real estate Dubai Palm, Waterfront living Dubai"
+      },
+      "dubai-hills-estate": {
+        "title": "Dubai Hills Estate Properties for Sale | Modern Living Dubai",
+        "description": "Find modern apartments, townhouses, and luxury villas in Dubai Hills Estate. Explore family-oriented community living with golf course views.",
+        "keywords": "Dubai Hills Estate, Buy property Dubai Hills, Dubai Hills villas, Emaar Dubai Hills Estate, Family community Dubai"
+      },
+      "saadiyat-island": {
+        "title": "Saadiyat Island Abu Dhabi | Cultural & Beachfront Properties",
+        "description": "Discover luxury beachfront apartments and villas on Saadiyat Island, Abu Dhabi's cultural heart. Iconic living near Louvre Abu Dhabi and stunning beaches.",
+        "keywords": "Saadiyat Island properties, Buy villa Saadiyat Island, Saadiyat Island apartments, Abu Dhabi cultural district, Beachfront properties Abu Dhabi"
+      },
+      "yas-island": {
+        "title": "Yas Island Properties for Sale | Abu Dhabi's Entertainment Hub",
+        "description": "Explore vibrant off-plan projects and luxury residences on Yas Island. Live near world-class theme parks, racing circuits, and retail destinations.",
+        "keywords": "Yas Island properties, Buy apartment Yas Island, Yas Island villas, Aldar Yas Island, Abu Dhabi entertainment hub"
+      }
+    },
+    "developers": {
+      "title": "UAE Property Developers | DubaiHaus",
+      "description": "Explore top real estate developers in Dubai and Abu Dhabi. Discover projects from Emaar, Damac, Sobha, Aldar, and more on DubaiHaus.",
+      "keywords": "Dubai Real Estate developers, Top developers UAE, Emaar projects, Damac properties, Sobha Realty Dubai, Aldar Abu Dhabi, Nakheel projects",
+      "emaar": {
+        "title": "Emaar Properties Dubai | Projects, Prices & Payment Plans",
+        "description": "Explore the latest off-plan projects by Emaar Properties. Iconic developments including Downtown Dubai, Dubai Hills Estate, and Emaar Beachfront.",
+        "keywords": "Emaar Properties, Emaar projects Dubai, Buy Emaar apartment, Emaar Dubai Hills, Emaar Downtown, Top developer Dubai"
+      },
+      "damac": {
+        "title": "DAMAC Properties Dubai | Luxury Real Estate & Projects",
+        "description": "Discover luxury apartments and villas by DAMAC Properties. Explore iconic developments like DAMAC Hills, DAMAC Lagoons, and Cavalli Tower.",
+        "keywords": "DAMAC Properties, Damac projects Dubai, Damac Hills villas, Damac Lagoons, Luxury apartments Damac, Damac Tower"
+      },
+      "sobha": {
+        "title": "Sobha Realty Dubai | Premium Off-Plan Projects",
+        "description": "Explore premium residences by Sobha Realty. Discover Sobha Hartland, luxury apartments, and forest villas with exceptional build quality.",
+        "keywords": "Sobha Realty, Sobha projects Dubai, Sobha Hartland, Buy apartment Sobha, Premium real estate Dubai Sobha"
+      },
+      "nakheel": {
+        "title": "Nakheel Properties Dubai | Iconic Waterfront Developments",
+        "description": "Discover world-class waterfront projects by Nakheel, the creator of Palm Jumeirah and Palm Jebel Ali. Iconic island and coastal living in Dubai.",
+        "keywords": "Nakheel Properties, Nakheel projects Dubai, Palm Jumeirah developer, Palm Jebel Ali Nakheel, Waterfront projects Dubai"
+      },
+      "aldar": {
+        "title": "Aldar Properties Abu Dhabi | Top Developer in Abu Dhabi",
+        "description": "Explore premium off-plan and ready properties by Aldar. Leading developer in Abu Dhabi with iconic projects on Yas Island, Saadiyat Island, and more.",
+        "keywords": "Aldar Properties, Aldar projects Abu Dhabi, Yas Island Aldar, Saadiyat Island Aldar, Best developer Abu Dhabi"
+      }
     },
     "projectDetail": {
       "title": "{title} ({city}) | Prices, Payment Plan & Handover | DubaiHaus",
@@ -641,14 +733,6 @@
     },
     "blogDetail": {
       "titleFallback": "{title} | DubaiHaus Insights"
-    },
-    "areas": {
-      "title": "UAE Areas Guide | Communities & Locations | DubaiHaus",
-      "description": "Explore UAE areas and communities including Downtown Dubai, Dubai Marina, JVC, Business Bay and more. Find off-plan projects by location on DubaiHaus."
-    },
-    "developers": {
-      "title": "UAE Property Developers | DubaiHaus",
-      "description": "Explore top real estate developers in Dubai and Abu Dhabi. Discover projects from Emaar, Damac, Sobha, Aldar and more on DubaiHaus."
     },
     "developerDetail": {
       "title": "{name} Properties in Dubai | DubaiHaus",
