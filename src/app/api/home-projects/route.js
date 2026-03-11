@@ -16,7 +16,7 @@ export async function GET(request) {
         const announcedPromise = searchProperties({
             page: 1,
             pageSize: limit,
-            sale_status: 'announced',
+            sale_status: 'start of sales', // 'announced' is not a valid status in Reelly, using 'start_of_sales' as closest match
             ordering: '-updated_at',
             // currency
         });

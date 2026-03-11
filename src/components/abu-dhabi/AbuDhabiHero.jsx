@@ -9,7 +9,7 @@ export default function AbuDhabiHero() {
     const t = useTranslations();
 
     // Using a nice fallback or actual placeholder if available
-    const heroImage = "/project_detail_images/building.jpg";
+    const heroImage = "/dashboard/abu-dhabi.jpeg";
 
     return (
         <section className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">
