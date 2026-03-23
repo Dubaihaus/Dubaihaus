@@ -1,5 +1,5 @@
-// src/lib/offplanFilters.ts
 import { prisma } from './prisma.js';
+import { dbSafe } from './dbSafe.js';
 
 export function parseSearchParamsToFilters(searchParams) {
     const filters = {
@@ -143,35 +143,45 @@ export function buildWhereClauseFromFilters(filters) {
 
 export async function getFilterOptions() {
     // 1. Types
-    const typesRaw = await prisma.reellyProjectPropertyType.findMany({
-        select: { type: true },
-        distinct: ['type'],
-        // ❌ remove the "where: { type: { not: null } }"
-    });
+    const typesRaw = await dbSafe(
+        () => prisma.reellyProjectPropertyType.findMany({
+            select: { type: true },
+            distinct: ['type'],
+        }),
+        [],
+        "getFilterOptions:types"
+    );
 
     const types = typesRaw
         .map((t) => t.type)
-        .filter((t) => !!t && t.trim().length > 0) // just in case
+        .filter((t) => !!t && t.trim().length > 0)
         .sort();
 
     // 2. Developers
-    const devsRaw = await prisma.reellyProject.findMany({
-        select: { developerName: true },
-        distinct: ['developerName'],
-        where: { developerName: { not: null } },
-    });
+    const devsRaw = await dbSafe(
+        () => prisma.reellyProject.findMany({
+            select: { developerName: true },
+            distinct: ['developerName'],
+            where: { developerName: { not: null } },
+        }),
+        [],
+        "getFilterOptions:developers"
+    );
     const developers = devsRaw
         .map((d) => d.developerName)
         .filter(Boolean)
         .sort();
 
     // 3. Areas & Regions
-    // We fetch areas AND their region so we can filter areas by region in UI
-    const locationsRaw = await prisma.reellyProject.findMany({
-        select: { area: true, region: true },
-        distinct: ['area', 'region'],
-        where: { area: { not: null } },
-    });
+    const locationsRaw = await dbSafe(
+        () => prisma.reellyProject.findMany({
+            select: { area: true, region: true },
+            distinct: ['area', 'region'],
+            where: { area: { not: null } },
+        }),
+        [],
+        "getFilterOptions:locations"
+    );
 
     // Unique valid regions
     const regions = Array.from(new Set(locationsRaw.map(l => l.region).filter(Boolean))).sort();
@@ -185,10 +195,14 @@ export async function getFilterOptions() {
     const areas = Array.from(new Set(areasWithRegion.map(a => a.area))).sort();
 
     // 4. Prices
-    const priceAgg = await prisma.reellyProject.aggregate({
-        _min: { priceFrom: true },
-        _max: { priceTo: true },
-    });
+    const priceAgg = await dbSafe(
+        () => prisma.reellyProject.aggregate({
+            _min: { priceFrom: true },
+            _max: { priceTo: true },
+        }),
+        { _min: { priceFrom: null }, _max: { priceTo: null } },
+        "getFilterOptions:prices"
+    );
 
     return {
         types,

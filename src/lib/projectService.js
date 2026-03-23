@@ -1,6 +1,6 @@
-// src/lib/projectService.js
 import { prisma } from "./prisma";
 import { syncProjects } from "./reellySync";
+import { dbSafe } from "./dbSafe";
 
 /**
  * Fetch projects from our cached Prisma DB, with filters,
@@ -292,7 +292,11 @@ export async function getCachedProjects(filters = {}) {
 
   /* ---------------- COUNT & INITIAL SYNC ---------------- */
 
-  const total = await prisma.reellyProject.count({ where });
+  const total = await dbSafe(
+    () => prisma.reellyProject.count({ where }),
+    0,
+    "getCachedProjects:count"
+  );
 
   // If DB is completely empty, trigger initial sync once
   if (total === 0) {
@@ -321,18 +325,22 @@ export async function getCachedProjects(filters = {}) {
   const skip = (page - 1) * pageSize;
   const take = limit ? limit : pageSize;
 
-  const projects = await prisma.reellyProject.findMany({
-    where,
-    skip,
-    take,
-    orderBy: {
-      [sortBy]: sortOrder,
-    },
-    include: {
-      paymentPlans: true,
-      propertyTypes: true,
-    },
-  });
+  const projects = await dbSafe(
+    () => prisma.reellyProject.findMany({
+      where,
+      skip,
+      take,
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      include: {
+        paymentPlans: true,
+        propertyTypes: true,
+      },
+    }),
+    [],
+    "getCachedProjects:findMany"
+  );
 
   /* ---------------- MAP TO FRONTEND SHAPE ---------------- */
 

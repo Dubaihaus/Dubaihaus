@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { dbSafe } from "@/lib/dbSafe";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { getCachedBlogPosts, getCachedCategories } from "@/lib/blog-helpers";
@@ -28,6 +29,8 @@ export default async function BlogPage({ searchParams }) {
   let posts;
   let allCats;
 
+  const locale = await getLocale();
+
   // If there's a search query, fetch dynamically (no cache)
   if (q) {
     const where = {
@@ -38,50 +41,57 @@ export default async function BlogPage({ searchParams }) {
       ],
     };
 
-    [posts, allCats] = await Promise.all([
-      prisma.blogPost.findMany({
-        where,
-        orderBy: { publishedAt: "desc" },
-        select: {
-          id: true,
-          title: true,
-          excerpt: true,
-          featuredImg: true,
-          publishedAt: true,
-          createdAt: true,
-          updatedAt: true,
-          readMinutes: true,
-          seo: {
-            select: { slug: true },
-          },
-          categoryLinks: {
-            select: {
-              category: {
-                select: { name: true, slug: true },
+    const results = await Promise.all([
+      dbSafe(
+        () => prisma.blogPost.findMany({
+          where,
+          orderBy: { publishedAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            excerpt: true,
+            featuredImg: true,
+            publishedAt: true,
+            createdAt: true,
+            updatedAt: true,
+            readMinutes: true,
+            seo: {
+              select: { slug: true },
+            },
+            categoryLinks: {
+              select: {
+                category: {
+                  select: { name: true, slug: true },
+                },
+              },
+            },
+            tagLinks: {
+              select: {
+                tag: {
+                  select: { name: true, slug: true },
+                },
               },
             },
           },
-          tagLinks: {
-            select: {
-              tag: {
-                select: { name: true, slug: true },
-              },
-            },
-          },
-        },
-      }),
+        }),
+        [],
+        "BlogPage:search"
+      ),
       getCachedCategories(),
     ]);
+    posts = results[0];
+    allCats = results[1];
   } else {
     // Use cached queries for better performance
-    [posts, allCats] = await Promise.all([
+    const results = await Promise.all([
       getCachedBlogPosts({ cat, tag }),
       getCachedCategories(),
     ]);
+    posts = results[0];
+    allCats = results[1];
   }
 
   // TRANSLATION LAYER
-  const locale = await getLocale();
   if (locale === 'de') {
     if (posts && posts.length > 0) {
       posts = await Promise.all(posts.map(p => translateBlog(p, locale)));

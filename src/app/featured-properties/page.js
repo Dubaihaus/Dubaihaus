@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import PropertyCard from "@/components/PropertyCard";
+import { dbSafe } from "@/lib/dbSafe";
+import PropertyCard from "@/components/dashboard/sections/PropertyCard";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { hydrateProjectsBatch } from "@/lib/projectDataHydration";
@@ -107,21 +108,29 @@ export default async function FeaturedPropertiesPage() {
   // ✅ Correct next-intl usage
   const t = await getTranslations({ locale, namespace: "featuredProperties" });
 
-  const [manualProps, reellyProjects] = await Promise.all([
-    prisma.property.findMany({
-      where: { featured: true },
-      include: { images: true },
-    }),
-    prisma.reellyProject.findMany({
-      where: { isFeatured: true },
-      include: {
-        paymentPlans: true,
-        propertyTypes: true,
-      },
-    }),
+  const [standardProps, offplanProps] = await Promise.all([
+    dbSafe(
+      () => prisma.property.findMany({
+        where: { featured: true },
+        take: 12,
+        orderBy: { updatedAt: 'desc' },
+        include: { images: true }
+      }),
+      [],
+      "FeaturedProperties:standard"
+    ),
+    dbSafe(
+      () => prisma.reellyProject.findMany({
+        where: { isFeatured: true },
+        take: 12,
+        orderBy: { updatedAt: 'desc' }
+      }),
+      [],
+      "FeaturedProperties:offplan"
+    )
   ]);
 
-  let normalizedReelly = reellyProjects.map(normalizeReellyProject);
+  let normalizedReelly = offplanProps.map(normalizeReellyProject);
   try {
     normalizedReelly = await hydrateProjectsBatch(normalizedReelly, "AED", 5);
   } catch (err) {
@@ -129,7 +138,7 @@ export default async function FeaturedPropertiesPage() {
   }
 
   const allItems = [
-    ...manualProps.map(normalizeManualProperty),
+    ...standardProps.map(normalizeManualProperty),
     ...normalizedReelly,
   ];
 
