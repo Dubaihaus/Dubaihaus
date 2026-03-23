@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { dbSafe } from "@/lib/dbSafe";
-import PropertyCard from "@/components/dashboard/sections/PropertyCard";
+import PropertyCard from "@/components/PropertyCard";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { hydrateProjectsBatch } from "@/lib/projectDataHydration";
